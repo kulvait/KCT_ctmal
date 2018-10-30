@@ -4,8 +4,8 @@
 #include <iostream>
 #include <mutex>
 
-#include "io/stringFormatter.h"
-#include "utils/VectorFunctionI.h"
+#include "stringFormatter.h"
+#include "VectorFunctionI.h"
 
 namespace CTL {
 namespace util {
