@@ -1,0 +1,7 @@
+build
+exampleData
+doc
+testRun
+*.swp
+.vscode
+tests/integerByteManipulations/*_
