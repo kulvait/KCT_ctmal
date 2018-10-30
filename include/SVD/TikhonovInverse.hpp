@@ -1,5 +1,7 @@
 #pragma once
 
+#include "mkl_lapacke.h" //Lapacke
+
 namespace CTL::utils {
 /**Construct approximate inverse of square matrix using SVD, where Tikhonov regularization is
  * utilized.
