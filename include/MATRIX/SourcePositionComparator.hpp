@@ -1,7 +1,7 @@
 #pragma once
 // Internal
 #include "MATRIX/ProjectionMatrix.hpp"
-#include "utils/ProjectionMatrixComparatorI.hpp"
+#include "MATRIX/ProjectionMatrixComparatorI.hpp"
 
 namespace CTL {
 namespace util {

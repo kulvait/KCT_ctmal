@@ -43,6 +43,17 @@ FILE( GLOB CTIOL_SRC ${CMAKE_SOURCE_DIR}/submodules/CTIOL/src/*.cpp ${CMAKE_SOUR
 add_library(ctiol ${CTIOL_SRC})
 include_directories(${CMAKE_SOURCE_DIR}/submodules/CTIOL/include)
 
+#CTMAL library
+include_directories(${CMAKE_SOURCE_DIR}/include)
+FILE( GLOB CTMAL_SRC ${CMAKE_SOURCE_DIR}/src/*.cpp )
+add_library(ctmal ${CTMAL_SRC})
+set_target_properties(
+    ctmal
+    PROPERTIES 
+        OUTPUT_NAME "ctmal.so"
+        SUFFIX ""
+)
+
 add_custom_target(formatWebkit
 ./formatWebkit
 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
@@ -81,8 +92,9 @@ include_directories(${CMAKE_SOURCE_DIR}/tests)
 add_library(Catch INTERFACE)
 target_include_directories(Catch INTERFACE ${CMAKE_SOURCE_DIR}/submodules/Catch2/single_include)
 FILE( GLOB TST_SRC ${CMAKE_SOURCE_DIR}/tests/*.cpp )
-add_executable(test_ctiol ${TST_SRC})
-target_link_libraries(test_ctiol Catch)
-target_link_libraries(test_ctiol ctiol)
+add_executable(test_ctmal ${TST_SRC})
+target_link_libraries(test_ctmal Catch)
+target_link_libraries(test_ctmal ctiol)
+target_link_libraries(test_ctmal ctmal)
 enable_testing()
 add_test(NAME CTMALTest COMMAND test_ctmal)
