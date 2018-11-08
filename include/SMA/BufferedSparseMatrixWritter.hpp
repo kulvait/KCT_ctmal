@@ -33,21 +33,23 @@ public:
             {
 
                 uint64_t totalFileSize = io::getFileSize(triplesFile);
-                if(fileSize % 16 != 0)
+                if(totalFileSize % 16 != 0)
                 {
                     io::throwerr("The file %s is not aligned with 16 byte "
                                  "element size. It seems not to be in a "
                                  "correct format since the size is %lu and "
                                  "size modulo 16 is %d.",
-                                 triplesFile.c_str(), fileSize, fileSize % 16);
+                                 triplesFile.c_str(), totalFileSize, totalFileSize % 16);
                 }
                 numberOfElements = totalFileSize / 16;
-                LOGD << io::xprintf("Openned matrix %s, that has %lu elements.",
-                                    projectionsFile.c_str(), totalFileSize);
+                LOGD << io::xprintf("Openned matrix %s, that has %lu elements for writing.",
+                                    triplesFile.c_str(), totalFileSize);
             }
         } else
         {
             io::createEmptyFile(triplesFile, 0, overwrite);
+                LOGD << io::xprintf("Created matrix %s, with zero size and openned it for writing.",
+                                    triplesFile.c_str());
             numberOfElements = 0;
         }
         buffer = new uint8_t[bufferSize * 16];
@@ -65,7 +67,8 @@ public:
     }
 
     /// Copy constructor
-    BufferedSparseMatrixWritter(const BufferedSparseMatrixWritter& b)
+	///Copied object needs to be non const in order to perform flush operation
+    BufferedSparseMatrixWritter(BufferedSparseMatrixWritter& b)
     {
         LOGW << "Caling Copy constructor of BufferedSparseMatrixWritter.";
         b.flush();
@@ -78,7 +81,8 @@ public:
     }
 
     // Copy assignment
-    BufferedSparseMatrixWritter& operator=(const BufferedSparseMatrixWritter& b)
+	///Copied object needs to be non const in order to perform flush operation
+    BufferedSparseMatrixWritter& operator=(BufferedSparseMatrixWritter& b)
     {
         LOGW << "Caling Copy assignment constructor of "
                 "BufferedSparseMatrixWritter.";
@@ -122,8 +126,9 @@ public:
         this->currentBufferPos = 0;
     }
 
-    // Move assignment
-    BufferedSparseMatrixWritter& operator=(const BufferedSparseMatrixWritter&& b)
+    // Move assignment 
+	///Copied object needs to be non const in order to perform flush operation
+    BufferedSparseMatrixWritter& operator=(BufferedSparseMatrixWritter&& b)
     {
         LOGW << "Caling Move assignment constructor of "
                 "BufferedSparseMatrixWritter.";
@@ -149,11 +154,11 @@ public:
     // Buffer into disk
     void flush()
     {
-        std::lock_guard<std::mutex> guard(
+        std::lock_guard<std::recursive_mutex> guard(
             writingMutex); // Mutex will be released as this goes out of scope.
         if(elementsInBuffer != 0)
         {
-            io::appendBytes(triplesFile, buffer, elementsInBuffer);
+            io::appendBytes(triplesFile, buffer, elementsInBuffer*16);
             currentBufferPos = 0;
             numberOfElements += elementsInBuffer;
             elementsInBuffer = 0;
@@ -163,7 +168,7 @@ public:
     void insertValue(uint32_t i, uint32_t j, double v)
     {
 
-        std::lock_guard<std::mutex> guard(
+        std::lock_guard<std::recursive_mutex> guard(
             writingMutex); // Mutex will be released as this goes out of scope.
         if(elementsInBuffer < bufferSize)
         {
