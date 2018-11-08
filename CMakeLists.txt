@@ -47,6 +47,7 @@ include_directories(${CMAKE_SOURCE_DIR}/submodules/CTIOL/include)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 FILE( GLOB CTMAL_SRC ${CMAKE_SOURCE_DIR}/src/*.cpp )
 add_library(ctmal ${CTMAL_SRC})
+target_link_libraries(ctmal ctiol)
 set_target_properties(
     ctmal
     PROPERTIES 
