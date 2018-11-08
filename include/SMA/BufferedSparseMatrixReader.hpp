@@ -1,0 +1,182 @@
+#pragma once
+
+#include "plog/Log.h"
+
+namespace CTL::matrix {
+/**
+ * Buffered sparse matrix is a structure
+ *
+ */
+class BufferedSparseMatrixReader
+{
+public:
+    /**
+     *Default buffer size is in number of elements. Default is 1024 elements
+     *that means 1024*16 = 16384 bytes.
+     */
+    BufferedSparseMatrixReader(std::string triplesFile, uint32_t bufferSize = 1024)
+    {
+        // Check if the file exists and treat it as a structure in the
+        // format (uint32,uint32,double)
+        this->triplesFile = triplesFile;
+        this->bufferSize = bufferSize;
+	if(io::fileExists(triplesFile))
+        {
+            totalFileSize = io::getFileSize(triplesFile);
+            if(fileSize % 16 != 0)
+            {
+                io::throwerr("The file %s is not aligned with 16 byte "
+                             "element size. It seems not to be in a "
+                             "correct format since the size is %lu and "
+                             "size modulo 16 is %d.",
+                             triplesFile.c_str(), fileSize, fileSize % 16);
+            }
+            numberOfElements = totalFileSize / 16;
+            LOGD << io::xprintf("Openned matrix %s, that has %lu elements.",
+                                projectionsFile.c_str(), totalFileSize);
+        } else
+        {
+            io::throwerr("The file %s does not exist.", triplesFile.c_str());
+        }
+        buffer = new uint8_t[bufferSize * 16];
+	elementsInBuffer = 0;
+	currentReadingPos = 0;
+    }
+
+    ~BufferedSparseMatrixReader()
+    {
+        if(buffer != nullptr)
+            delete[] buffer;
+    }
+
+    /// Copy constructor
+    BufferedSparseMatrixReader(const BufferedSparseMatrixReader& b)
+        : BufferedSparseMatrixReader(b.triplesFile, b.bufferSize)
+    {
+        LOGD << "Caling Copy constructor of BufferedSparseMatrixReader.";
+    }
+
+    // Copy assignment
+    BufferedSparseMatrixReader& operator=(const BufferedSparseMatrixReader& b)
+    {
+        LOGD << "Caling Copy assignment constructor of "
+                "BufferedSparseMatrixReader.";
+        if(&b != this) // To elegantly solve situation when assigning
+                       // to itself
+        {
+            this->triplesFile = b.triplesFile;
+            this->totalFileSize = b.totalFileSize;
+            this->numberOfElements = b.numberOfElements;
+            this->currentReadingPos = b.currentReadingPos;
+            this->elementsInBuffer = 0;
+            if(this->buffer != nullptr)
+            {
+                if(this->bufferSize != b.bufferSize)
+                {
+                    delete[] this->buffer;
+                    this->buffer = nullptr;
+                    this->bufferSize = b.bufferSize;
+                    this->buffer = new uint8_t[b.bufferSize * 16];
+                }
+            } else
+            {
+                this->bufferSize = b.bufferSize;
+                this->buffer = new uint8_t[b.bufferSize * 16];
+            }
+        }
+    }
+
+    // Move constructor
+    BufferedSparseMatrixReader(BufferedSparseMatrixReader&& b)
+    {
+        LOGD << "Caling Move constructor of BufferedSparseMatrixReader.";
+        this->triplesFile = b.triplesFile;
+        this->totalFileSize = b.totalFileSize;
+        this->numberOfElements = b.numberOfElements;
+        this->currentReadingPos = b.currentReadingPos;
+        this->elementsInBuffer = b.elementsInBuffer;
+        this->bufferSize = b.bufferSize;
+        this->buffer = b.buffer;
+        b.buffer = nullptr;
+        this->startOfBufferPos = b.startOfBufferPos;
+        this->currentBufferOffset = b.currentBufferOffset;
+    }
+
+    // Move assignment
+    BufferedSparseMatrixReader& operator=(const BufferedSparseMatrixReader&& b)
+    {
+        LOGD << "Caling Move assignment constructor of "
+                "BufferedSparseMatrixReader.";
+        if(&b != this) // To elegantly solve situation when assigning
+                       // to itself
+        {
+            this->triplesFile = b.triplesFile;
+            this->totalFileSize = b.totalFileSize;
+            this->numberOfElements = b.numberOfElements;
+            this->currentReadingPos = b.currentReadingPos;
+            this->elementsInBuffer = b.elementsInBuffer;
+            this->startOfBufferPos = b.startOfBufferPos;
+            this->currentBufferOffset = b.currentBufferOffset;
+            this->bufferSize = b.bufferSize;
+            if(this->buffer != nullptr)
+            {
+                delete[] this->buffer;
+                this->buffer = nullptr;
+            }
+            this->buffer = b.buffer;
+            b.buffer = nullptr;
+        }
+    }
+    // Increments position
+    void readNextValue(int* i, int* j, double* v)
+    {
+        if(currentBufferOffset < elementsInBuffer * 16)
+        {
+            *i = util::nextUint32(&buffer[currentBufferOffset]);
+            *j = util::nextUint32(&buffer[currentBufferOffset + 4]);
+            *v = util::nextDouble(&buffer[currentBufferOffset + 8]);
+            currentBufferOffset += 16;
+            currentReadingPos++;
+        } else
+        {
+            // PAGE FAULT
+            elementsInBuffer = std::min(numberOfElements - currentReadingPos, bufferSize);
+            io::readBytesFrom(triplesFile, currentReadingPos * 16, buffer, ele);
+            currentBufferOffset = 0;
+            startOfBufferPos = currentReadingPos;
+            readNextValue(i, j, v);
+        }
+    }
+
+    /** Position is in the units of the number of elements
+     *
+     */
+    void seek(uint64_t pos)
+    {
+        if(elementsInBuffer != 0)
+        {
+            if(startOfBufferPos <= pos && pos < startOfBufferPos + elementsInBuffer)
+            {
+                currentBufferOffset = (pos - startOfBufferPos) * 16;
+            } else
+            {
+                elementsInBuffer = 0;
+                currentBufferOffset = 0;
+            }
+        }
+        currentReadingPos = pos;
+    }
+
+private:
+    int64_t currentReadingPos;
+    uint8_t* buffer;
+	int bufferSize;
+    int elementsInBuffer;
+    int64_t startOfBufferPos;
+    int64_t currentBufferOffset; // Offset of the reading buffer.
+
+    std::string triplesFile;
+    uint64_t totalFileSize, numberOfElements;
+};
+
+} // namespace CTL::matrix
