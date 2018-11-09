@@ -1,6 +1,8 @@
 #pragma once
 
 #include "plog/Log.h"
+#include "rawop.h"
+#include <algorithm>
 
 namespace CTL::matrix {
 /**
@@ -20,27 +22,27 @@ public:
         // format (uint32,uint32,double)
         this->triplesFile = triplesFile;
         this->bufferSize = bufferSize;
-	if(io::fileExists(triplesFile))
+        if(io::fileExists(triplesFile))
         {
             totalFileSize = io::getFileSize(triplesFile);
-            if(fileSize % 16 != 0)
+            if(totalFileSize % 16 != 0)
             {
                 io::throwerr("The file %s is not aligned with 16 byte "
                              "element size. It seems not to be in a "
                              "correct format since the size is %lu and "
                              "size modulo 16 is %d.",
-                             triplesFile.c_str(), fileSize, fileSize % 16);
+                             triplesFile.c_str(), totalFileSize, totalFileSize % 16);
             }
             numberOfElements = totalFileSize / 16;
-            LOGD << io::xprintf("Openned matrix %s, that has %lu elements.",
-                                projectionsFile.c_str(), totalFileSize);
+            LOGD << io::xprintf("Openned matrix %s, that has %lu elements.", triplesFile.c_str(),
+                                totalFileSize);
         } else
         {
             io::throwerr("The file %s does not exist.", triplesFile.c_str());
         }
         buffer = new uint8_t[bufferSize * 16];
-	elementsInBuffer = 0;
-	currentReadingPos = 0;
+        elementsInBuffer = 0;
+        currentReadingPos = 0;
     }
 
     ~BufferedSparseMatrixReader()
@@ -103,7 +105,8 @@ public:
     }
 
     // Move assignment
-    BufferedSparseMatrixReader& operator=(const BufferedSparseMatrixReader&& b)
+    // Non const since I want to set buffer to nullptr
+    BufferedSparseMatrixReader& operator=(BufferedSparseMatrixReader&& b)
     {
         LOGD << "Caling Move assignment constructor of "
                 "BufferedSparseMatrixReader.";
@@ -140,8 +143,15 @@ public:
         } else
         {
             // PAGE FAULT
-            elementsInBuffer = std::min(numberOfElements - currentReadingPos, bufferSize);
-            io::readBytesFrom(triplesFile, currentReadingPos * 16, buffer, ele);
+            if(numberOfElements - currentReadingPos < bufferSize)
+            {
+                elementsInBuffer = numberOfElements - currentReadingPos;
+            } else
+            {
+                elementsInBuffer = bufferSize;
+            }
+//	LOGD << io::xprintf("Page fault on reading pos %lu increasing buffer by %d elements.", currentReadingPos, elementsInBuffer);
+            io::readBytesFrom(triplesFile, currentReadingPos * 16, buffer, elementsInBuffer * 16);
             currentBufferOffset = 0;
             startOfBufferPos = currentReadingPos;
             readNextValue(i, j, v);
@@ -167,13 +177,15 @@ public:
         currentReadingPos = pos;
     }
 
+    uint64_t getNumberOfElements() const { return numberOfElements; }
+
 private:
-    int64_t currentReadingPos;
+    uint64_t currentReadingPos;
     uint8_t* buffer;
-	int bufferSize;
+    int bufferSize;
     int elementsInBuffer;
-    int64_t startOfBufferPos;
-    int64_t currentBufferOffset; // Offset of the reading buffer.
+    uint64_t startOfBufferPos;
+    uint64_t currentBufferOffset; // Offset of the reading buffer.
 
     std::string triplesFile;
     uint64_t totalFileSize, numberOfElements;
