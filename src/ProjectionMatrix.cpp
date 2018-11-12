@@ -60,10 +60,10 @@ namespace util {
         normal[0] = (*this)(2, 0);
         normal[1] = (*this)(2, 1);
         normal[2] = (*this)(2, 2);
-        double normsquare = normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2];
-        normal[0] /= normsquare;
-        normal[1] /= normsquare;
-        normal[2] /= normsquare;
+        double normvec = std::sqrt(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
+        normal[0] /= normvec;
+        normal[1] /= normvec;
+        normal[2] /= normvec;
         return normal;
     }
 
