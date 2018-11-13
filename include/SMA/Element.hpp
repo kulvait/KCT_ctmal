@@ -17,15 +17,17 @@ public:
      */
     Element(uint8_t * elementBytes)
     {
-	std::memcpy((void*)element, (void*)elementBytes, 16);
+	i = 	util::nextUint32(element);
+	j = 
+		util::nextUint32(&element[4]);
+		v=util::nextDouble(&element[8]);
     }
 
     Element(uint32_t i, uint32_t j, double v)
     {
-	
-    	util::putUint32(i, element);
-    	util::putUint32(j, &element[4]);
-    	util::putDouble(v, &element[8]);
+	this->i = i;
+	this->j = j;
+	this->v = v;
     }
 
 /** Position is in the units of the file
@@ -33,24 +35,27 @@ public:
 */
 	uint32_t i()
 	{
-		util::nextUint32(element);
+		return i;
 	}
 
 uint32_t j()
 {
-
-		util::nextUint32(&element[4]);
+return j;
 }
 
 double val()
 {
-
-		util::nextDouble(&element[8]);
+return v;
 } 
 
+double addToVal(double x)
+{
+	v = v + x;
+}
 
-private:
-    uint8_t element[16];
+protected:
+	uint32_t i,j;
+	double v;
 };
 
 } // namespace CTL::matrix
