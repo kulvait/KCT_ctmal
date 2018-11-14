@@ -1,6 +1,8 @@
 #pragma once
 
 #include <mutex>
+#include "rawop.h"
+#include "SMA/ElementFloat.hpp"
 #include "plog/Log.h"
 
 namespace CTL::matrix {
@@ -8,12 +10,12 @@ namespace CTL::matrix {
  * Buffered sparse matrix is a structure
  *
  */
-class BufferedSparseMatrixWritter
+class BufferedSparseMatrixFloatWritter
 {
 public:
     /**
      */
-    BufferedSparseMatrixWritter(std::string triplesFile,
+    BufferedSparseMatrixFloatWritter(std::string triplesFile,
                                 uint32_t bufferSize=1024,
                                 bool overwrite = false)
     {
@@ -33,15 +35,15 @@ public:
             {
 
                 uint64_t totalFileSize = io::getFileSize(triplesFile);
-                if(totalFileSize % 16 != 0)
+                if(totalFileSize % 12 != 0)
                 {
-                    io::throwerr("The file %s is not aligned with 16 byte "
+                    io::throwerr("The file %s is not aligned with 12 byte "
                                  "element size. It seems not to be in a "
                                  "correct format since the size is %lu and "
-                                 "size modulo 16 is %d.",
-                                 triplesFile.c_str(), totalFileSize, totalFileSize % 16);
+                                 "size modulo 12 is %d.",
+                                 triplesFile.c_str(), totalFileSize, totalFileSize % 12);
                 }
-                numberOfElements = totalFileSize / 16;
+                numberOfElements = totalFileSize / 12;
                 LOGD << io::xprintf("Openned matrix %s, that has %lu elements for writing.",
                                     triplesFile.c_str(), totalFileSize);
             }
@@ -52,12 +54,12 @@ public:
                                     triplesFile.c_str());
             numberOfElements = 0;
         }
-        buffer = new uint8_t[bufferSize * 16];
+        buffer = new uint8_t[bufferSize * 12];
         elementsInBuffer = 0;
         currentBufferPos = 0;
     }
 
-    ~BufferedSparseMatrixWritter()
+    ~BufferedSparseMatrixFloatWritter()
     {
         if(buffer != nullptr)
         {
@@ -68,24 +70,24 @@ public:
 
     /// Copy constructor
 	///Copied object needs to be non const in order to perform flush operation
-    BufferedSparseMatrixWritter(BufferedSparseMatrixWritter& b)
+    BufferedSparseMatrixFloatWritter(BufferedSparseMatrixFloatWritter& b)
     {
-        LOGW << "Caling Copy constructor of BufferedSparseMatrixWritter.";
+        LOGW << "Caling Copy constructor of BufferedSparseMatrixFloatWritter.";
         b.flush();
         this->triplesFile = b.triplesFile;
         this->bufferSize = b.bufferSize;
         this->numberOfElements = b.numberOfElements;
-        buffer = new uint8_t[bufferSize * 16];
+        buffer = new uint8_t[bufferSize * 12];
         elementsInBuffer = 0;
         currentBufferPos = 0;
     }
 
     // Copy assignment
 	///Copied object needs to be non const in order to perform flush operation
-    BufferedSparseMatrixWritter& operator=(BufferedSparseMatrixWritter& b)
+    BufferedSparseMatrixFloatWritter& operator=(BufferedSparseMatrixFloatWritter& b)
     {
         LOGW << "Caling Copy assignment constructor of "
-                "BufferedSparseMatrixWritter.";
+                "BufferedSparseMatrixFloatWritter.";
         b.flush();
         if(&b != this) // To elegantly solve situation when assigning
                        // to itself
@@ -100,12 +102,12 @@ public:
                     delete[] this->buffer;
                     this->buffer = nullptr;
                     this->bufferSize = b.bufferSize;
-                    this->buffer = new uint8_t[b.bufferSize * 16];
+                    this->buffer = new uint8_t[b.bufferSize * 12];
                 }
             } else
             {
                 this->bufferSize = b.bufferSize;
-                this->buffer = new uint8_t[b.bufferSize * 16];
+                this->buffer = new uint8_t[b.bufferSize * 12];
             }
         }
         this->elementsInBuffer = 0;
@@ -113,9 +115,9 @@ public:
     }
 
     // Move constructor
-    BufferedSparseMatrixWritter(BufferedSparseMatrixWritter&& b)
+    BufferedSparseMatrixFloatWritter(BufferedSparseMatrixFloatWritter&& b)
     {
-        LOGW << "Caling Move constructor of BufferedSparseMatrixWritter.";
+        LOGW << "Caling Move constructor of BufferedSparseMatrixFloatWritter.";
         b.flush();
         this->triplesFile = b.triplesFile;
         this->numberOfElements = b.numberOfElements;
@@ -128,10 +130,10 @@ public:
 
     // Move assignment 
 	///Copied object needs to be non const in order to perform flush operation
-    BufferedSparseMatrixWritter& operator=(BufferedSparseMatrixWritter&& b)
+    BufferedSparseMatrixFloatWritter& operator=(BufferedSparseMatrixFloatWritter&& b)
     {
         LOGW << "Caling Move assignment constructor of "
-                "BufferedSparseMatrixWritter.";
+                "BufferedSparseMatrixFloatWritter.";
         this->flush();
         b.flush();
         if(&b != this) // To elegantly solve situation when assigning
@@ -158,7 +160,7 @@ public:
             writingMutex); // Mutex will be released as this goes out of scope.
         if(elementsInBuffer != 0)
         {
-            io::appendBytes(triplesFile, buffer, elementsInBuffer*16);
+            io::appendBytes(triplesFile, buffer, elementsInBuffer*12);
             currentBufferPos = 0;
             numberOfElements += elementsInBuffer;
             elementsInBuffer = 0;
@@ -174,8 +176,8 @@ public:
         {
             util::putUint32(i, &buffer[currentBufferPos]);
             util::putUint32(j, &buffer[currentBufferPos + 4]);
-            util::putDouble(v, &buffer[currentBufferPos + 8]);
-            currentBufferPos += 16;
+            util::putFloat(v, &buffer[currentBufferPos + 8]);
+            currentBufferPos += 12;
             elementsInBuffer++;
         } else
         {

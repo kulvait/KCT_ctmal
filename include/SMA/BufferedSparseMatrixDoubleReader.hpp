@@ -2,6 +2,7 @@
 
 #include "plog/Log.h"
 #include "rawop.h"
+#include "SMA/ElementDouble.hpp"
 #include <algorithm>
 
 namespace CTL::matrix {
@@ -9,14 +10,14 @@ namespace CTL::matrix {
  * Buffered sparse matrix is a structure
  *
  */
-class BufferedSparseMatrixReader
+class BufferedSparseMatrixDoubleReader
 {
 public:
     /**
      *Default buffer size is in number of elements. Default is 1024 elements
      *that means 1024*16 = 16384 bytes.
      */
-    BufferedSparseMatrixReader(std::string triplesFile, uint32_t bufferSize = 1024)
+    BufferedSparseMatrixDoubleReader(std::string triplesFile, uint32_t bufferSize = 1024)
     {
         // Check if the file exists and treat it as a structure in the
         // format (uint32,uint32,double)
@@ -45,24 +46,24 @@ public:
         currentReadingPos = 0;
     }
 
-    ~BufferedSparseMatrixReader()
+    ~BufferedSparseMatrixDoubleReader()
     {
         if(buffer != nullptr)
             delete[] buffer;
     }
 
     /// Copy constructor
-    BufferedSparseMatrixReader(const BufferedSparseMatrixReader& b)
-        : BufferedSparseMatrixReader(b.triplesFile, b.bufferSize)
+    BufferedSparseMatrixDoubleReader(const BufferedSparseMatrixDoubleReader& b)
+        : BufferedSparseMatrixDoubleReader(b.triplesFile, b.bufferSize)
     {
-        LOGD << "Caling Copy constructor of BufferedSparseMatrixReader.";
+        LOGD << "Caling Copy constructor of BufferedSparseMatrixDoubleReader.";
     }
 
     // Copy assignment
-    BufferedSparseMatrixReader& operator=(const BufferedSparseMatrixReader& b)
+    BufferedSparseMatrixDoubleReader& operator=(const BufferedSparseMatrixDoubleReader& b)
     {
         LOGD << "Caling Copy assignment constructor of "
-                "BufferedSparseMatrixReader.";
+                "BufferedSparseMatrixDoubleReader.";
         if(&b != this) // To elegantly solve situation when assigning
                        // to itself
         {
@@ -89,9 +90,9 @@ public:
     }
 
     // Move constructor
-    BufferedSparseMatrixReader(BufferedSparseMatrixReader&& b)
+    BufferedSparseMatrixDoubleReader(BufferedSparseMatrixDoubleReader&& b)
     {
-        LOGD << "Caling Move constructor of BufferedSparseMatrixReader.";
+        LOGD << "Caling Move constructor of BufferedSparseMatrixDoubleReader.";
         this->triplesFile = b.triplesFile;
         this->totalFileSize = b.totalFileSize;
         this->numberOfElements = b.numberOfElements;
@@ -106,10 +107,10 @@ public:
 
     // Move assignment
     // Non const since I want to set buffer to nullptr
-    BufferedSparseMatrixReader& operator=(BufferedSparseMatrixReader&& b)
+    BufferedSparseMatrixDoubleReader& operator=(BufferedSparseMatrixDoubleReader&& b)
     {
         LOGD << "Caling Move assignment constructor of "
-                "BufferedSparseMatrixReader.";
+                "BufferedSparseMatrixDoubleReader.";
         if(&b != this) // To elegantly solve situation when assigning
                        // to itself
         {
@@ -150,11 +151,39 @@ public:
             {
                 elementsInBuffer = bufferSize;
             }
-//	LOGD << io::xprintf("Page fault on reading pos %lu increasing buffer by %d elements.", currentReadingPos, elementsInBuffer);
+            //	LOGD << io::xprintf("Page fault on reading pos %lu increasing buffer by %d
+            //elements.", currentReadingPos, elementsInBuffer);
             io::readBytesFrom(triplesFile, currentReadingPos * 16, buffer, elementsInBuffer * 16);
             currentBufferOffset = 0;
             startOfBufferPos = currentReadingPos;
             readNextValue(i, j, v);
+        }
+    }
+
+    ElementDouble readNextElement()
+    {
+        if(currentBufferOffset < elementsInBuffer * 16)
+        {
+            ElementDouble e(&buffer[currentBufferOffset]);
+            currentBufferOffset += 16;
+            currentReadingPos++;
+            return e;
+        } else
+        {
+            // PAGE FAULT
+            if(numberOfElements - currentReadingPos < bufferSize)
+            {
+                elementsInBuffer = numberOfElements - currentReadingPos;
+            } else
+            {
+                elementsInBuffer = bufferSize;
+            }
+            //	LOGD << io::xprintf("Page fault on reading pos %lu increasing buffer by %d
+            //elements.", currentReadingPos, elementsInBuffer);
+            io::readBytesFrom(triplesFile, currentReadingPos * 16, buffer, elementsInBuffer * 16);
+            currentBufferOffset = 0;
+            startOfBufferPos = currentReadingPos;
+            return readNextElement();
         }
     }
 
