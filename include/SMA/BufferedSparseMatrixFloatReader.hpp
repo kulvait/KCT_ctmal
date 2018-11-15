@@ -23,6 +23,7 @@ public:
         // format (uint32,uint32,double)
         this->triplesFile = triplesFile;
         this->bufferSize = bufferSize;
+        this->bufferSize64 = bufferSize;
         if(io::fileExists(triplesFile))
         {
             totalFileSize = io::getFileSize(triplesFile);
@@ -193,20 +194,23 @@ public:
         } else
         {
             // PAGE FAULT
-            if(numberOfElements - currentReadingPos < bufferSize)
-            {
-                elementsInBuffer = numberOfElements - currentReadingPos;
-            } else
-            {
-                elementsInBuffer = bufferSize;
-            }
-            if(elementsInBuffer == 0)
+            /*
+                        if(numberOfElements - currentReadingPos < bufferSize)
+                        {
+                            elementsInBuffer = numberOfElements - currentReadingPos;
+                        } else
+                        {
+                            elementsInBuffer = bufferSize;
+                        }*/
+            /*
+                if(elementsInBuffer == 0)
             {
                 *i = 256 * 256 * 199;
                 *j = 0;
                 *v = 0;
                 return;
-            }
+            }*/
+            elementsInBuffer = std::min(numberOfElements - currentReadingPos, bufferSize64);
             //	LOGD << io::xprintf("Page fault on reading pos %lu increasing buffer by %d
             // elements.", currentReadingPos, elementsInBuffer);
             io::readBytesFrom(triplesFile, currentReadingPos * 12, buffer, elementsInBuffer * 12);
@@ -269,7 +273,8 @@ public:
 private:
     uint64_t currentReadingPos;
     uint8_t* buffer;
-    int bufferSize;
+    uint32_t bufferSize;
+    uint64_t bufferSize64; // For faster computations
     int elementsInBuffer;
     uint64_t startOfBufferPos;
     uint64_t currentBufferOffset; // Offset of the reading buffer.
