@@ -112,6 +112,7 @@ public:
         }
         this->elementsInBuffer = 0;
         this->currentBufferPos = 0;
+	return *this;
     }
 
     // Move constructor
@@ -152,6 +153,7 @@ public:
             this->elementsInBuffer = 0;
             this->currentBufferPos = 0;
         }
+	return *this;
     }
     // Buffer into disk
     void flush()

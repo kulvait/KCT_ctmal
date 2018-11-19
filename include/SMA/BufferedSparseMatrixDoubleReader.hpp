@@ -87,6 +87,7 @@ public:
                 this->buffer = new uint8_t[b.bufferSize * 16];
             }
         }
+	return *this;
     }
 
     // Move constructor
@@ -130,9 +131,10 @@ public:
             this->buffer = b.buffer;
             b.buffer = nullptr;
         }
+	return *this;
     }
     // Increments position
-    void readNextValue(int* i, int* j, double* v)
+    void readNextValue(uint32_t* i, uint32_t* j, double* v)
     {
         if(currentBufferOffset < elementsInBuffer * 16)
         {
@@ -211,8 +213,8 @@ public:
 private:
     uint64_t currentReadingPos;
     uint8_t* buffer;
-    int bufferSize;
-    int elementsInBuffer;
+    uint32_t bufferSize;
+    uint32_t elementsInBuffer;
     uint64_t startOfBufferPos;
     uint64_t currentBufferOffset; // Offset of the reading buffer.
 

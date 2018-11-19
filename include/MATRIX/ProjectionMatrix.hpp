@@ -39,6 +39,7 @@ namespace util {
         SquareMatrix<3> colSubMatrix(int i);
 	/**Compute projection of volume point to the projector point*/
 	void project(double x, double y, double z, double* px, double* py); 
+	void project(float x, float y, float z, float* px, float* py); 
     };
 } // namespace util
 } // namespace CTL

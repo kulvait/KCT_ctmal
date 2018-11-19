@@ -220,7 +220,7 @@ namespace util {
             double val = (*LU)((*P)[i], i);
             if(val < 0)
             {
-                negativeSign != negativeSign;
+                negativeSign = !negativeSign;
             }
             determinant += std::log10(std::abs(val));
         }

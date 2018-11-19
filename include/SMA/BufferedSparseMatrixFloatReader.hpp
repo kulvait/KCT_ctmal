@@ -88,6 +88,7 @@ public:
                 this->buffer = new uint8_t[b.bufferSize * 12];
             }
         }
+	return *this;
     }
 
     // Move constructor
@@ -131,6 +132,7 @@ public:
             this->buffer = b.buffer;
             b.buffer = nullptr;
         }
+	return *this;
     }
     void getNextValue(uint32_t* i, uint32_t* j, float* v)
     {
@@ -275,7 +277,7 @@ private:
     uint8_t* buffer;
     uint32_t bufferSize;
     uint64_t bufferSize64; // For faster computations
-    int elementsInBuffer;
+    uint32_t elementsInBuffer;
     uint64_t startOfBufferPos;
     uint64_t currentBufferOffset; // Offset of the reading buffer.
 

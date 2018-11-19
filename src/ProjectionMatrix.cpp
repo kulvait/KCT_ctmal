@@ -60,7 +60,8 @@ namespace util {
         normal[0] = (*this)(2, 0);
         normal[1] = (*this)(2, 1);
         normal[2] = (*this)(2, 2);
-        double normvec = std::sqrt(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
+        double normvec
+            = std::sqrt(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
         normal[0] /= normvec;
         normal[1] /= normvec;
         normal[2] /= normvec;
@@ -78,6 +79,21 @@ namespace util {
             / divideByMe;
         *py = (x * (*this)(1, 0) + y * (*this)(1, 1) + z * (*this)(1, 2) + (*this)(1, 3))
             / divideByMe;
+    }
+
+    /**
+     *Actual projection
+     */
+    void ProjectionMatrix::project(float x, float y, float z, float* px, float* py)
+    {
+        double divideByMe
+            = x * (*this)(2, 0) + y * (*this)(2, 1) + z * (*this)(2, 2) + (*this)(2, 3);
+        double pxd = (x * (*this)(0, 0) + y * (*this)(0, 1) + z * (*this)(0, 2) + (*this)(0, 3))
+            / divideByMe;
+        double pyd = (x * (*this)(1, 0) + y * (*this)(1, 1) + z * (*this)(1, 2) + (*this)(1, 3))
+            / divideByMe;
+        *px = float(pxd);
+        *py = float(pyd);
     }
 
 } // namespace util
