@@ -287,6 +287,7 @@ namespace util {
             std::cout << std::endl;
         }
 
+	//Transformation to the interval [start,end] => [-1,1]
         double transformToSupport(double t) const
         {
             return (transformationSlope * t) + transformationIntercept;

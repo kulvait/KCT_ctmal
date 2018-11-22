@@ -85,7 +85,7 @@ namespace util {
                 return 1;
 
             int result = n;
-            for(int i = 2; i <= k; ++i)
+            for(size_t i = 2; i <= k; ++i)
             {
                 result *= (n - i + 1);
                 result /= i;

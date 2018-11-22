@@ -1,16 +1,16 @@
-#include "catch2/catch.hpp"
+#include "catch.hpp"
 #include <cmath>
 #include <plog/Log.h>
 
 // Internal libs
-#include "stringFormatter.h"
 #include "FUN/LegendrePolynomial.h"
 #include "FUN/LegendrePolynomialsDerivatives.hpp"
 #include "FUN/LegendrePolynomialsExplicit.hpp"
+#include "stringFormatter.h"
 
 using namespace CTL;
 
-///Testing correctness of legendre polynomials and its derivatives
+/// Testing correctness of legendre polynomials and its derivatives
 
 TEST_CASE("CTL.util.LegendrePolynomialsExplicit.evaluate", "[legendre]")
 {
@@ -116,6 +116,8 @@ TEST_CASE("CTL.util.LegendrePolynomialsExplicit.evaluate", "[legendre]")
     util::LegendrePolynomialsExplicit lp5(5, 0, 1.0);
     double t = 0.201;
     double a = lp5.transformToSupport(t);
+    double targetSupportVal = t * 2 - 1; // transforming [0,1] -> [-1,1]
+    REQUIRE((a - targetSupportVal) < 1e-30); // a should be equal to t*2-1
     // LOGD << io::xprintf("Evaluating at %f.", a);
     lp5.valuesAt(t, values);
     double x[6];
@@ -193,9 +195,10 @@ TEST_CASE("TEST:class LegendrePolynomial.", "[Polynomial]")
 
     double x[6];
     double t = 0.22;
-    double value = lp5.valueAt(t);
+    double val = lp5.valueAt(t);
     lp5.valuesAt(t, &x[0]);
-    double difference = x[5] - lp5.valueAt(t);
+    double difference = x[5] - val;
+    REQUIRE(difference < 1e-30);
     // LOGD << io::xprintf("Value is %f and difference of the two methods is %f", value,
     // difference);
     REQUIRE(std::abs(x[5] - lp5.valueAt(t)) < 0.00001);

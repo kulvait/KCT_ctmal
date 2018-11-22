@@ -5,7 +5,10 @@ set(CMAKE_INSTALL_PREFIX $ENV{HOME}/bin)
 set(CMAKE_CXX_STANDARD 14)#Supported values are 98, 11 and 14.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+message("Current value of flags is ${CMAKE_CXX_FLAGS} and debug is ${CMAKE_CXX_FLAGS_DEBUG} and release is ${CMAKE_CXX_FLAGS_RELEASE}")
+#Default CMAKE_CXX_FLAGS are empty, default for CMAKE_CXX_FLAGS_DEBUG is -g and CMAKE_CXX_FLAGS_RELEASE are not empty
+set(CMAKE_CXX_FLAGS "-Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_BUILD_TYPE Debug)
 set(BUILD_SHARED_LIBS True)
 
@@ -26,6 +29,7 @@ include_directories(${CMAKE_SOURCE_DIR}/submodules/plog/include)
 #Matrix class 
 #ssh:  // git@gitlab.stimulate.ovgu.de:2200/robert-frysch/Matrix-Template.git
 include_directories(${CMAKE_SOURCE_DIR}/submodules/Matrix-Template)
+add_definitions("-DENABLE_FROBENIUS_NORM")#Nor in the frobenius sense
 
 #Projection matrix comparator by Robert Frysch
 #To enable Frobenius norm just define ENABLE_FROBENIUS_NORM
@@ -91,7 +95,7 @@ endif (DOXYGEN_FOUND)
 #Testing
 include_directories(${CMAKE_SOURCE_DIR}/tests)
 add_library(Catch INTERFACE)
-target_include_directories(Catch INTERFACE ${CMAKE_SOURCE_DIR}/submodules/Catch2/single_include)
+target_include_directories(Catch INTERFACE ${CMAKE_SOURCE_DIR}/submodules/Catch2/single_include/catch2)
 FILE( GLOB TST_SRC ${CMAKE_SOURCE_DIR}/tests/*.cpp )
 add_executable(test_ctmal ${TST_SRC})
 target_link_libraries(test_ctmal Catch)
