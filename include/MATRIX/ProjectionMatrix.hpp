@@ -6,9 +6,9 @@
 #include <array>
 
 // Internal libraries
-#include "matrix.h"
 #include "MATRIX/LUDoolittleForm.hpp"
 #include "MATRIX/SquareMatrix.hpp"
+#include "matrix.h"
 
 namespace CTL {
 namespace util {
@@ -31,15 +31,29 @@ namespace util {
             : Matrix<3, 4>(pm)
         {
         }
+        /**Equality test*/
+
+        bool operator==(const ProjectionMatrix& rhs)
+        {
+            for(int i = 0; i != 3; i++)
+            {
+                for(int j = 0; j != 4; j++)
+                {
+                    if((*this)(i, j) != (rhs)(i, j))
+                        return false;
+                }
+            }
+            return true;
+        }
         /**Get source position*/
         std::array<double, 3> sourcePosition();
         /**Get normal to detector ending at 0*/
         std::array<double, 3> normalToDetector();
         /*Get 3x3 submatrix of projection matrix, where i-th row is removed.*/
         SquareMatrix<3> colSubMatrix(int i);
-	/**Compute projection of volume point to the projector point*/
-	void project(double x, double y, double z, double* px, double* py); 
-	void project(float x, float y, float z, float* px, float* py); 
+        /**Compute projection of volume point to the projector point*/
+        void project(double x, double y, double z, double* px, double* py);
+        void project(float x, float y, float z, float* px, float* py);
     };
 } // namespace util
 } // namespace CTL
