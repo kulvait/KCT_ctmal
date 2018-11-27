@@ -14,8 +14,9 @@ namespace util {
     public:
         /**Initializes support interval.
          *
+	*Dimension is the size of the vector returned by valuesAt call.
          */
-        VectorFunctionI(int dimension, double start, double end)
+        VectorFunctionI(uint32_t dimension, double start, double end)
         {
             if(start < end)
             {
@@ -37,7 +38,7 @@ namespace util {
         /**Dimension of the vector.
          *
          */
-        int getDimension() { return dimension; }
+        uint32_t getDimension() { return dimension; }
 
         /**Provides values of the function at particular point.
          *
@@ -66,7 +67,7 @@ namespace util {
     protected:
         double start; ///< Start of interval of the support.
         double end; ///< End of interval of the support.
-        int dimension; ///< Dimension of the output.
+        uint32_t dimension; ///< Dimension of the output.
     };
 
 } // namespace util
