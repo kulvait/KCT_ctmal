@@ -18,6 +18,30 @@ public:
         this->truncate = truncate;
     }
 
+    /** Precompute convolution matrix in the format as on page 10, Fieselmann at. al, 2011.
+     *
+     *@param[in] granularity Number of elements in aif sequence, A have to be prealocated to have
+     *granularity*granularity elements.
+     *@param[in] aif Values of arthery input function to make deconvolution matrix from.
+     *@param[out] A The matrix prealocated to size granularity*granularity to be filled by
+     *deconvolution data, row major alignment.
+     *
+     */
+    static void precomputeConvolutionMatrix(const uint32_t granularity, const float* aif, float* A)
+    {
+        for(uint32_t i = 0; i != granularity; i++)
+            for(uint32_t j = 0; j != granularity; j++)
+            {
+                if(j > i)
+                {
+                    A[i * granularity + j] = 0.0;
+                } else
+                {
+                    A[i * granularity + j] = aif[i - j];
+                }
+            }
+    }
+
     double regularizeInverted(float s, double lambda)
     {
         if(truncate)
