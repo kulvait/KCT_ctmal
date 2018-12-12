@@ -27,8 +27,8 @@ namespace util {
                      double end,
                      int startReportDegree = 0)
             : VectorFunctionI(baseSize - startReportDegree, start, end)
-            , transformationSlope((double(valuesPerFunction)-1.0)/(end-start))
-            , transformationIntercept(-start*(double(valuesPerFunction) - 1.0) / (end - start))
+            , transformationSlope((double(valuesPerFunction) - 1.0) / (end - start))
+            , transformationIntercept(-start * (double(valuesPerFunction) - 1.0) / (end - start))
         {
             if(startReportDegree < 0)
             {
@@ -58,6 +58,45 @@ namespace util {
             // Now precompute the values of legendre polynomials
         } ///< Inits the function
 
+        StepFunction(int baseSize, std::string sampledBasis, double start, double end, int startReportDegree = 0)
+            : VectorFunctionI(baseSize - startReportDegree, start, end)
+            , transformationSlope((double(valuesPerFunction) - 1.0) / (end - start))
+            , transformationIntercept(-start * (double(valuesPerFunction) - 1.0) / (end - start))
+        {
+            if(startReportDegree < 0)
+            {
+                io::throwerr("Variable startReportDegree must be non negative but supplied was %d.",
+                             startReportDegree);
+            }
+            if(baseSize - startReportDegree < 0)
+            {
+                io::throwerr("Base size must be greater then startReportDegree and not "
+                             "%d as supplied.",
+                             baseSize);
+            }
+            io::DenFileInfo bfi(sampledBasis);
+            this->valuesPerFunction = bfi.dimx();
+            this->baseSize = bfi.dimz();
+            this->valuesD = new double[baseSize * valuesPerFunction];
+            this->valuesF = new float[baseSize * valuesPerFunction];
+            // Fill this array only by values without offset.
+            std::shared_ptr<io::Frame2DReaderI<double>> pr
+                = std::make_shared<io::DenFrame2DReader<double>>(sampledBasis);
+            std::shared_ptr<io::Frame2DI<double>> f;
+            for(int i = 0; i != baseSize; i++)
+            {
+                f = pr->readFrame(i);
+
+                for(int j = 0; j != valuesPerFunction; j++)
+                {
+                    valuesD[i * valuesPerFunction + j] = f->get(j, 0);
+                    valuesF[i * valuesPerFunction + j] = float(f->get(j, 0));
+                }
+            }
+            this->startReportDegree = startReportDegree;
+
+            // Now precompute the values of legendre polynomials
+        } ///< Inits the function
         ~StepFunction()
         {
             delete[] valuesD;
@@ -81,8 +120,8 @@ namespace util {
             {
                 VectorFunctionI::operator=(other);
                 this->startReportDegree = other.startReportDegree;
-		this->start = other.start;
-		this->end = other.end;
+                this->start = other.start;
+                this->end = other.end;
                 if(this->baseSize != other.baseSize
                    || this->valuesPerFunction != other.valuesPerFunction)
                 {
@@ -97,14 +136,15 @@ namespace util {
                 {
                     for(int j = 0; j != valuesPerFunction; j++)
                     {
-                        valuesD[i * valuesPerFunction + j] = other.valuesD[i * valuesPerFunction + j];
-                        valuesF[i * valuesPerFunction + j] = other.valuesF[i * valuesPerFunction + j];
+                        valuesD[i * valuesPerFunction + j]
+                            = other.valuesD[i * valuesPerFunction + j];
+                        valuesF[i * valuesPerFunction + j]
+                            = other.valuesF[i * valuesPerFunction + j];
                     }
                 }
             }
             return *this;
         } // Assignment
-
 
         /**Values of the function at specific time point.
          *
@@ -114,11 +154,12 @@ namespace util {
         void valuesAt(double t, double* array) const override
         {
             // std::lock_guard<std::mutex> guard(powerProtectionMutex);//Big overhead
-            int index = std::max(std::min(valuesPerFunction-1, int(std::lround(transformToIndex(t)))), 0);
+            int index = std::max(
+                std::min(valuesPerFunction - 1, int(std::lround(transformToIndex(t)))), 0);
             std::fill(array, &array[baseSize - startReportDegree], double(0.0));
             for(int i = startReportDegree; i < baseSize; i++)
             {
-                    array[i - startReportDegree] = valuesD[valuesPerFunction*i+index];
+                array[i - startReportDegree] = valuesD[valuesPerFunction * i + index];
             }
         }
 
@@ -128,19 +169,20 @@ namespace util {
         void valuesAt(double t, float* array) const override
         {
             // std::lock_guard<std::mutex> guard(powerProtectionMutex);//Big overhead
-            int index = std::max(std::min(valuesPerFunction-1, int(std::lround(transformToIndex(t)))), 0);
+            int index = std::max(
+                std::min(valuesPerFunction - 1, int(std::lround(transformToIndex(t)))), 0);
             std::fill(array, &array[baseSize - startReportDegree], float(0.0));
             for(int i = startReportDegree; i < baseSize; i++)
             {
-                    array[i - startReportDegree] = valuesD[valuesPerFunction*i+index];
+                array[i - startReportDegree] = valuesD[valuesPerFunction * i + index];
             }
         }
 
         // Transformation to the interval [start,end] => [0,valuesPerFunction-1]
         double transformToIndex(double t) const
         {
-            //return (t-start)*(double(valuesPerFunction)-1.0)/(end-start);
-		return t*transformationSlope+transformationIntercept;
+            // return (t-start)*(double(valuesPerFunction)-1.0)/(end-start);
+            return t * transformationSlope + transformationIntercept;
         }
 
     private:
@@ -151,7 +193,7 @@ namespace util {
         double transformationSlope;
         double transformationIntercept;
 
-	int valuesPerFunction;
+        int valuesPerFunction;
         int baseSize;
         int startReportDegree;
         double start, end;
