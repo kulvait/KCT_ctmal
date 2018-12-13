@@ -2,6 +2,13 @@
 
 #include "stringFormatter.h"
 
+#if DEBUG
+
+#include "matplotlibcpp.h"
+namespace plt = matplotlibcpp;
+
+#endif
+
 namespace CTL {
 namespace util {
     /**Interface that will be implemented to contain actual vector function supported on the
@@ -14,7 +21,7 @@ namespace util {
     public:
         /**Initializes support interval.
          *
-	*Dimension is the size of the vector returned by valuesAt call.
+         *Dimension is the size of the vector returned by valuesAt call.
          */
         VectorFunctionI(uint32_t dimension, double start, double end)
         {
@@ -63,6 +70,42 @@ namespace util {
         /**Start of support.
          */
         double getEnd() { return end; }
+
+#if DEBUG
+        void plotFunctions(uint32_t granularity = 100)
+        {
+            if(granularity < 2)
+            {
+                io::throwerr("It is not possible to plot functions with granularity less than 2");
+            }
+            std::vector<double> taxis;
+            std::vector<std::vector<double>> values;
+            for(uint32_t j = 0; j != dimension; j++)
+            {
+                values.push_back(std::vector<double>());
+            }
+            float* val = new float[dimension];
+            double time = start;
+            double increment = (end - start) / double(granularity - 1);
+            for(uint32_t i = 0; i != granularity; i++)
+            {
+                taxis.push_back(time);
+                valuesAt(time, val);
+                for(uint32_t j = 0; j != dimension; j++)
+                {
+                    values[j].push_back(val[j]);
+                }
+                time += increment;
+            }
+            for(uint32_t j = 0; j != dimension; j++)
+            {
+                plt::named_plot(io::xprintf("Function %d", j), taxis, values[j]);
+            }
+            plt::legend();
+            plt::show();
+            delete[] val;
+        }
+#endif
 
     protected:
         double start; ///< Start of interval of the support.

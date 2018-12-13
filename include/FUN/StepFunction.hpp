@@ -9,13 +9,17 @@
 
 namespace CTL {
 namespace util {
-    /** Class for evaluation Legendre polynomials stretched from [-1,1] to a domain [start, end].
+    /** Class for evaluation of sampled functions on a domain [start, end].
      *
-     *Values at particular point of the domain are evaluated for Legendre polynomials. Values are
-     *written to the array. Polynomials start from the degree startReportDegree and ends by the
-     *polynomial of the degree.
-     *degree ... degree of polynomial to report last in the resulting vector
-     * startReportDegree ... The degree of polynomial to report first in the resulting vector.
+     *Values are written to the array. It is possible to omit first functions in the basis by
+     *specifiing higher startReportDegree.
+     *
+     *@param[in] values Array with the function values
+     *@param[in] baseSize number of the functions in the array
+     *@param[in] valuesPerFunction number of sampling points
+     *@param[in] start Start of interval.
+     *@param[in] end End of interval.
+     *@param[in] startReportDegree First function of the basis to report.
      */
     class StepFunction : public VectorFunctionI
     {
@@ -58,10 +62,12 @@ namespace util {
             // Now precompute the values of legendre polynomials
         } ///< Inits the function
 
-        StepFunction(int baseSize, std::string sampledBasis, double start, double end, int startReportDegree = 0)
+        StepFunction(int baseSize,
+                     std::string sampledBasis,
+                     double start,
+                     double end,
+                     int startReportDegree = 0)
             : VectorFunctionI(baseSize - startReportDegree, start, end)
-            , transformationSlope((double(valuesPerFunction) - 1.0) / (end - start))
-            , transformationIntercept(-start * (double(valuesPerFunction) - 1.0) / (end - start))
         {
             if(startReportDegree < 0)
             {
@@ -77,6 +83,8 @@ namespace util {
             io::DenFileInfo bfi(sampledBasis);
             this->valuesPerFunction = bfi.dimx();
             this->baseSize = bfi.dimz();
+            transformationSlope = ((double(valuesPerFunction) - 1.0) / (end - start));
+            transformationIntercept = (-start * (double(valuesPerFunction) - 1.0) / (end - start));
             this->valuesD = new double[baseSize * valuesPerFunction];
             this->valuesF = new float[baseSize * valuesPerFunction];
             // Fill this array only by values without offset.
