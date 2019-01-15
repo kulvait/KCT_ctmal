@@ -3,10 +3,10 @@
 #include <plog/Log.h>
 
 // Internal libraries
-#include "matrix.h"
+#include "MATRIX/Matrix.hpp"
 
 namespace CTL {
-namespace util {
+namespace matrix {
     template <uint N>
     class SquareMatrix : public Matrix<N, N>
     {

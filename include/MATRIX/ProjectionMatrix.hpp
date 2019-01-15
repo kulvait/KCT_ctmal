@@ -8,10 +8,10 @@
 // Internal libraries
 #include "MATRIX/LUDoolittleForm.hpp"
 #include "MATRIX/SquareMatrix.hpp"
-#include "matrix.h"
+#include "MATRIX/Matrix.hpp"
 
 namespace CTL {
-namespace util {
+namespace matrix {
     /**
      *Class to represent projection matrices.
      */

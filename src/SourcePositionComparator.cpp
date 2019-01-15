@@ -1,7 +1,7 @@
 #include "MATRIX/SourcePositionComparator.hpp"
 
 namespace CTL {
-namespace util {
+namespace matrix {
 
     double SourcePositionComparator::distance(ProjectionMatrix a, ProjectionMatrix b)
     {

@@ -26,10 +26,9 @@ include_directories(${CMAKE_SOURCE_DIR}/submodules)
 #Plog logger
 include_directories(${CMAKE_SOURCE_DIR}/submodules/plog/include)
 
-#Matrix class 
-#ssh:  // git@gitlab.stimulate.ovgu.de:2200/robert-frysch/Matrix-Template.git
-include_directories(${CMAKE_SOURCE_DIR}/submodules/Matrix-Template)
-add_definitions("-DENABLE_FROBENIUS_NORM")#Nor in the frobenius sense
+#Intel MKL
+find_package(MKL)
+include_directories(${MKL_INCLUDE_DIRS})
 
 #Projection matrix comparator by Robert Frysch
 #To enable Frobenius norm just define ENABLE_FROBENIUS_NORM
@@ -52,6 +51,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 FILE( GLOB CTMAL_SRC ${CMAKE_SOURCE_DIR}/src/*.cpp )
 add_library(ctmal ${CTMAL_SRC})
 target_link_libraries(ctmal ctiol)
+target_link_libraries(ctmal ${MKL_CORE_LIBRARY})
 set_target_properties(
     ctmal
     PROPERTIES 

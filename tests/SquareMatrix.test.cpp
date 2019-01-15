@@ -8,14 +8,15 @@
 #include "DEN/DenFileInfo.hpp"
 #include "MATRIX/LUDoolittleForm.hpp"
 #include "MATRIX/SquareMatrix.hpp"
+#include "MATRIX/Matrix.hpp"
 #include "catch.hpp"
-#include "matrix.h"
 #include "stringFormatter.h"
 /**First test is simple, just computing Sebastian least squares problem from the excercises.
  *
  */
 using namespace CTL;
 using namespace CTL::util;
+using namespace CTL::matrix;
 
 TEST_CASE("TEST: Matrix norm", "Matrix norm properties")
 {
@@ -38,16 +39,16 @@ TEST_CASE("TEST: SquareMatrix class, test basic operations.", "SquareMatrix.test
     Matrix<8, 1> b({ 20, 20, 10, 10, 20, 20, 10, 10 });
     Matrix<8, 1> p({ 18, 18, 8, 8, 18, 18, 8, 8 });
     // LOGD << "A="<< std::endl << A.info();
-    util::SquareMatrix<4> AA(A.transposed() * A);
+    SquareMatrix<4> AA(A.T() * A);
     // LOGD << "A^TA=" << std::endl << AA.info();
     Matrix<4, 4> AA_result({ 3, 1, 1, 0, 1, 3, 0, 1, 1, 0, 3, 1, 0, 1, 1, 3 });
     REQUIRE((AA - AA_result).norm()
             == 0.0); // Polymorphism ... derived class might act as superclass
-    Matrix<4, 1> Ab = A.transposed() * b;
-    REQUIRE(Ab(1) == 50);
+    Matrix<4, 1> Ab = A.T() * b;
+    REQUIRE(Ab(1,0) == 50);
     // LOGD << "A^tp=" << std::endl << Ap.info();
     double minimalPivotSize = 0.0001;
-    util::LUDoolittleForm<4> lu = LUDoolittleForm<4>::LUDecomposeDoolittle(AA, minimalPivotSize);
+    LUDoolittleForm<4> lu = LUDoolittleForm<4>::LUDecomposeDoolittle(AA, minimalPivotSize);
     SquareMatrix<4> L = lu.getLMatrix();
     SquareMatrix<4> L_result({ 1, 0, 0, 0, 0.333333333333333, 1, 0, 0, 0.333333333333333, -0.125, 1,
                                0, 0, 0.375, 0.428571428571429, 1 });
@@ -95,7 +96,7 @@ TEST_CASE("TEST: SquareMatrix class, test basic operations.", "SquareMatrix.test
         AA = SquareMatrix<4>({ 3, 1, 1, 0, 1, 0, 3, 1, 1, 3, 0, 1, 0, 1, 1, 3 });
         lu = LUDoolittleForm<4>::LUDecomposeDoolittle(AA, minimalPivotSize);
         INV = lu.inverseMatrix();
-        REQUIRE((eye<4>() - AA * INV).norm() < 1e-10);
+        REQUIRE((Matrix<4,4>::unitDiagonal() - AA * INV).norm() < 1e-10);
         REQUIRE((lu.getLog10Determinant() + 1.653213) < 0.00001);
         REQUIRE(lu.getDeterminant() == -45);
     }

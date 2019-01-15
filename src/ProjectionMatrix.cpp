@@ -2,7 +2,7 @@
 #include "MATRIX/ProjectionMatrix.hpp"
 
 namespace CTL {
-namespace util {
+namespace matrix {
 
     SquareMatrix<3> ProjectionMatrix::colSubMatrix(int j)
     {

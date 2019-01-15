@@ -3,7 +3,7 @@
 #include "MATRIX/ProjectionMatrix.hpp"
 
 namespace CTL {
-namespace util {
+namespace matrix {
     /**
     Interface to compare two projection matrices.
     */

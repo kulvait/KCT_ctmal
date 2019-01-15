@@ -8,11 +8,11 @@
 
 // Internal libraries
 #include "stringFormatter.h"
-#include "matrix.h"
+#include "MATRIX/Matrix.hpp"
 #include "MATRIX/SquareMatrix.hpp"
 
 namespace CTL {
-namespace util {
+namespace matrix {
     template <uint N>
     class LUDoolittleForm
     {
@@ -96,8 +96,9 @@ namespace util {
     template <uint N>
     SquareMatrix<N> LUDoolittleForm<N>::getPAMatrix()
     {
-        SquareMatrix<N> PA = this->getLMatrix() * this->getUMatrix();
-        return PA;
+	SquareMatrix<N> U = this->getUMatrix();
+	SquareMatrix<N> L = this->getLMatrix();
+        return L*U;
     }
 
     template <uint N>
@@ -176,13 +177,13 @@ namespace util {
         Matrix<N, 1> vec;
         for(int i = 0; i != N; i++)
         {
-            Matrix<N, 1> eu(0);
+            Matrix<N, 1> eu(0.0);
             eu(i, 0) = 1;
             vec = solve(eu);
             //	LOGD << "Solution of " << eu.info() << "is" << vec.info();
             for(int j = 0; j != N; j++)
             {
-                out(j, i) = vec(j);
+                out(j, i) = vec(j,0);
             }
         }
         return out;
