@@ -4,6 +4,3 @@
 [submodule "submodules/CTIOL"]
 	path = submodules/CTIOL
 	url = ssh://git@gitlab.stimulate.ovgu.de:2200/vojtech.kulvait/CTIOL.git
-[submodule "submodules/Matrix-Template"]
-	path = submodules/Matrix-Template
-	url = ssh://git@gitlab.stimulate.ovgu.de:2200/robert-frysch/Matrix-Template.git
