@@ -4,11 +4,13 @@
 
 // Standard libraries
 #include <array>
+#include <iostream>
+#include <iomanip>
 
 // Internal libraries
 #include "MATRIX/LUDoolittleForm.hpp"
-#include "MATRIX/SquareMatrix.hpp"
 #include "MATRIX/Matrix.hpp"
+#include "MATRIX/SquareMatrix.hpp"
 
 namespace CTL {
 namespace matrix {
@@ -54,6 +56,16 @@ namespace matrix {
         /**Compute projection of volume point to the projector point*/
         void project(double x, double y, double z, double* px, double* py);
         void project(float x, float y, float z, float* px, float* py);
+
+        /**Compute the projection matrix with origin shifted by (x,y) detector pixels
+         *
+         *The projection matrix is multiplied from the left by the matrix
+         *1 0 -x
+         *0 1 -y
+         *0 0 1
+         */
+        ProjectionMatrix shiftDetectorOrigin(double x, double y) const;
+    	void print() const;
     };
-} // namespace util
+} // namespace matrix
 } // namespace CTL

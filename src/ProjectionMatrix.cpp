@@ -96,5 +96,36 @@ namespace matrix {
         *py = float(pyd);
     }
 
-} // namespace util
+    ProjectionMatrix ProjectionMatrix::shiftDetectorOrigin(double x, double y) const
+    {
+        Matrix<3, 3> T = Matrix<3, 3>::unitDiagonal();
+        T(0, 2) = -x;
+        T(1, 2) = -y;
+        return T * (*this);
+    }
+
+    void ProjectionMatrix::print() const
+    {
+        for(unsigned int i = 0; i != 3; ++i)
+        {
+            if(i == 1)
+            {
+                std::cout << "P = |";
+            } else
+            {
+                std::cout << "    |";
+            }
+            for(unsigned int j = 0; j != 4; ++j)
+            {
+                if(j != 0)
+                    std::cout << " ";
+                std::cout << std::setw(9) << std::fixed << std::setfill(' ') << std::setprecision(3)
+                          << static_cast<double>((*this)(i, j));
+            }
+            std::cout << "|\n";
+        }
+	std::cout << std::endl;
+    }
+
+} // namespace matrix
 } // namespace CTL
