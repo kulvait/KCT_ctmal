@@ -24,7 +24,7 @@ TEST_CASE("TEST: Print projection matrix", "Projection matrix printing")
 	ProjectionMatrix pm =  dpr.readMatrix(10);
 	ProjectionMatrix pm_shift =  pm.shiftDetectorOrigin(2.0,1.0);
 	LOGE << "Printing original and shifted matrices:";
-	pm.print();
-	pm_shift.print();
+	std::cout << pm.toString();
+	std::cout << pm_shift.toString();
 }
 

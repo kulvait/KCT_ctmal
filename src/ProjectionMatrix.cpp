@@ -104,27 +104,61 @@ namespace matrix {
         return T * (*this);
     }
 
-    void ProjectionMatrix::print() const
+    std::string ProjectionMatrix::toString(std::string name) const
     {
+        std::ostringstream os;
+        matrix::RQFactorization<3, 4> rq;
+	std::shared_ptr<CTL::matrix::Matrix<3u, 4u> > F = std::make_shared<CTL::matrix::Matrix<3u, 4u>>(*this);
+        rq.factorize(F);
+        auto R = rq.getRMatrix();
+        auto Q = rq.getQMatrix();
+
         for(unsigned int i = 0; i != 3; ++i)
         {
             if(i == 1)
             {
-                std::cout << "P = |";
+                os << io::xprintf("%s = |", name.c_str());
             } else
             {
-                std::cout << "    |";
+                os << "    |";
             }
             for(unsigned int j = 0; j != 4; ++j)
             {
                 if(j != 0)
-                    std::cout << " ";
-                std::cout << std::setw(9) << std::fixed << std::setfill(' ') << std::setprecision(3)
-                          << static_cast<double>((*this)(i, j));
+                    os << " ";
+                os << std::setw(9) << std::fixed << std::setfill(' ') << std::setprecision(3)
+                   << static_cast<double>((*this)(i, j));
             }
-            std::cout << "|\n";
+            os << "|";
+            if(i == 1)
+            {
+                os << " = C[Q|t] = ";
+            } else
+            {
+                os << "            ";
+            }
+            os << "|";
+            for(unsigned int j = 0; j != 3; ++j)
+            {
+                if(j != 0)
+                    os << " ";
+                os << std::setw(9) << std::fixed << std::setfill(' ') << std::setprecision(3)
+                   << static_cast<double>((*R)(i, j));
+            }
+            os << "|";
+            for(unsigned int j = 0; j != 4; ++j)
+            {
+                if(j != 0)
+                    os << " ";
+                os << std::setw(9) << std::fixed << std::setfill(' ') << std::setprecision(3)
+                   << static_cast<double>((*Q)(i, j));
+            }
+
+            os << "|";
+            os << "\n";
         }
-	std::cout << std::endl;
+        os << std::endl;
+        return os.str();
     }
 
 } // namespace matrix

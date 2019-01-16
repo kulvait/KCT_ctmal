@@ -2,7 +2,12 @@
 
 #include <plog/Log.h>
 
+// STL
+#include <cmath>
+
+// External libraries
 #include "mkl.h"
+#include "stringFormatter.h"
 
 namespace CTL {
 namespace matrix {
@@ -44,8 +49,8 @@ namespace matrix {
          *
          */
         double* getPtr() { return A; }
-        
-	/**Get const data pointer.
+
+        /**Get const data pointer.
          *
          */
         const double* getConstPtr() const { return A; }
@@ -62,10 +67,24 @@ namespace matrix {
         // Transpose matrix
         Matrix<n, m> T() const;
 
+        /**Creates string representation of the matrix
+         *
+         *Do not use for large matrices.
+         */
+        std::string toString(std::string name = "A") const;
         // Matrix multiplication
         template <uint n2>
         Matrix<m, n2> operator*(const Matrix<n, n2>& B) const;
         Matrix<m, n> operator-(const Matrix<m, n>& rhs) const;
+        friend Matrix<m, n> operator*(const double& alpha, const Matrix<m, n>& rhs)
+        {
+            Matrix<m, n> out;
+            for(size_t i = 0; i != rhs.size; i++)
+            {
+                out.A[i] = alpha * rhs.A[i];
+            }
+            return out;
+        }
 
     private:
         double* A;
@@ -187,8 +206,8 @@ namespace matrix {
     Matrix<m, n2> Matrix<m, n>::operator*(const Matrix<n, n2>& B) const
     {
         Matrix<m, n2> out;
-        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n2, n, 1.0, getConstPtr(), n, B.getConstPtr(), n2,
-                    0.0, out.getPtr(), n2);
+        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n2, n, 1.0, getConstPtr(), n,
+                    B.getConstPtr(), n2, 0.0, out.getPtr(), n2);
         return out;
     }
 
@@ -203,6 +222,32 @@ namespace matrix {
         return out;
     }
 
+    template <uint m, uint n>
+    std::string Matrix<m, n>::toString(std::string name) const
+    {
+        std::ostringstream os;
+        for(unsigned int i = 0; i != m; ++i)
+        {
+            if(i == 0)
+            {
+                os << io::xprintf("%s = |", name.c_str());
+            } else
+            {
+                os << "    |";
+            }
+            for(unsigned int j = 0; j != n; ++j)
+            {
+                if(j != 0)
+                    os << " ";
+                os << std::setw(9) << std::fixed << std::setfill(' ') << std::setprecision(3)
+                   << static_cast<double>((*this)(i, j));
+            }
+            os << "|";
+            os << "\n";
+        }
+        os << std::endl;
+        return os.str();
+    }
     template <uint m, uint n>
     double Matrix<m, n>::norm(uint16_t p) const
     {

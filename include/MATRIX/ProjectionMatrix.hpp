@@ -4,13 +4,14 @@
 
 // Standard libraries
 #include <array>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 // Internal libraries
 #include "MATRIX/LUDoolittleForm.hpp"
 #include "MATRIX/Matrix.hpp"
 #include "MATRIX/SquareMatrix.hpp"
+#include "MATRIX/RQFactorization.hpp"
 
 namespace CTL {
 namespace matrix {
@@ -65,7 +66,7 @@ namespace matrix {
          *0 0 1
          */
         ProjectionMatrix shiftDetectorOrigin(double x, double y) const;
-    	void print() const;
+        std::string toString(std::string name = "P") const;
     };
 } // namespace matrix
 } // namespace CTL
