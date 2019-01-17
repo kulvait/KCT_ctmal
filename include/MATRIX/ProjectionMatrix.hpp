@@ -49,11 +49,11 @@ namespace matrix {
             return true;
         }
         /**Get source position*/
-        std::array<double, 3> sourcePosition();
+        std::array<double, 3> sourcePosition() const;
         /**Get normal to detector ending at 0*/
         std::array<double, 3> normalToDetector();
         /*Get 3x3 submatrix of projection matrix, where i-th row is removed.*/
-        SquareMatrix<3> colSubMatrix(int i);
+        SquareMatrix<3> colSubMatrix(int i) const;
         /**Compute projection of volume point to the projector point*/
         void project(double x, double y, double z, double* px, double* py);
         void project(float x, float y, float z, float* px, float* py);

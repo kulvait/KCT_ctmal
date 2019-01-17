@@ -7,9 +7,9 @@
 #include <memory>
 
 // Internal libraries
-#include "stringFormatter.h"
 #include "MATRIX/Matrix.hpp"
 #include "MATRIX/SquareMatrix.hpp"
+#include "stringFormatter.h"
 
 namespace CTL {
 namespace matrix {
@@ -37,12 +37,12 @@ namespace matrix {
         bool getOddSwapParity();
         static LUDoolittleForm<N> LUDecomposeDoolittle(const SquareMatrix<N>& m,
                                                        double minimalPivotSize);
+        Matrix<N, 1> backwardSubstitute(Matrix<N, 1> b);
 
     private:
         std::shared_ptr<SquareMatrix<N>> LU;
         std::shared_ptr<std::array<int, N>> P;
         Matrix<N, 1> forwardSubstitute(Matrix<N, 1> b);
-        Matrix<N, 1> backwardSubstitute(Matrix<N, 1> b);
         static int findPivot(const SquareMatrix<N>& M,
                              const std::array<int, N>& P,
                              int k,
@@ -96,9 +96,9 @@ namespace matrix {
     template <uint N>
     SquareMatrix<N> LUDoolittleForm<N>::getPAMatrix()
     {
-	SquareMatrix<N> U = this->getUMatrix();
-	SquareMatrix<N> L = this->getLMatrix();
-        return L*U;
+        SquareMatrix<N> U = this->getUMatrix();
+        SquareMatrix<N> L = this->getLMatrix();
+        return L * U;
     }
 
     template <uint N>
@@ -183,7 +183,7 @@ namespace matrix {
             //	LOGD << "Solution of " << eu.info() << "is" << vec.info();
             for(int j = 0; j != N; j++)
             {
-                out(j, i) = vec(j,0);
+                out(j, i) = vec(j, 0);
             }
         }
         return out;
@@ -313,5 +313,5 @@ namespace matrix {
         return p;
     }
 
-} // namespace util
+} // namespace matrix
 } // namespace CTL

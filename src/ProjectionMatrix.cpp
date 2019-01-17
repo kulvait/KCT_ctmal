@@ -4,7 +4,7 @@
 namespace CTL {
 namespace matrix {
 
-    SquareMatrix<3> ProjectionMatrix::colSubMatrix(int j)
+    SquareMatrix<3> ProjectionMatrix::colSubMatrix(int j) const
     {
         if(j < 0 || j > 3)
         {
@@ -40,7 +40,7 @@ namespace matrix {
         return lu.getDeterminant();
     }
 
-    std::array<double, 3> ProjectionMatrix::sourcePosition()
+    std::array<double, 3> ProjectionMatrix::sourcePosition() const
     {
         double divisor = -determinant<3>(this->colSubMatrix(3));
         std::array<double, 3> source;
@@ -107,12 +107,24 @@ namespace matrix {
     std::string ProjectionMatrix::toString(std::string name) const
     {
         std::ostringstream os;
-        matrix::RQFactorization<3, 4> rq;
-	std::shared_ptr<CTL::matrix::Matrix<3u, 4u> > F = std::make_shared<CTL::matrix::Matrix<3u, 4u>>(*this);
+        matrix::RQFactorization<3, 3> rq;
+        std::shared_ptr<CTL::matrix::Matrix<3, 3>> F
+            = std::make_shared<CTL::matrix::Matrix<3, 3>>(this->colSubMatrix(3));
+        Matrix<3, 1> p4({ (*this)(0, 3), (*this)(1, 3), (*this)(2, 3) });
         rq.factorize(F);
-        auto R = rq.getRMatrix();
+        auto C = rq.getRMatrix();
         auto Q = rq.getQMatrix();
-
+        // I use backward substitution from the LUDoolittleForm, where C matrix is upper diagonal
+        // representing LU matrix
+        std::shared_ptr<std::array<int, 3>> P = std::make_shared<std::array<int, 3>>();
+        for(int i = 0; i != 3; i++)
+        {
+            (*P)[i]
+                = i; // On i-th position is the row index in the original matrix that is on the i-th
+                     // position in the PA matrix.
+        }
+        LUDoolittleForm<3> lu(std::make_shared<SquareMatrix<3>>(*C), P, false);
+        Matrix<3, 1> u = lu.backwardSubstitute(p4);
         for(unsigned int i = 0; i != 3; ++i)
         {
             if(i == 1)
@@ -132,7 +144,7 @@ namespace matrix {
             os << "|";
             if(i == 1)
             {
-                os << " = C[Q|t] = ";
+                os << " = C[Q|u] = ";
             } else
             {
                 os << "            ";
@@ -143,20 +155,31 @@ namespace matrix {
                 if(j != 0)
                     os << " ";
                 os << std::setw(9) << std::fixed << std::setfill(' ') << std::setprecision(3)
-                   << static_cast<double>((*R)(i, j));
+                   << static_cast<double>((*C)(i, j));
             }
-            os << "|";
-            for(unsigned int j = 0; j != 4; ++j)
+            if(i == 1)
+            {
+                os << "|.|";
+
+            } else
+            {
+                os << "| |";
+            }
+            for(unsigned int j = 0; j != 3; ++j)
             {
                 if(j != 0)
                     os << " ";
                 os << std::setw(9) << std::fixed << std::setfill(' ') << std::setprecision(3)
                    << static_cast<double>((*Q)(i, j));
             }
-
+            os << "|";
+            os << std::setw(9) << std::fixed << std::setfill(' ') << std::setprecision(3)
+               << static_cast<double>(u(i, 0));
             os << "|";
             os << "\n";
         }
+	std::array<double, 3> S = sourcePosition();
+	os << io::xprintf("S = [%5.2f, %5.2f, %5.2f]", S[0], S[1], S[2]);
         os << std::endl;
         return os.str();
     }
