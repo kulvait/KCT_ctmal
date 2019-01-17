@@ -141,7 +141,7 @@ namespace matrix {
     Matrix<m, n>::Matrix(const Matrix<m, n>& b)
         : Matrix<m, n>(b.A)
     {
-        LOGD << "Caling Copy constructor of Matrix.";
+        //LOGD << "Caling Copy constructor of Matrix.";
     }
 
     /**Copy assignment
