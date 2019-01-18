@@ -31,7 +31,7 @@ namespace util {
                 this->end = end;
             } else
             {
-                io::throwerr("You have supplied the range [start, end] = [%d, %d] but the value of "
+                io::throwerr("VectorFunctionI:You have supplied the range [start, end] = [%f, %f] but the value of "
                              "start needs to be less then the value of end.",
                              start, end);
             }
