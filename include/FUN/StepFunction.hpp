@@ -1,9 +1,14 @@
 #pragma once
 
+
+//External libraries
 #include <cmath>
 #include <iostream>
 #include <mutex>
 
+//Internal includes
+#include "Frame2DReaderI.hpp"
+#include "DEN/DenFrame2DReader.hpp"
 #include "VectorFunctionI.h"
 #include "stringFormatter.h"
 
