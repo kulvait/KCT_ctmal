@@ -12,10 +12,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_BUILD_TYPE Debug)
 set(BUILD_SHARED_LIBS True)
 
-#MKL
-find_package(MKL)
-include_directories(${MKL_INCLUDE_DIRS})
-
 #Header directories for the project
 set(GLOBAL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 include_directories(${GLOBAL_INCLUDE_DIR})
@@ -29,17 +25,6 @@ include_directories(${CMAKE_SOURCE_DIR}/submodules/plog/include)
 #Intel MKL
 find_package(MKL)
 include_directories(${MKL_INCLUDE_DIRS})
-
-#Projection matrix comparator by Robert Frysch
-#To enable Frobenius norm just define ENABLE_FROBENIUS_NORM
-#add_definitions("-DENABLE_FROBENIUS_NORM")
-#include_directories(${CMAKE_SOURCE_DIR} / submodules / projection - matrix - \
-#		     comparator)
-#SET(PMC_SRC ${CMAKE_SOURCE_DIR} / submodules / projection - matrix -         \
-#     comparator / pmatcachedfilereader.cpp ${CMAKE_SOURCE_DIR} / submodules / \
-#	 projection -                                                         \
-#     matrix - comparator / pmatcomparator.cpp)
-#add_library(pmc ${PMC_SRC})
 
 #CT input output library
 FILE( GLOB CTIOL_SRC ${CMAKE_SOURCE_DIR}/submodules/CTIOL/src/*.cpp ${CMAKE_SOURCE_DIR}/submodules/CTIOL/src/ARGPARSE/*.cpp)
