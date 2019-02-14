@@ -88,7 +88,21 @@ namespace util {
             }
             return *this;
         } // Assignment
-
+        
+#if DEBUG
+        void plotFunctions(uint32_t granularity = 100, std::shared_ptr<std::vector<string>> names = nullptr) override
+	{
+		if(names == nullptr)
+		{
+			names = std::make_shared<std::vector<string>>();
+			for(int i = startReportDegree; i <= degree; ++i)
+			{
+				names->push_back(io::xprintf("Legendre %d", i);
+			}
+		}
+		VectorFunctionI::plotFunctions(granularity, names);
+	}
+#endif
         /*Construct the Legendre polynomials using polynomial basis.
          *
          * It is based on the formulas

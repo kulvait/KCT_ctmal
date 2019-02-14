@@ -72,7 +72,7 @@ namespace util {
         double getEnd() { return end; }
 
 #if DEBUG
-        void plotFunctions(uint32_t granularity = 100)
+        virtual void plotFunctions(uint32_t granularity = 100, std::shared_ptr<std::vector<string>> names = nullptr)
         {
             if(granularity < 2)
             {
