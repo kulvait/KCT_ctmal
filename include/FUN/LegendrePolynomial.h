@@ -2,8 +2,8 @@
 
 #include <cmath>
 
-#include "stringFormatter.h"
 #include "FUN/ScalarFunctionI.h"
+#include "stringFormatter.h"
 
 namespace CTL {
 namespace util {

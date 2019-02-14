@@ -31,7 +31,8 @@ namespace util {
                 this->end = end;
             } else
             {
-                io::throwerr("VectorFunctionI:You have supplied the range [start, end] = [%f, %f] but the value of "
+                io::throwerr("VectorFunctionI:You have supplied the range [start, end] = [%f, %f] "
+                             "but the value of "
                              "start needs to be less then the value of end.",
                              start, end);
             }
@@ -72,7 +73,8 @@ namespace util {
         double getEnd() { return end; }
 
 #if DEBUG
-        virtual void plotFunctions(uint32_t granularity = 100, std::shared_ptr<std::vector<string>> names = nullptr)
+        virtual void plotFunctions(uint32_t granularity = 100,
+                                   std::shared_ptr<std::vector<std::string>> names = nullptr)
         {
             if(granularity < 2)
             {
@@ -99,7 +101,13 @@ namespace util {
             }
             for(uint32_t j = 0; j != dimension; j++)
             {
-                plt::named_plot(io::xprintf("Function %d", j), taxis, values[j]);
+                if(names == nullptr)
+                {
+                    plt::named_plot(io::xprintf("Function %d", j), taxis, values[j]);
+                } else
+                {
+                    plt::named_plot((*names)[j], taxis, values[j]);
+                }
             }
             plt::legend();
             plt::show();

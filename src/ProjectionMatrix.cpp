@@ -125,11 +125,11 @@ namespace matrix {
         }
         LUDoolittleForm<3> lu(std::make_shared<SquareMatrix<3>>(*C), P, false);
         Matrix<3, 1> u = lu.backwardSubstitute(p4);
-	auto Qt = (-1.0)*Q->T();
-	auto Qu = Qt*u;
-		double factor = 1/(*C)(2, 2);
-		Matrix<3,3> Cprime = factor*(*C);
-	std::array<double, 3> S = sourcePosition();
+        auto Qt = (-1.0) * Q->T();
+        auto Qu = Qt * u;
+        double factor = 1 / (*C)(2, 2);
+        Matrix<3, 3> Cprime = factor * (*C);
+        std::array<double, 3> S = sourcePosition();
         for(unsigned int i = 0; i != 3; ++i)
         {
             if(i == 1)
@@ -156,7 +156,7 @@ namespace matrix {
             }
             if(i == 1)
             {
-                os << io::xprintf("%9.1f",factor);
+                os << io::xprintf("%9.1f", factor);
             } else
             {
                 os << "         ";
@@ -190,8 +190,8 @@ namespace matrix {
             os << "|";
             os << "\n";
         }
-	os << io::xprintf("S = [%5.2f, %5.2f, %5.2f]", S[0], S[1], S[2]);
-	os << io::xprintf(", -Q^T u = [%5.2f, %5.2f, %5.2f].", Qu(0,0), Qu(1,0), Qu(2,0));
+        os << io::xprintf("S = [%5.2f, %5.2f, %5.2f]", S[0], S[1], S[2]);
+        os << io::xprintf(", -Q^T u = [%5.2f, %5.2f, %5.2f].", Qu(0, 0), Qu(1, 0), Qu(2, 0));
         os << std::endl;
         return os.str();
     }

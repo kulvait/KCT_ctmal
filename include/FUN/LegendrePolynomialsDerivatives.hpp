@@ -3,9 +3,9 @@
 #include <cmath>
 #include <iostream>
 
-#include "stringFormatter.h"
 #include "FUN/LegendrePolynomialsExplicit.hpp"
 #include "FUN/VectorFunctionI.h"
+#include "stringFormatter.h"
 
 namespace CTL {
 namespace util {

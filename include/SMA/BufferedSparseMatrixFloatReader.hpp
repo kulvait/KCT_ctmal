@@ -88,7 +88,7 @@ public:
                 this->buffer = new uint8_t[b.bufferSize * 12];
             }
         }
-	return *this;
+        return *this;
     }
 
     // Move constructor
@@ -132,7 +132,7 @@ public:
             this->buffer = b.buffer;
             b.buffer = nullptr;
         }
-	return *this;
+        return *this;
     }
     void getNextValue(uint32_t* i, uint32_t* j, float* v)
     {

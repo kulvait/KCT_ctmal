@@ -29,5 +29,5 @@ namespace matrix {
     private:
     };
 
-} // namespace util
+} // namespace matrix
 } // namespace CTL

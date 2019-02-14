@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mutex>
-#include "rawop.h"
 #include "SMA/ElementFloat.hpp"
 #include "plog/Log.h"
+#include "rawop.h"
+#include <mutex>
 
 namespace CTL::matrix {
 /**
@@ -16,8 +16,8 @@ public:
     /**
      */
     BufferedSparseMatrixFloatWritter(std::string triplesFile,
-                                uint32_t bufferSize=1024,
-                                bool overwrite = false)
+                                     uint32_t bufferSize = 1024,
+                                     bool overwrite = false)
     {
         // Check if the file exists and treat it as a structure in the
         // format (uint32,uint32,double)
@@ -50,8 +50,8 @@ public:
         } else
         {
             io::createEmptyFile(triplesFile, 0, overwrite);
-                LOGD << io::xprintf("Created matrix %s, with zero size and openned it for writing.",
-                                    triplesFile.c_str());
+            LOGD << io::xprintf("Created matrix %s, with zero size and openned it for writing.",
+                                triplesFile.c_str());
             numberOfElements = 0;
         }
         buffer = new uint8_t[bufferSize * 12];
@@ -69,7 +69,7 @@ public:
     }
 
     /// Copy constructor
-	///Copied object needs to be non const in order to perform flush operation
+    /// Copied object needs to be non const in order to perform flush operation
     BufferedSparseMatrixFloatWritter(BufferedSparseMatrixFloatWritter& b)
     {
         LOGW << "Caling Copy constructor of BufferedSparseMatrixFloatWritter.";
@@ -83,7 +83,7 @@ public:
     }
 
     // Copy assignment
-	///Copied object needs to be non const in order to perform flush operation
+    /// Copied object needs to be non const in order to perform flush operation
     BufferedSparseMatrixFloatWritter& operator=(BufferedSparseMatrixFloatWritter& b)
     {
         LOGW << "Caling Copy assignment constructor of "
@@ -112,7 +112,7 @@ public:
         }
         this->elementsInBuffer = 0;
         this->currentBufferPos = 0;
-	return *this;
+        return *this;
     }
 
     // Move constructor
@@ -129,8 +129,8 @@ public:
         this->currentBufferPos = 0;
     }
 
-    // Move assignment 
-	///Copied object needs to be non const in order to perform flush operation
+    // Move assignment
+    /// Copied object needs to be non const in order to perform flush operation
     BufferedSparseMatrixFloatWritter& operator=(BufferedSparseMatrixFloatWritter&& b)
     {
         LOGW << "Caling Move assignment constructor of "
@@ -153,7 +153,7 @@ public:
             this->elementsInBuffer = 0;
             this->currentBufferPos = 0;
         }
-	return *this;
+        return *this;
     }
     // Buffer into disk
     void flush()
@@ -162,7 +162,7 @@ public:
             writingMutex); // Mutex will be released as this goes out of scope.
         if(elementsInBuffer != 0)
         {
-            io::appendBytes(triplesFile, buffer, elementsInBuffer*12);
+            io::appendBytes(triplesFile, buffer, elementsInBuffer * 12);
             currentBufferPos = 0;
             numberOfElements += elementsInBuffer;
             elementsInBuffer = 0;
@@ -185,7 +185,7 @@ public:
         {
             // PAGE FAULT
             flush();
-            insertValue(i, j, v);// ... this would not work with normal mutex
+            insertValue(i, j, v); // ... this would not work with normal mutex
         }
     }
 
@@ -197,7 +197,7 @@ private:
 
     std::string triplesFile;
     uint64_t numberOfElements;
-        mutable std::recursive_mutex writingMutex;
+    mutable std::recursive_mutex writingMutex;
 };
 
 } // namespace CTL::matrix

@@ -13,5 +13,5 @@ namespace matrix {
         virtual double distance(ProjectionMatrix a, ProjectionMatrix b) = 0;
         /**Get the distance between two compared matrices*/
     };
-} // namespace util
+} // namespace matrix
 } // namespace CTL

@@ -15,8 +15,8 @@ float roundLow(float x)
         return std::round(x);
     } else
     {
-	float intsize = long(x)+1;
-        return intsize+std::round(x-intsize);
+        float intsize = long(x) + 1;
+        return intsize + std::round(x - intsize);
     }
 }
 
@@ -27,8 +27,8 @@ double roundLow(double x)
         return std::round(x);
     } else
     {
-	double intsize = long(x)+1;
-        return intsize+std::round(x-intsize);
+        double intsize = long(x) + 1;
+        return intsize + std::round(x - intsize);
     }
 }
 
@@ -39,8 +39,8 @@ long lroundLow(float x)
         return std::lround(x);
     } else
     {
-	float intsize = long(x)+1;
-        return long(x)+1+std::lround(x-intsize);
+        float intsize = long(x) + 1;
+        return long(x) + 1 + std::lround(x - intsize);
     }
 }
 
@@ -51,8 +51,8 @@ long lroundLow(double x)
         return std::lround(x);
     } else
     {
-	double intsize = long(x)+1;
-        return long(x)+1+std::lround(x-intsize);
+        double intsize = long(x) + 1;
+        return long(x) + 1 + std::lround(x - intsize);
     }
 }
 

@@ -59,8 +59,8 @@ TEST_CASE("TEST: Test RQ factorization on particular example", "RQ factorization
     matrix::Matrix<3, 4> Q_({ -0.2712, 0.1831, -0.8406, -0.4316, -0.4256, -0.8899, -0.1161, 0.1161,
                               -0.2887, 0.2887, -0.2887, 0.8660 });
     std::shared_ptr<matrix::Matrix<3, 4>> A = std::make_shared<matrix::Matrix<3, 4>>(A_);
-    std::shared_ptr<matrix::Matrix<3, 3>> R = std::make_shared<matrix::Matrix<3, 3>>(-1.0*R_);
-    std::shared_ptr<matrix::Matrix<3, 4>> Q = std::make_shared<matrix::Matrix<3, 4>>(-1.0*Q_);
+    std::shared_ptr<matrix::Matrix<3, 3>> R = std::make_shared<matrix::Matrix<3, 3>>(-1.0 * R_);
+    std::shared_ptr<matrix::Matrix<3, 4>> Q = std::make_shared<matrix::Matrix<3, 4>>(-1.0 * Q_);
     matrix::RQFactorization<3, 4> rq;
     rq.factorize(A);
     auto R_computed = rq.getRMatrix();

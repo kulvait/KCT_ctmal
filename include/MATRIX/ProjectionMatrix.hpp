@@ -10,8 +10,8 @@
 // Internal libraries
 #include "MATRIX/LUDoolittleForm.hpp"
 #include "MATRIX/Matrix.hpp"
-#include "MATRIX/SquareMatrix.hpp"
 #include "MATRIX/RQFactorization.hpp"
+#include "MATRIX/SquareMatrix.hpp"
 
 namespace CTL {
 namespace matrix {

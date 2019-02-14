@@ -14,5 +14,5 @@ namespace matrix {
         }
         return square;
     }
-} // namespace util
+} // namespace matrix
 } // namespace CTL

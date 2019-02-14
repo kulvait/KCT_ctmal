@@ -1,8 +1,8 @@
 #pragma once
 
+#include "SMA/ElementDouble.hpp"
 #include "plog/Log.h"
 #include "rawop.h"
-#include "SMA/ElementDouble.hpp"
 #include <algorithm>
 
 namespace CTL::matrix {
@@ -87,7 +87,7 @@ public:
                 this->buffer = new uint8_t[b.bufferSize * 16];
             }
         }
-	return *this;
+        return *this;
     }
 
     // Move constructor
@@ -131,7 +131,7 @@ public:
             this->buffer = b.buffer;
             b.buffer = nullptr;
         }
-	return *this;
+        return *this;
     }
     // Increments position
     void readNextValue(uint32_t* i, uint32_t* j, double* v)
@@ -154,7 +154,7 @@ public:
                 elementsInBuffer = bufferSize;
             }
             //	LOGD << io::xprintf("Page fault on reading pos %lu increasing buffer by %d
-            //elements.", currentReadingPos, elementsInBuffer);
+            // elements.", currentReadingPos, elementsInBuffer);
             io::readBytesFrom(triplesFile, currentReadingPos * 16, buffer, elementsInBuffer * 16);
             currentBufferOffset = 0;
             startOfBufferPos = currentReadingPos;
@@ -181,7 +181,7 @@ public:
                 elementsInBuffer = bufferSize;
             }
             //	LOGD << io::xprintf("Page fault on reading pos %lu increasing buffer by %d
-            //elements.", currentReadingPos, elementsInBuffer);
+            // elements.", currentReadingPos, elementsInBuffer);
             io::readBytesFrom(triplesFile, currentReadingPos * 16, buffer, elementsInBuffer * 16);
             currentBufferOffset = 0;
             startOfBufferPos = currentReadingPos;

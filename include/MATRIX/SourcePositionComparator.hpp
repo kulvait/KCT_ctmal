@@ -14,5 +14,5 @@ namespace matrix {
         double distance(ProjectionMatrix a, ProjectionMatrix b) override;
         /**Get the distance between two compared matrices*/
     };
-} // namespace util
+} // namespace matrix
 } // namespace CTL
