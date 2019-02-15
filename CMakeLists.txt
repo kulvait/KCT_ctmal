@@ -26,6 +26,13 @@ include_directories(${CMAKE_SOURCE_DIR}/submodules/plog/include)
 find_package(MKL)
 include_directories(${MKL_INCLUDE_DIRS})
 
+#Matplotlibcpp
+include_directories(${CMAKE_SOURCE_DIR}/submodules/matplotlib-cpp)
+
+#Python for matplotlib
+find_package(PythonLibs 2.7)
+include_directories(${PYTHON_INCLUDE_DIRS})
+
 #CT input output library
 FILE( GLOB CTIOL_SRC ${CMAKE_SOURCE_DIR}/submodules/CTIOL/src/*.cpp ${CMAKE_SOURCE_DIR}/submodules/CTIOL/src/ARGPARSE/*.cpp)
 add_library(ctiol ${CTIOL_SRC})
@@ -86,5 +93,6 @@ add_executable(test_ctmal ${TST_SRC})
 target_link_libraries(test_ctmal Catch)
 target_link_libraries(test_ctmal ctiol)
 target_link_libraries(test_ctmal ctmal)
+target_link_libraries(test_ctmal ${PYTHON_LIBRARIES})
 enable_testing()
 add_test(NAME CTMALTest COMMAND test_ctmal)

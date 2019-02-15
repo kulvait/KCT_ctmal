@@ -4,3 +4,6 @@
 [submodule "submodules/CTIOL"]
 	path = submodules/CTIOL
 	url = ssh://git@gitlab.stimulate.ovgu.de:2200/vojtech.kulvait/CTIOL.git
+[submodule "submodules/matplotlib-cpp"]
+	path = submodules/matplotlib-cpp
+	url = https://github.com/lava/matplotlib-cpp

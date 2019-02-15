@@ -1,5 +1,7 @@
 #pragma once
 
+#include "stringFormatter.h"
+
 namespace CTL {
 namespace util {
     /**Interface that will be implemented to contain actual scalar function supported on the
