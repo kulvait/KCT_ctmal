@@ -42,10 +42,10 @@ public:
         {
             delete[] coeffs;
         }
-	if(task != nullptr)
-	{
-		 status = dfDeleteTask( &task );
-	}
+        if(task != nullptr)
+        {
+            dfDeleteTask(&task);
+        }
     }
 
     void buildSpline(double* t,
@@ -54,15 +54,15 @@ public:
                      double* bc = nullptr)
     {
         MKL_INT status;
-	if(task != nullptr)
-	{
-		 status = dfDeleteTask( &task );
-	}
-        if(status != DF_STATUS_OK)
+        if(task != nullptr)
         {
-            LOGE << "Can not dealocate previous task.";
+            status = dfDeleteTask(&task);
+            if(status != DF_STATUS_OK)
+            {
+                LOGE << "Can not dealocate previous task.";
+            }
         }
-	task = nullptr;
+        task = nullptr;
         // See https://software.intel.com/en-us/mkl-developer-reference-c-df-newtask1d
         status = dfdNewTask1D(&task, numberOfBreakpoints, t, DF_NO_HINT, 1, y, DF_NO_HINT);
         if(status != DF_STATUS_OK)
