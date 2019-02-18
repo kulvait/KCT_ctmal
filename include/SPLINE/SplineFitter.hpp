@@ -44,7 +44,7 @@ public:
         }
 	if(task != nullptr)
 	{
-		 status = dfDeleteTask( &task );
+		dfDeleteTask( &task );
 	}
     }
 
