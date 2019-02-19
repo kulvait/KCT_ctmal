@@ -2,7 +2,7 @@
 
 #include "stringFormatter.h"
 
-#if DEBUG
+#ifdef DEBUG
 
 #include "matplotlibcpp.h"
 namespace plt = matplotlibcpp;
@@ -72,7 +72,7 @@ namespace util {
          */
         double getEnd() { return end; }
 
-#if DEBUG
+#ifdef DEBUG
         virtual void plotFunctions(uint32_t granularity = 100,
                                    std::shared_ptr<std::vector<std::string>> names = nullptr)
         {

@@ -41,3 +41,4 @@ TEST_CASE("CTL.math.SplineFitter", "[spline]")
     plt::show();
     delete[] val;
 }
+
