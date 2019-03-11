@@ -44,6 +44,10 @@ public:
 
     double regularizeInverted(float s, double lambda)
     {
+        if(s==0)
+        {
+            return 0.0;
+        }
         if(truncate)
         {
             if(s < lambda)
