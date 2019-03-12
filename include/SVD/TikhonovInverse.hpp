@@ -44,7 +44,7 @@ public:
 
     double regularizeInverted(float s, double lambda)
     {
-        if(s==0)
+        if(s == 0)
         {
             return 0.0;
         }
@@ -59,8 +59,8 @@ public:
             }
         } else
         {
-            double factor = (s * s) / (s * s + lambda * lambda);
-            return factor / s;
+            double factor = s / (s * s + lambda * lambda);
+            return factor;
         }
     }
 
