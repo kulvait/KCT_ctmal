@@ -165,6 +165,14 @@ namespace util {
          */
         void valuesAt(double t, double* array) const override
         {
+            if(t < start)
+            {
+                t = start;
+            }
+            if(t > end)
+            {
+                t = end;
+            }
             // std::lock_guard<std::mutex> guard(powerProtectionMutex);//Big overhead
             int index = std::max(
                 std::min(valuesPerFunction - 1, int(std::lround(transformToIndex(t)))), 0);
@@ -180,6 +188,14 @@ namespace util {
          */
         void valuesAt(double t, float* array) const override
         {
+            if(t < start)
+            {
+                t = start;
+            }
+            if(t > end)
+            {
+                t = end;
+            }
             // std::lock_guard<std::mutex> guard(powerProtectionMutex);//Big overhead
             int index = std::max(
                 std::min(valuesPerFunction - 1, int(std::lround(transformToIndex(t)))), 0);

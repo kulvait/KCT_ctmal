@@ -88,6 +88,14 @@ namespace util {
          */
         void valuesAt(double t, double* array) const override
         {
+            if(t < start)
+            {
+                t = start;
+            }
+            if(t > end)
+            {
+                t = end;
+            }
             double x = transformToSupport(t);
             int n;
             for(int i = startReportDegree; i < degree; i++)
@@ -111,6 +119,14 @@ namespace util {
          */
         void valuesAt(double t, float* array) const override
         {
+            if(t < start)
+            {
+                t = start;
+            }
+            if(t > end)
+            {
+                t = end;
+            }
             double x = transformToSupport(t);
             int n;
             for(int i = startReportDegree; i < degree; i++)

@@ -193,6 +193,14 @@ namespace util {
          */
         void valuesAt(double t, double* array) const override
         {
+            if(t < start)
+            {
+                t = start;
+            }
+            if(t > end)
+            {
+                t = end;
+            }
             // std::lock_guard<std::mutex> guard(powerProtectionMutex);//Big overhead
             double x = transformToSupport(t);
             double* xn = new double[degree + 1];
@@ -219,6 +227,14 @@ namespace util {
          */
         void valuesAt(double t, float* array) const override
         {
+            if(t < start)
+            {
+                t = start;
+            }
+            if(t > end)
+            {
+                t = end;
+            }
             // std::lock_guard<std::mutex> guard(powerProtectionMutex);//Big overhead
             double x = transformToSupport(t);
             double xk = 1.0;
