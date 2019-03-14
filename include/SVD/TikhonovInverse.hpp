@@ -73,11 +73,12 @@ public:
     void computePseudoinverse(float* A, int n)
     {
         float *u, *s, *vt;
+        float* superb = new float[n - 1];
         u = new float[n * n];
         s = new float[n];
         vt = new float[n * n];
         int info;
-        info = LAPACKE_sgesdd(LAPACK_ROW_MAJOR, 'A', n, n, A, n, s, u, n, vt, n);
+        info = LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', n, n, A, n, s, u, n, vt, n, superb);
         // Everything will be stored row major, vt consecutive vectors, u vectors in columns non
         // consecutive
         if(info != 0)
@@ -104,6 +105,7 @@ public:
         delete[] u;
         delete[] s;
         delete[] vt;
+        delete[] superb;
     }
 
 private:
