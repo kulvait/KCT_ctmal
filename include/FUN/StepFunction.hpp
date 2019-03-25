@@ -224,7 +224,6 @@ namespace util {
         int valuesPerFunction;
         int baseSize;
         int startReportDegree;
-        double start, end;
         double* valuesD;
         float* valuesF;
         mutable std::mutex powerProtectionMutex;
