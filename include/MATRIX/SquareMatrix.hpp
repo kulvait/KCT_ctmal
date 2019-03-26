@@ -33,6 +33,11 @@ namespace matrix {
         {
         }
 
+        SquareMatrix(uint32_t n, std::initializer_list<double> A_copy)
+            : Matrix(n, n, A_copy)
+        {
+        }
+
     private:
     };
 

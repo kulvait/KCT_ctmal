@@ -54,14 +54,14 @@ TEST_CASE("TEST: Test RQ factorization on particular example", "RQ factorization
 {
 
     // Testing if the matrix norm works well
-    matrix::Matrix<3, 4> A_({ 1, 2, 3, 5, 5, 12, 1, 0, 1, -1, 1, -3 });
-    matrix::Matrix<3, 3> R_({ -4.5851, -1.9732, 3.7528, 0, -12.9228, 1.7321, 0, 0, -3.4641 });
-    matrix::Matrix<3, 4> Q_({ -0.2712, 0.1831, -0.8406, -0.4316, -0.4256, -0.8899, -0.1161, 0.1161,
+    matrix::Matrix A_(3, 4, { 1, 2, 3, 5, 5, 12, 1, 0, 1, -1, 1, -3 });
+    matrix::Matrix R_(3,3,{ -4.5851, -1.9732, 3.7528, 0, -12.9228, 1.7321, 0, 0, -3.4641 });
+    matrix::Matrix Q_(3,4,{ -0.2712, 0.1831, -0.8406, -0.4316, -0.4256, -0.8899, -0.1161, 0.1161,
                               -0.2887, 0.2887, -0.2887, 0.8660 });
-    std::shared_ptr<matrix::Matrix<3, 4>> A = std::make_shared<matrix::Matrix<3, 4>>(A_);
-    std::shared_ptr<matrix::Matrix<3, 3>> R = std::make_shared<matrix::Matrix<3, 3>>(-1.0 * R_);
-    std::shared_ptr<matrix::Matrix<3, 4>> Q = std::make_shared<matrix::Matrix<3, 4>>(-1.0 * Q_);
-    matrix::RQFactorization<3, 4> rq;
+    std::shared_ptr<matrix::Matrix> A = std::make_shared<matrix::Matrix>(A_);
+    std::shared_ptr<matrix::Matrix> R = std::make_shared<matrix::Matrix>(-1.0 * R_);
+    std::shared_ptr<matrix::Matrix> Q = std::make_shared<matrix::Matrix>(-1.0 * Q_);
+    matrix::RQFactorization rq;
     rq.factorize(A);
     auto R_computed = rq.getRMatrix();
     auto Q_computed = rq.getQMatrix();
