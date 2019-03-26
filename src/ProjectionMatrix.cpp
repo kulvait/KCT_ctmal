@@ -1,10 +1,9 @@
-// Logging on the top
 #include "MATRIX/ProjectionMatrix.hpp"
 
 namespace CTL {
 namespace matrix {
 
-    SquareMatrix<3> ProjectionMatrix::colSubMatrix(int j) const
+    SquareMatrix ProjectionMatrix::colSubMatrix(int j) const
     {
         if(j < 0 || j > 3)
         {
@@ -13,7 +12,7 @@ namespace matrix {
             LOGE << errMsg;
             throw std::runtime_error(errMsg);
         }
-        SquareMatrix<3> out;
+        SquareMatrix out(3);
         for(int i = 0; i != 3; i++)
         {
             for(int jtm = 0; jtm != 4; jtm++)
@@ -33,20 +32,19 @@ namespace matrix {
         return (out);
     }
 
-    template <uint N>
-    double determinant(const SquareMatrix<N>& M)
+    double determinant(const SquareMatrix& M)
     {
-        LUDoolittleForm<N> lu = LUDoolittleForm<N>::LUDecomposeDoolittle(M, 0.000001);
+        LUDoolittleForm lu = LUDoolittleForm::LUDecomposeDoolittle(M, 0.000001);
         return lu.getDeterminant();
     }
 
     std::array<double, 3> ProjectionMatrix::sourcePosition() const
     {
-        double divisor = -determinant<3>(this->colSubMatrix(3));
+        double divisor = -determinant(this->colSubMatrix(3));
         std::array<double, 3> source;
-        source[0] = determinant<3>(this->colSubMatrix(0)) / divisor;
-        source[1] = -determinant<3>(this->colSubMatrix(1)) / divisor;
-        source[2] = determinant<3>(this->colSubMatrix(2)) / divisor;
+        source[0] = determinant(this->colSubMatrix(0)) / divisor;
+        source[1] = -determinant(this->colSubMatrix(1)) / divisor;
+        source[2] = determinant(this->colSubMatrix(2)) / divisor;
         return source;
     }
 
@@ -98,7 +96,7 @@ namespace matrix {
 
     ProjectionMatrix ProjectionMatrix::shiftDetectorOrigin(double x, double y) const
     {
-        Matrix<3, 3> T = Matrix<3, 3>::unitDiagonal();
+        Matrix T = Matrix::unitDiagonal(3,3);
         T(0, 2) = -x;
         T(1, 2) = -y;
         return T * (*this);
@@ -107,28 +105,28 @@ namespace matrix {
     std::string ProjectionMatrix::toString(std::string name) const
     {
         std::ostringstream os;
-        matrix::RQFactorization<3, 3> rq;
-        std::shared_ptr<CTL::matrix::Matrix<3, 3>> F
-            = std::make_shared<CTL::matrix::Matrix<3, 3>>(this->colSubMatrix(3));
-        Matrix<3, 1> p4({ (*this)(0, 3), (*this)(1, 3), (*this)(2, 3) });
+        matrix::RQFactorization rq;
+        std::shared_ptr<CTL::matrix::Matrix> F
+            = std::make_shared<CTL::matrix::Matrix>(this->colSubMatrix(3));
+        Matrix p4(3,1,{ (*this)(0, 3), (*this)(1, 3), (*this)(2, 3) });
         rq.factorize(F);
         auto C = rq.getRMatrix();
         auto Q = rq.getQMatrix();
         // I use backward substitution from the LUDoolittleForm, where C matrix is upper diagonal
         // representing LU matrix
-        std::shared_ptr<std::array<int, 3>> P = std::make_shared<std::array<int, 3>>();
+        std::shared_ptr<std::vector<uint32_t>> P = std::make_shared<std::vector<uint32_t>>();
         for(int i = 0; i != 3; i++)
         {
-            (*P)[i]
-                = i; // On i-th position is the row index in the original matrix that is on the i-th
+            P->push_back(i);
+               // On i-th position is the row index in the original matrix that is on the i-th
                      // position in the PA matrix.
         }
-        LUDoolittleForm<3> lu(std::make_shared<SquareMatrix<3>>(*C), P, false);
-        Matrix<3, 1> u = lu.backwardSubstitute(p4);
+        LUDoolittleForm lu(std::make_shared<SquareMatrix>(*C), P, false);
+        Matrix u = lu.backwardSubstitute(p4);
         auto Qt = (-1.0) * Q->T();
         auto Qu = Qt * u;
         double factor = 1 / (*C)(2, 2);
-        Matrix<3, 3> Cprime = factor * (*C);
+        Matrix Cprime = factor * (*C);
         std::array<double, 3> S = sourcePosition();
         for(unsigned int i = 0; i != 3; ++i)
         {

@@ -7,22 +7,29 @@
 
 namespace CTL {
 namespace matrix {
-    template <uint N>
-    class SquareMatrix : public Matrix<N, N>
+    class SquareMatrix : public Matrix
     {
     public:
-        SquareMatrix()
-            : Matrix<N, N>()
+        SquareMatrix(uint32_t n)
+            : Matrix(n, n)
         {
         }
 
-        SquareMatrix(const Matrix<N, N>& squaremat)
-            : Matrix<N, N>(squaremat)
+        SquareMatrix(const Matrix& squaremat)
+            : Matrix(squaremat)
         {
+            if(squaremat.dimm() != squaremat.dimn())
+            {
+                std::string msg = io::xprintf("Square matrix must have the same m and n dimensions "
+                                              "but they differ m=%d, n=%d.",
+                                              squaremat.dimm(), squaremat.dimn());
+                LOGE << msg;
+                throw new std::runtime_error(msg);
+            }
         }
 
-        SquareMatrix(const double (&initArray)[N * N])
-            : Matrix<N, N>(initArray)
+        SquareMatrix(uint32_t n, const double(&initArray))
+            : Matrix(n, n, initArray)
         {
         }
 

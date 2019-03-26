@@ -60,7 +60,7 @@ namespace util {
             {
                 array[2] = ((3.0 * x * x) - 1.0) * 0.5;
             }
-            for(int n = 3; n != degree + 1; n++)
+            for(int n = 3; n < degree + 1; n++)
             {
                 array[n]
                     = (((2.0 * n) - 1.0) * x * array[n - 1] - (((double)n - 1.0) * array[n - 2]))
