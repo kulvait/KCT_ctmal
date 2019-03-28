@@ -100,10 +100,6 @@ namespace matrix {
             delete[] this->A;
             this->A = b.A;
             this->size = b.size;
-            if(this->m != b.m || this->n != b.n)
-            {
-                LOGW << "Using move assignment for matrices with incompatible dimensions.";
-            }
             this->m = b.m;
             this->n = b.n;
             b.A = nullptr;
