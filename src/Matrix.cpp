@@ -84,10 +84,6 @@ namespace matrix {
     {
         this->A = b.A;
         this->size = b.size;
-        if(this->m != b.m || this->n != b.n)
-        {
-            LOGW << "Using move constructor for matrices with incompatible dimensions.";
-        }
         this->m = b.m;
         this->n = b.n;
         b.A = nullptr;
