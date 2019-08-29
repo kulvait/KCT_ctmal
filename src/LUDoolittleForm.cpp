@@ -2,10 +2,7 @@
 
 namespace CTL {
 namespace matrix {
-    bool LUDoolittleForm::getOddSwapParity()
-    {
-        return oddSwapParity;
-    }
+    bool LUDoolittleForm::getOddSwapParity() { return oddSwapParity; }
 
     SquareMatrix LUDoolittleForm::getLMatrix()
     {
@@ -52,7 +49,7 @@ namespace matrix {
     std::vector<uint32_t> LUDoolittleForm::getPermutation()
     {
         std::vector<uint32_t> x = *P;
-        return x;//Deep copy
+        return x; // Deep copy
     }
 
     /**Solution of the system A x = b, for b given.
@@ -76,7 +73,7 @@ namespace matrix {
      */
     Matrix LUDoolittleForm::forwardSubstitute(Matrix b)
     {
-        Matrix c(n,1);
+        Matrix c(n, 1);
         for(uint32_t i = 0; i != n; i++)
         {
             c(i, 0) = b((*P)[i], 0);
@@ -96,7 +93,7 @@ namespace matrix {
      */
     Matrix LUDoolittleForm::backwardSubstitute(Matrix b)
     {
-        Matrix x(n,1);
+        Matrix x(n, 1);
         for(int i = n - 1; i != -1; i--)
         {
             double divisor = (*LU)((*P)[i], i);
@@ -113,10 +110,10 @@ namespace matrix {
     SquareMatrix LUDoolittleForm::inverseMatrix()
     {
         SquareMatrix out(n);
-        Matrix vec(n,1);
+        Matrix vec(n, 1);
         for(uint32_t i = 0; i != n; i++)
         {
-            Matrix eu(n,1,0.0);
+            Matrix eu(n, 1, 0.0);
             eu(i, 0) = 1;
             vec = solve(eu);
             //	LOGD << "Solution of " << eu.info() << "is" << vec.info();
@@ -182,17 +179,17 @@ namespace matrix {
      *permutation of matrix rows.
      */
     LUDoolittleForm LUDoolittleForm::LUDecomposeDoolittle(const SquareMatrix& M,
-                                                                double minimalPivotSize)
+                                                          double minimalPivotSize)
     {
         int swapParity = 0;
-	uint32_t n = M.dimn();
+        uint32_t n = M.dimn();
         std::shared_ptr<SquareMatrix> LU = std::make_shared<SquareMatrix>(M);
         std::shared_ptr<std::vector<uint32_t>> P = std::make_shared<std::vector<uint32_t>>();
         for(uint32_t i = 0; i != n; i++)
         {
-		P->push_back(i);
-                // On i-th position is the row index in the original matrix that is on the i-th
-                     // position in the PA matrix.
+            P->push_back(i);
+            // On i-th position is the row index in the original matrix that is on the i-th
+            // position in the PA matrix.
         }
         for(uint32_t k = 0; k != n; k++) // K-th step of the Gauss elimination
         {
@@ -225,11 +222,11 @@ namespace matrix {
     }
 
     uint32_t LUDoolittleForm::findPivot(const SquareMatrix& M,
-                                      const std::vector<uint32_t>& P,
-                                      uint32_t k,
-                                      double minimalPivotSize)
+                                        const std::vector<uint32_t>& P,
+                                        uint32_t k,
+                                        double minimalPivotSize)
     {
-	int n = M.dimn();
+        int n = M.dimn();
         double curMax = std::abs(M(P[k], k));
         int p = k;
         for(int i = k + 1; i != n; i++)
@@ -244,10 +241,47 @@ namespace matrix {
         {
             std::string errMsg = io::xprintf(
                 "Matrix is so close to singular that I can not find pivot of sufficient size.");
-            LOGE << errMsg;
-            throw std::runtime_error(errMsg);
+            //            LOGE << errMsg; ... here is not necessery to print msg when I use it for
+            //            determining determinant even for singular matrices
+            throw PivotingException(errMsg);
         }
         return p;
+    }
+
+    double LUDoolittleForm::determinant(const SquareMatrix& A)
+    {
+        if(A.dimm() == 0)
+        {
+            std::string msg = "Can not compute determinant of matrix with dimensions 0x0!";
+            LOGE << msg;
+            throw std::runtime_error(msg);
+        }
+        if(A.dimm() == 1)
+        {
+            return A.get(0, 0);
+        }
+        try
+        {
+            LUDoolittleForm lu = LUDoolittleForm::LUDecomposeDoolittle(A, 0.000001);
+            return lu.getDeterminant();
+        } catch(const matrix::PivotingException e)
+        { // Pivoting failed so that determinant is close to zero, attempt to compute it anyway
+            double det = 0.0;
+            for(uint32_t j = 0; j != A.dimn(); j++)
+            {
+                Matrix minorSub = A.minorSubMatrix(0, j);
+                SquareMatrix minorSubMatrix(minorSub);
+                double minor = determinant(minorSubMatrix);
+                if(j % 2 == 0)
+                {
+                    det += A(0, j) * minor;
+                } else
+                {
+                    det -= A(0, j) * minor;
+                }
+            }
+            return det;
+        }
     }
 
 } // namespace matrix

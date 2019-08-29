@@ -103,6 +103,52 @@ namespace matrix {
         return *this;
     } // Move assignment
 
+    Matrix Matrix::minorSubMatrix(uint32_t i, uint32_t j) const
+    {
+        if(m == 0 || n == 0)
+        {
+            std::string errMsg
+                = io::xprintf("Can not further subdivide matrix with dimension zero!", i, j);
+            LOGE << errMsg;
+            throw std::runtime_error(errMsg);
+        }
+        if(i > m - 1 || j > n - 1)
+        {
+            std::string errMsg = io::xprintf(
+                "For minor submatrix you have to specify valid element (i, j) but not (%d, %d)!", i,
+                j);
+            LOGE << errMsg;
+            throw std::runtime_error(errMsg);
+        }
+        Matrix out(m - 1, n - 1);
+        for(uint32_t a = 0; a != m; a++)
+        {
+            for(uint32_t b = 0; b != n; b++)
+            {
+                if(i > a)
+                {
+                    if(j > b)
+                    {
+                        out(a, b) = (*this)(a, b);
+                    } else if(j < b)
+                    {
+                        out(a, b - 1) = (*this)(a, b);
+                    }
+                } else if(i < a)
+                {
+                    if(j > b)
+                    {
+                        out(a - 1, b) = (*this)(a, b);
+                    } else if(j < b)
+                    {
+                        out(a - 1, b - 1) = (*this)(a, b);
+                    }
+                }
+            }
+        }
+        return (out);
+    }
+
     Matrix Matrix::T() const
     {
         Matrix transposed(n, m);

@@ -32,19 +32,13 @@ namespace matrix {
         return (out);
     }
 
-    double determinant(const SquareMatrix& M)
-    {
-        LUDoolittleForm lu = LUDoolittleForm::LUDecomposeDoolittle(M, 0.000001);
-        return lu.getDeterminant();
-    }
-
     std::array<double, 3> ProjectionMatrix::sourcePosition() const
     {
-        double divisor = -determinant(this->colSubMatrix(3));
+        double divisor = -LUDoolittleForm::determinant(this->colSubMatrix(3));
         std::array<double, 3> source;
-        source[0] = determinant(this->colSubMatrix(0)) / divisor;
-        source[1] = -determinant(this->colSubMatrix(1)) / divisor;
-        source[2] = determinant(this->colSubMatrix(2)) / divisor;
+        source[0] = LUDoolittleForm::determinant(this->colSubMatrix(0)) / divisor;
+        source[1] = -LUDoolittleForm::determinant(this->colSubMatrix(1)) / divisor;
+        source[2] = LUDoolittleForm::determinant(this->colSubMatrix(2)) / divisor;
         return source;
     }
 
