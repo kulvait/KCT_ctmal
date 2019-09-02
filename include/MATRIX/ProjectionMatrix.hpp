@@ -8,10 +8,10 @@
 #include <iostream>
 
 // Internal libraries
+#include "MATRIX/LUDoolittleForm.hpp"
 #include "MATRIX/Matrix.hpp"
 #include "MATRIX/RQFactorization.hpp"
 #include "MATRIX/SquareMatrix.hpp"
-#include "MATRIX/LUDoolittleForm.hpp"
 
 namespace CTL {
 namespace matrix {
@@ -20,14 +20,21 @@ namespace matrix {
      */
     class ProjectionMatrix : public Matrix
     {
+    private:
+        void computeSourcePosition();
+
     public:
         /**Constructs new ProjectionMatrix that is inicialized by zeros.*/
         ProjectionMatrix()
-            : Matrix(3, 4){};
+            : Matrix(3, 4)
+        {
+            computeSourcePosition();
+        }
         /**Constructor from the double array*/
         ProjectionMatrix(const double (&initArray)[3 * 4])
             : Matrix(3, 4, initArray)
         {
+            computeSourcePosition();
         }
         /**Constructor from the 3x4 Matrix.*/
         ProjectionMatrix(const Matrix& pm)
@@ -41,6 +48,7 @@ namespace matrix {
                 LOGE << msg;
                 throw new std::runtime_error(msg);
             }
+            computeSourcePosition();
         }
         /**Equality test*/
 
@@ -59,7 +67,21 @@ namespace matrix {
         /**Get source position*/
         std::array<double, 3> sourcePosition() const;
         /**Get normal to detector ending at 0*/
-        std::array<double, 3> normalToDetector();
+        std::array<double, 3> normalToDetector() const;
+        /**Get normalized vector from source to detector ending at (px,py)*/
+        std::array<double, 3> projectedToPosition(double px, double py) const;
+        /**
+         *
+         * @return Normalized vector that multiples of can be added to the source position to get
+         * the normal to the detector in the x pixel direction.
+         */
+        std::array<double, 3> tangentToDetectorXDirection() const;
+        /**
+         *
+         * @return Normalized vector that multiples of can be added to the source position to get
+         * the normal to the detector in the y pixel direction.
+         */
+        std::array<double, 3> tangentToDetectorYDirection() const;
         /*Get 3x3 submatrix of projection matrix, where i-th row is removed.*/
         SquareMatrix colSubMatrix(int i) const;
         /**Compute projection of volume point to the projector point*/
@@ -75,6 +97,29 @@ namespace matrix {
          */
         ProjectionMatrix shiftDetectorOrigin(double x, double y) const;
         std::string toString(std::string name = "P") const;
+
+    private:
+        /**
+         * Compute normalized vector with respect to l2 norm of a 3D vector.
+         *
+         * @param v
+         *
+         * @return
+         */
+        inline std::array<double, 3> normalizeVector(std::array<double, 3> v) const;
+        /**
+         * Compute l2 norm of a 3D vector.
+         *
+         * @param v
+         *
+         * @return
+         */
+        std::array<double, 4> reorthogonalize(std::array<double, 4> v,
+                                              std::array<double, 4> og) const;
+        inline double vectorNorm(std::array<double, 3> v) const;
+        bool sourceComputed = false;
+        std::array<double, 3> source;
+        const double zeroPrecisionTolerance = 1e-10;
     };
 } // namespace matrix
 } // namespace CTL

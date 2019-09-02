@@ -2,6 +2,7 @@
 #include "PLOG/PlogSetup.h"
 
 // Standard libs
+#include <cmath>
 #include <iostream>
 
 // Internal libs
@@ -30,10 +31,146 @@ TEST_CASE("TEST: Print projection matrix", "Projection matrix printing")
     std::cout << pm_shift.toString();
 }
 
-TEST_CASE("TEST: Create projection matrices", "Circular trajectory matrices")
+std::array<double, 3> vecnorm(std::array<double, 3> v)
+{
+    std::array<double, 3> n;
+    double na = std::sqrt(v[1] * v[1] + v[2] * v[2] + v[0] * v[0]);
+    n[0] = v[0] / na;
+    n[1] = v[1] / na;
+    n[2] = v[2] / na;
+    return n;
+}
+
+double normdiff(std::array<double, 3> v, std::array<double, 3> w)
+{
+    std::array<double, 3> n;
+    n[0] = v[0] - w[0];
+    n[1] = v[1] - w[1];
+    n[2] = v[2] - w[2];
+    double na = std::sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]);
+    return na;
+}
+
+double normdiff2(std::array<double, 2> v, std::array<double, 2> w)
+{
+    std::array<double, 2> n;
+    n[0] = v[0] - w[0];
+    n[1] = v[1] - w[1];
+    double na = std::sqrt(n[0] * n[0] + n[1] * n[1]);
+    return na;
+}
+
+TEST_CASE("ProjectionMatrix.normalToDetector.synthetic", "Normal to detector")
+{
+    io::DenProjectionMatrixReader dpr("../tests/circular.matrix");
+    const double pi = std::acos(-1);
+    int k = 15;
+    std::array<double, 3> sourceLocation = { -600.0 * std::sin(k * 2 * pi / dpr.count()),
+                                             600.0 * std::cos(k * 2 * pi / dpr.count()), 0.0 };
+    ProjectionMatrix pm = dpr.readMatrix(k);
+    std::array<double, 3> n = pm.normalToDetector();
+    std::array<double, 3> s = pm.sourcePosition();
+    std::cout << io::xprintf("Source location=(%f, %f, %f).\n", sourceLocation[0],
+                             sourceLocation[1], sourceLocation[2]);
+    double s_norm = std::sqrt(s[0] * s[0] + s[1] * s[1] + s[2] * s[2]);
+    std::cout << io::xprintf("Source=(%f, %f, %f) with norm %f.\n", s[0], s[1], s[2], s_norm);
+    REQUIRE(normdiff(s, sourceLocation) < 0.000001);
+    REQUIRE(std::abs(s_norm - 600) < 0.000001);
+    std::cout << io::xprintf("Normal=(%f, %f, %f).\n", n[0], n[1], n[2]);
+    std::array<double, 3> n_source = { s[0] / s_norm, s[1] / s_norm, s[2] / s_norm };
+    std::cout << io::xprintf("Source_normal=(%f, %f, %f).\n", n_source[0], n_source[1],
+                             n_source[2]);
+    REQUIRE(normdiff(n, n_source) < 0.0000001);
+    double psx, psy;
+    pm.project(s[0], s[1], s[2], &psx, &psy);
+    std::cout << io::xprintf("Source is projected to (px,py) = (%f, %f)", psx, psy);
+    REQUIRE(std::isnan(psx));
+    REQUIRE(std::isnan(psy));
+    std::array<double, 3> n_center = pm.projectedToPosition(616.0 * 0.5 - 0.5, 480.0 * 0.5 - 0.5);
+    n_center = { -n_center[0], -n_center[1], -n_center[2] };
+    REQUIRE(normdiff(n, n_center) < 0.0000001);
+    double px, py;
+    pm.project(s[0] + n_center[0], s[1] + n_center[1], s[2] + n_center[2], &px, &py);
+    REQUIRE(std::abs(px - 616.0 * 0.5 + 0.5) < 0.000001);
+    REQUIRE(std::abs(py - 480.0 * 0.5 + 0.5) < 0.000001);
+    std::array<double, 2> np;
+    pm.project(s[0] - n[0], s[1] - n[1], s[2] - n[2], &np[0], &np[1]);
+    std::array<double, 3> tx = pm.tangentToDetectorXDirection();
+    std::array<double, 3> ty = pm.tangentToDetectorYDirection();
+    std::array<double, 2> ptx, pty;
+    pm.project(s[0] + tx[0], s[1] + tx[1], s[2] + tx[2], &ptx[0], &ptx[1]);
+    pm.project(s[0] + ty[0], s[1] + ty[1], s[2] + ty[2], &pty[0], &pty[1]);
+    REQUIRE(std::isnan(ptx[0]));
+    REQUIRE(std::isnan(ptx[1]));
+    REQUIRE(std::isnan(pty[0]));
+    REQUIRE(std::isnan(pty[1]));
+    LOGI << io::xprintf("ptx = (%f, %f) pty=(%f, %f)", ptx[0], ptx[1], pty[0], pty[1]);
+    pm.project(s[0] - n[0] + tx[0], s[1] - n[1] + tx[1], s[2] - n[2] + tx[2], &ptx[0], &ptx[1]);
+    pm.project(s[0] - n[0] + ty[0], s[1] - n[1] + ty[1], s[2] - n[2] + ty[2], &pty[0], &pty[1]);
+    double sd1 = normdiff2(ptx, np) * 0.412109375;
+    double sd2 = normdiff2(pty, np) * 0.412109375;
+    LOGI << io::xprintf("Distances are (x, y) = (%f, %f).", sd1, sd2);
+    REQUIRE(std::abs(sd1 - 1200.0) < 0.00001);
+    REQUIRE(std::abs(sd2 - 1200.0) < 0.00001);
+}
+
+TEST_CASE("ProjectionMatrix.normalToDetector.siemens", "Normal to detector")
+{
+    io::DenProjectionMatrixReader dpr("../tests/camera.matrices");
+    int k = 15;
+    ProjectionMatrix pm = dpr.readMatrix(k);
+    std::array<double, 3> n = pm.normalToDetector();
+    n = { -n[0], -n[1], -n[2] }; // Asi levotocivy system???
+    std::array<double, 3> s = pm.sourcePosition();
+    double s_norm = std::sqrt(s[0] * s[0] + s[1] * s[1] + s[2] * s[2]);
+    std::cout << io::xprintf("Source=(%f, %f, %f) with norm %f.\n", s[0], s[1], s[2], s_norm);
+    REQUIRE(std::abs(s_norm - 750) < 1);
+    std::cout << io::xprintf("Normal=(%f, %f, %f).\n", n[0], n[1], n[2]);
+    std::array<double, 3> n_source = { s[0] / s_norm, s[1] / s_norm, s[2] / s_norm };
+    std::cout << io::xprintf("Source_normal=(%f, %f, %f).\n", n_source[0], n_source[1],
+                             n_source[2]);
+    REQUIRE(normdiff(n, n_source) < 0.2);
+    double psx, psy;
+    pm.project(s[0], s[1], s[2], &psx, &psy);
+    std::cout << io::xprintf("Source is projected to (px,py) = (%f, %f)", psx, psy);
+    REQUIRE(std::isnan(psx));
+    REQUIRE(std::isnan(psy));
+    std::array<double, 3> n_center = pm.projectedToPosition(616.0 * 0.5 - 0.5, 480.0 * 0.5 - 0.5);
+    n_center = { -n_center[0], -n_center[1], -n_center[2] };
+    REQUIRE(normdiff(n, n_center) < 0.02);
+    double px, py;
+    pm.project(s[0] + n_center[0], s[1] + n_center[1], s[2] + n_center[2], &px, &py);
+    REQUIRE(std::abs(px - 616.0 * 0.5 + 0.5) < 0.000001);
+    REQUIRE(std::abs(py - 480.0 * 0.5 + 0.5) < 0.000001);
+    std::array<double, 2> np;
+    pm.project(s[0] - n[0], s[1] - n[1], s[2] - n[2], &np[0], &np[1]);
+    std::array<double, 3> tx = pm.tangentToDetectorXDirection();
+    std::array<double, 3> ty = pm.tangentToDetectorYDirection();
+    std::array<double, 2> ptx, pty;
+    pm.project(s[0] + tx[0], s[1] + tx[1], s[2] + tx[2], &ptx[0], &ptx[1]);
+    pm.project(s[0] + ty[0], s[1] + ty[1], s[2] + ty[2], &pty[0], &pty[1]);
+    REQUIRE(std::isnan(ptx[0]));
+    REQUIRE(std::isnan(ptx[1]));
+    REQUIRE(std::isnan(pty[0]));
+    REQUIRE(std::isnan(pty[1]));
+    LOGI << io::xprintf("ptx = (%f, %f) pty=(%f, %f)", ptx[0], ptx[1], pty[0], pty[1]);
+    pm.project(s[0] + n[0] + tx[0], s[1] + n[1] + tx[1], s[2] + n[2] + tx[2], &ptx[0], &ptx[1]);
+    pm.project(s[0] + n[0] + ty[0], s[1] + n[1] + ty[1], s[2] + n[2] + ty[2], &pty[0], &pty[1]);
+    double sd1 = normdiff2(ptx, np) * 0.616;
+    double sd2 = normdiff2(pty, np) * 0.616;
+    LOGI << io::xprintf("Distances are (x, y) = (%f, %f).", sd1, sd2);
+    REQUIRE(std::abs(sd1 - 1200.0) < 2);
+    REQUIRE(std::abs(sd2 - 1200.0) < 2);
+    std::array<double, 3> n_0 = pm.projectedToPosition(px, py);
+    std::array<double, 3> n_1 = pm.projectedToPosition(0,0);
+    double cos = n_0[0] * n_1[0] + n_0[1] * n_1[1] + n_0[2] * n_1[2];
+    std::cout << io::xprintf("The cos^3=%e, original figure is %e in size.", std::pow(cos, 3), 1 - (cos*cos*cos));
+}
+
+TEST_CASE("CreateTestMatrices", "Circular trajectory matrices")
 {
     // Testing if the matrix norm works well
-	int numAngles = 248;//360
+    int numAngles = 248; // 360
     io::DenAsyncFrame2DWritter<double> cmw("/tmp/circular.matrix", 4, 3, numAngles);
     double sourceToDetector = 1200;
     double pixel_size_x = 0.412109375;
@@ -48,16 +185,17 @@ TEST_CASE("TEST: Create projection matrices", "Circular trajectory matrices")
     matrix::Matrix shift = matrix::Matrix::unitDiagonal(4, 4);
     shift(2, 3) = sourceToDetector / 2.0;
     LOGE << shift.toString("SHIFT");
-    matrix::Matrix detectorShift(
-        3, 3, { 1.0, 0.0, detector_dim_x / 2.0, 0.0, 1.0, detector_dim_y / 2.0, 0.0, 0.0, 1.0 });
+    matrix::Matrix detectorShift(3, 3,
+                                 { 1.0, 0.0, detector_dim_x * 0.5 - 0.5, 0.0, 1.0,
+                                   detector_dim_y * 0.5 - 0.5, 0.0, 0.0, 1.0 });
     for(int i = 0; i != numAngles; ++i)
     {
         matrix::Matrix rotation(4, 4);
-        rotation(0, 0) = std::cos(i * 2*pi / numAngles);
-        rotation(0, 1) = std::sin(i * 2*pi / numAngles);
+        rotation(0, 0) = std::cos(i * 2 * pi / numAngles);
+        rotation(0, 1) = std::sin(i * 2 * pi / numAngles);
         rotation(1, 2) = 1.0;
-        rotation(2, 0) = std::sin(i * 2*pi / numAngles);
-        rotation(2, 1) = -std::cos(i * 2*pi / numAngles);
+        rotation(2, 0) = std::sin(i * 2 * pi / numAngles);
+        rotation(2, 1) = -std::cos(i * 2 * pi / numAngles);
         rotation(3, 3) = 1.0;
         LOGE << rotation.toString("ROTATION");
         matrix::Matrix PM = detectorShift * pm * shift * rotation;
