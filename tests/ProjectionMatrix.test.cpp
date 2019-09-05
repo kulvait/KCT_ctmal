@@ -20,17 +20,7 @@ using namespace CTL;
 using namespace CTL::util;
 using namespace CTL::matrix;
 
-TEST_CASE("TEST: Print projection matrix", "Projection matrix printing")
-{
-    // Testing if the matrix norm works well
-    io::DenProjectionMatrixReader dpr("../tests/phantom.matrices");
-    ProjectionMatrix pm = dpr.readMatrix(10);
-    ProjectionMatrix pm_shift = pm.shiftDetectorOrigin(2.0, 1.0);
-    LOGE << "Printing original and shifted matrices:";
-    std::cout << pm.toString();
-    std::cout << pm_shift.toString();
-}
-
+// Helper functions before tests
 std::array<double, 3> vecnorm(std::array<double, 3> v)
 {
     std::array<double, 3> n;
@@ -41,130 +31,164 @@ std::array<double, 3> vecnorm(std::array<double, 3> v)
     return n;
 }
 
-double normdiff(std::array<double, 3> v, std::array<double, 3> w)
+template <uint32_t N>
+double normdiff(std::array<double, N> v, std::array<double, N> w)
 {
-    std::array<double, 3> n;
-    n[0] = v[0] - w[0];
-    n[1] = v[1] - w[1];
-    n[2] = v[2] - w[2];
-    double na = std::sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]);
-    return na;
+    double nrmsq = 0.0;
+    for(uint32_t i = 0; i != N; i++)
+    {
+        nrmsq += (v[i] - w[i]) * (v[i] - w[i]);
+    }
+    return std::sqrt(nrmsq);
 }
 
-double normdiff2(std::array<double, 2> v, std::array<double, 2> w)
+TEST_CASE("ProjectionMatrix.toString", "[print]")
 {
-    std::array<double, 2> n;
-    n[0] = v[0] - w[0];
-    n[1] = v[1] - w[1];
-    double na = std::sqrt(n[0] * n[0] + n[1] * n[1]);
-    return na;
+    // Testing if the matrix norm works well
+    io::DenProjectionMatrixReader dpr("../tests/phantom.matrices");
+    ProjectionMatrix pm = dpr.readMatrix(10);
+    ProjectionMatrix pm_shift = pm.shiftDetectorOrigin(2.0, 1.0);
+    LOGD << std::endl << "Printing original and shifted matrices:";
+    LOGD << std::endl << pm.toString();
+    LOGD << std::endl << pm_shift.toString();
 }
 
 TEST_CASE("ProjectionMatrix.normalToDetector.synthetic", "Normal to detector")
 {
     io::DenProjectionMatrixReader dpr("../tests/circular.matrix");
     const double pi = std::acos(-1);
-    int k = 15;
-    std::array<double, 3> sourceLocation = { -600.0 * std::sin(k * 2 * pi / dpr.count()),
-                                             600.0 * std::cos(k * 2 * pi / dpr.count()), 0.0 };
-    ProjectionMatrix pm = dpr.readMatrix(k);
-    std::array<double, 3> n = pm.normalToDetector();
-    std::array<double, 3> s = pm.sourcePosition();
-    std::cout << io::xprintf("Source location=(%f, %f, %f).\n", sourceLocation[0],
-                             sourceLocation[1], sourceLocation[2]);
-    double s_norm = std::sqrt(s[0] * s[0] + s[1] * s[1] + s[2] * s[2]);
-    std::cout << io::xprintf("Source=(%f, %f, %f) with norm %f.\n", s[0], s[1], s[2], s_norm);
-    REQUIRE(normdiff(s, sourceLocation) < 0.000001);
-    REQUIRE(std::abs(s_norm - 600) < 0.000001);
-    std::cout << io::xprintf("Normal=(%f, %f, %f).\n", n[0], n[1], n[2]);
-    std::array<double, 3> n_source = { s[0] / s_norm, s[1] / s_norm, s[2] / s_norm };
-    std::cout << io::xprintf("Source_normal=(%f, %f, %f).\n", n_source[0], n_source[1],
-                             n_source[2]);
-    REQUIRE(normdiff(n, n_source) < 0.0000001);
-    double psx, psy;
-    pm.project(s[0], s[1], s[2], &psx, &psy);
-    std::cout << io::xprintf("Source is projected to (px,py) = (%f, %f)", psx, psy);
-    REQUIRE(std::isnan(psx));
-    REQUIRE(std::isnan(psy));
-    std::array<double, 3> n_center = pm.projectedToPosition(616.0 * 0.5 - 0.5, 480.0 * 0.5 - 0.5);
-    n_center = { -n_center[0], -n_center[1], -n_center[2] };
-    REQUIRE(normdiff(n, n_center) < 0.0000001);
-    double px, py;
-    pm.project(s[0] + n_center[0], s[1] + n_center[1], s[2] + n_center[2], &px, &py);
-    REQUIRE(std::abs(px - 616.0 * 0.5 + 0.5) < 0.000001);
-    REQUIRE(std::abs(py - 480.0 * 0.5 + 0.5) < 0.000001);
-    std::array<double, 2> np;
-    pm.project(s[0] - n[0], s[1] - n[1], s[2] - n[2], &np[0], &np[1]);
-    std::array<double, 3> tx = pm.tangentToDetectorXDirection();
-    std::array<double, 3> ty = pm.tangentToDetectorYDirection();
-    std::array<double, 2> ptx, pty;
-    pm.project(s[0] + tx[0], s[1] + tx[1], s[2] + tx[2], &ptx[0], &ptx[1]);
-    pm.project(s[0] + ty[0], s[1] + ty[1], s[2] + ty[2], &pty[0], &pty[1]);
-    REQUIRE(std::isnan(ptx[0]));
-    REQUIRE(std::isnan(ptx[1]));
-    REQUIRE(std::isnan(pty[0]));
-    REQUIRE(std::isnan(pty[1]));
-    LOGI << io::xprintf("ptx = (%f, %f) pty=(%f, %f)", ptx[0], ptx[1], pty[0], pty[1]);
-    pm.project(s[0] - n[0] + tx[0], s[1] - n[1] + tx[1], s[2] - n[2] + tx[2], &ptx[0], &ptx[1]);
-    pm.project(s[0] - n[0] + ty[0], s[1] - n[1] + ty[1], s[2] - n[2] + ty[2], &pty[0], &pty[1]);
-    double sd1 = normdiff2(ptx, np) * 0.412109375;
-    double sd2 = normdiff2(pty, np) * 0.412109375;
-    LOGI << io::xprintf("Distances are (x, y) = (%f, %f).", sd1, sd2);
-    REQUIRE(std::abs(sd1 - 1200.0) < 0.00001);
-    REQUIRE(std::abs(sd2 - 1200.0) < 0.00001);
+    int numAngles = 248;
+    for(int k = 0; k != numAngles; k++)
+    {
+        std::array<double, 3> sourceLocation = { -600.0 * std::sin(k * 2 * pi / dpr.count()),
+                                                 600.0 * std::cos(k * 2 * pi / dpr.count()), 0.0 };
+        LOGD << "Source position computed by design of circular trajectory" << std::endl
+             << io::xprintf("Source=(%f, %f, %f).\n", sourceLocation[0], sourceLocation[1],
+                            sourceLocation[2]);
+        ProjectionMatrix pm = dpr.readMatrix(k);
+        std::array<double, 3> n = pm.normalToDetector();
+        std::array<double, 3> s = pm.sourcePosition();
+        double s_norm = std::sqrt(s[0] * s[0] + s[1] * s[1] + s[2] * s[2]);
+        LOGD << "Source position computed by PM" << std::endl
+             << io::xprintf("Source=(%f, %f, %f) with norm %f.\n", s[0], s[1], s[2], s_norm);
+        REQUIRE(normdiff<3>(s, sourceLocation) < 0.000001);
+        REQUIRE(std::abs(s_norm - 600) < 0.000001);
+        LOGD << "Normal to detector by PM" << std::endl
+             << io::xprintf("Normal=(%f, %f, %f).\n", n[0], n[1], n[2]);
+        std::array<double, 3> n_source = { s[0] / s_norm, s[1] / s_norm, s[2] / s_norm };
+        LOGD << "Normal to detector by design as 0 to source normalized" << std::endl
+             << io::xprintf("Normal=(%f, %f, %f).\n", n_source[0], n_source[1], n_source[2]);
+        std::array<double, 3> n_thirdrow = { -pm.get(2, 0), -pm.get(2, 1), -pm.get(2, 2) };
+        LOGD << "Normal to detector by third row of the PM" << std::endl
+             << io::xprintf("Normal=(%f, %f, %f).\n", n_thirdrow[0], n_thirdrow[1], n_thirdrow[2]);
+        REQUIRE(normdiff<3>(n, n_source) < 0.0000001);
+        REQUIRE(normdiff<3>(n, n_thirdrow) < 0.0000001);
+        double psx, psy;
+        pm.project(s[0], s[1], s[2], &psx, &psy);
+        LOGD << "Source projection should be nan" << std::endl
+             << io::xprintf("Source projection (px,py) = (%f, %f)\n", psx, psy);
+        REQUIRE(std::isnan(psx));
+        REQUIRE(std::isnan(psy));
+        std::array<double, 3> n_center
+            = pm.projectedToPosition(616.0 * 0.5 - 0.5, 480.0 * 0.5 - 0.5);
+        n_center = { -n_center[0], -n_center[1], -n_center[2] };
+        REQUIRE(normdiff<3>(n, n_center) < 0.0000001);
+        double px, py;
+        pm.project(s[0] + n_center[0], s[1] + n_center[1], s[2] + n_center[2], &px, &py);
+        REQUIRE(std::abs(px - 616.0 * 0.5 + 0.5) < 0.000001);
+        REQUIRE(std::abs(py - 480.0 * 0.5 + 0.5) < 0.000001);
+        std::array<double, 2> np;
+        pm.project(s[0] - n[0], s[1] - n[1], s[2] - n[2], &np[0], &np[1]);
+        std::array<double, 3> tx = pm.tangentToDetectorXDirection();
+        std::array<double, 3> ty = pm.tangentToDetectorYDirection();
+        std::array<double, 2> ptx, pty;
+        pm.project(s[0] + tx[0], s[1] + tx[1], s[2] + tx[2], &ptx[0], &ptx[1]);
+        pm.project(s[0] + ty[0], s[1] + ty[1], s[2] + ty[2], &pty[0], &pty[1]);
+        REQUIRE(std::isnan(ptx[0]));
+        REQUIRE(std::isnan(ptx[1]));
+        REQUIRE(std::isnan(pty[0]));
+        REQUIRE(std::isnan(pty[1]));
+        LOGD << "Source plus tangents vector projection should be nan" << std::endl
+             << io::xprintf("ptx = (%f, %f) pty=(%f, %f)", ptx[0], ptx[1], pty[0], pty[1]);
+        pm.project(s[0] - n[0] + tx[0], s[1] - n[1] + tx[1], s[2] - n[2] + tx[2], &ptx[0], &ptx[1]);
+        pm.project(s[0] - n[0] + ty[0], s[1] - n[1] + ty[1], s[2] - n[2] + ty[2], &pty[0], &pty[1]);
+        double sd1 = normdiff<2>(ptx, np) * 0.412109375;
+        double sd2 = normdiff<2>(pty, np) * 0.412109375;
+        LOGD << "Distance of source to detector based on the projections of tangent vectors should "
+                "be "
+                "1200"
+             << std::endl
+             << io::xprintf("Distances are (x, y) = (%f, %f).", sd1, sd2) << std::endl;
+        REQUIRE(std::abs(sd1 - 1200.0) < 0.00001);
+        REQUIRE(std::abs(sd2 - 1200.0) < 0.00001);
+    }
 }
 
 TEST_CASE("ProjectionMatrix.normalToDetector.siemens", "Normal to detector")
 {
     io::DenProjectionMatrixReader dpr("../tests/camera.matrices");
-    int k = 15;
-    ProjectionMatrix pm = dpr.readMatrix(k);
-    std::array<double, 3> n = pm.normalToDetector();
-    n = { -n[0], -n[1], -n[2] }; // Asi levotocivy system???
-    std::array<double, 3> s = pm.sourcePosition();
-    double s_norm = std::sqrt(s[0] * s[0] + s[1] * s[1] + s[2] * s[2]);
-    std::cout << io::xprintf("Source=(%f, %f, %f) with norm %f.\n", s[0], s[1], s[2], s_norm);
-    REQUIRE(std::abs(s_norm - 750) < 1);
-    std::cout << io::xprintf("Normal=(%f, %f, %f).\n", n[0], n[1], n[2]);
-    std::array<double, 3> n_source = { s[0] / s_norm, s[1] / s_norm, s[2] / s_norm };
-    std::cout << io::xprintf("Source_normal=(%f, %f, %f).\n", n_source[0], n_source[1],
-                             n_source[2]);
-    REQUIRE(normdiff(n, n_source) < 0.2);
-    double psx, psy;
-    pm.project(s[0], s[1], s[2], &psx, &psy);
-    std::cout << io::xprintf("Source is projected to (px,py) = (%f, %f)", psx, psy);
-    REQUIRE(std::isnan(psx));
-    REQUIRE(std::isnan(psy));
-    std::array<double, 3> n_center = pm.projectedToPosition(616.0 * 0.5 - 0.5, 480.0 * 0.5 - 0.5);
-    n_center = { -n_center[0], -n_center[1], -n_center[2] };
-    REQUIRE(normdiff(n, n_center) < 0.02);
-    double px, py;
-    pm.project(s[0] + n_center[0], s[1] + n_center[1], s[2] + n_center[2], &px, &py);
-    REQUIRE(std::abs(px - 616.0 * 0.5 + 0.5) < 0.000001);
-    REQUIRE(std::abs(py - 480.0 * 0.5 + 0.5) < 0.000001);
-    std::array<double, 2> np;
-    pm.project(s[0] - n[0], s[1] - n[1], s[2] - n[2], &np[0], &np[1]);
-    std::array<double, 3> tx = pm.tangentToDetectorXDirection();
-    std::array<double, 3> ty = pm.tangentToDetectorYDirection();
-    std::array<double, 2> ptx, pty;
-    pm.project(s[0] + tx[0], s[1] + tx[1], s[2] + tx[2], &ptx[0], &ptx[1]);
-    pm.project(s[0] + ty[0], s[1] + ty[1], s[2] + ty[2], &pty[0], &pty[1]);
-    REQUIRE(std::isnan(ptx[0]));
-    REQUIRE(std::isnan(ptx[1]));
-    REQUIRE(std::isnan(pty[0]));
-    REQUIRE(std::isnan(pty[1]));
-    LOGI << io::xprintf("ptx = (%f, %f) pty=(%f, %f)", ptx[0], ptx[1], pty[0], pty[1]);
-    pm.project(s[0] + n[0] + tx[0], s[1] + n[1] + tx[1], s[2] + n[2] + tx[2], &ptx[0], &ptx[1]);
-    pm.project(s[0] + n[0] + ty[0], s[1] + n[1] + ty[1], s[2] + n[2] + ty[2], &pty[0], &pty[1]);
-    double sd1 = normdiff2(ptx, np) * 0.616;
-    double sd2 = normdiff2(pty, np) * 0.616;
-    LOGI << io::xprintf("Distances are (x, y) = (%f, %f).", sd1, sd2);
-    REQUIRE(std::abs(sd1 - 1200.0) < 2);
-    REQUIRE(std::abs(sd2 - 1200.0) < 2);
-    std::array<double, 3> n_0 = pm.projectedToPosition(px, py);
-    std::array<double, 3> n_1 = pm.projectedToPosition(0,0);
-    double cos = n_0[0] * n_1[0] + n_0[1] * n_1[1] + n_0[2] * n_1[2];
-    std::cout << io::xprintf("The cos^3=%e, original figure is %e in size.", std::pow(cos, 3), 1 - (cos*cos*cos));
+    int numAngles = 248;
+    for(int k = 0; k != numAngles; k++)
+    {
+        ProjectionMatrix pm = dpr.readMatrix(k);
+        std::array<double, 3> n = pm.normalToDetector();
+        std::array<double, 3> s = pm.sourcePosition();
+        double s_norm = std::sqrt(s[0] * s[0] + s[1] * s[1] + s[2] * s[2]);
+        LOGD << "Source position computed by PM" << std::endl
+             << io::xprintf("Source=(%f, %f, %f) with norm %f.\n", s[0], s[1], s[2], s_norm);
+        REQUIRE(std::abs(s_norm - 750) < 5);
+        LOGD << "Normal to detector by PM" << std::endl
+             << io::xprintf("Normal=(%f, %f, %f).\n", n[0], n[1], n[2]);
+        std::array<double, 3> n_source = { s[0] / s_norm, s[1] / s_norm, s[2] / s_norm };
+        LOGD << "Normal to detector by design as 0 to source normalized" << std::endl
+             << io::xprintf("Normal=(%f, %f, %f).\n", n_source[0], n_source[1], n_source[2]);
+        std::array<double, 3> n_thirdrow = { -pm.get(2, 0), -pm.get(2, 1), -pm.get(2, 2) };
+        n_thirdrow = vecnorm(n_thirdrow);
+        LOGD << "Normal to detector by third row of the PM" << std::endl
+             << io::xprintf("Normal=(%f, %f, %f).\n", n_thirdrow[0], n_thirdrow[1], n_thirdrow[2]);
+        REQUIRE(normdiff<3>(n, n_source) < 0.025);
+        REQUIRE(normdiff<3>(n, n_thirdrow) < 0.0000001);
+        double psx, psy;
+        pm.project(s[0], s[1], s[2], &psx, &psy);
+        LOGD << "Source projection should be nan" << std::endl
+             << io::xprintf("Source projection (px,py) = (%f, %f)\n", psx, psy);
+        REQUIRE(std::isnan(psx));
+        REQUIRE(std::isnan(psy));
+        std::array<double, 3> n_center
+            = pm.projectedToPosition(616.0 * 0.5 - 0.5, 480.0 * 0.5 - 0.5);
+        n_center = { -n_center[0], -n_center[1], -n_center[2] };
+        LOGD << "Normal to detector by projection to the center" << std::endl
+             << io::xprintf("Normal=(%f, %f, %f).\n", n_center[0], n_center[1], n_center[2]);
+        REQUIRE(normdiff<3>(n, n_center) < 0.025);
+        double px, py;
+        pm.project(s[0] + n_center[0], s[1] + n_center[1], s[2] + n_center[2], &px, &py);
+        REQUIRE(std::abs(px - 616.0 * 0.5 + 0.5) < 0.000001);
+        REQUIRE(std::abs(py - 480.0 * 0.5 + 0.5) < 0.000001);
+        std::array<double, 2> np;
+        pm.project(s[0] - n[0], s[1] - n[1], s[2] - n[2], &np[0], &np[1]);
+        std::array<double, 3> tx = pm.tangentToDetectorXDirection();
+        std::array<double, 3> ty = pm.tangentToDetectorYDirection();
+        std::array<double, 2> ptx, pty;
+        pm.project(s[0] + tx[0], s[1] + tx[1], s[2] + tx[2], &ptx[0], &ptx[1]);
+        pm.project(s[0] + ty[0], s[1] + ty[1], s[2] + ty[2], &pty[0], &pty[1]);
+        REQUIRE(std::isnan(ptx[0]));
+        REQUIRE(std::isnan(ptx[1]));
+        REQUIRE(std::isnan(pty[0]));
+        REQUIRE(std::isnan(pty[1]));
+        LOGD << "Source plus tangents vector projection should be nan" << std::endl
+             << io::xprintf("ptx = (%f, %f) pty=(%f, %f)", ptx[0], ptx[1], pty[0], pty[1]);
+        pm.project(s[0] - n[0] + tx[0], s[1] - n[1] + tx[1], s[2] - n[2] + tx[2], &ptx[0], &ptx[1]);
+        pm.project(s[0] - n[0] + ty[0], s[1] - n[1] + ty[1], s[2] - n[2] + ty[2], &pty[0], &pty[1]);
+        double sd1 = normdiff<2>(ptx, np) * 0.616;
+        double sd2 = normdiff<2>(pty, np) * 0.616;
+        LOGD << "Distance of source to detector based on the projections of tangent vectors should "
+                "be "
+                "1200"
+             << std::endl
+             << io::xprintf("Distances are (x, y) = (%f, %f).", sd1, sd2) << std::endl;
+        REQUIRE(std::abs(sd1 - 1200.0) < 10);
+        REQUIRE(std::abs(sd2 - 1200.0) < 10);
+    }
 }
 
 TEST_CASE("CreateTestMatrices", "Circular trajectory matrices")

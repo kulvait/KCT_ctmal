@@ -66,7 +66,7 @@ namespace matrix {
         }
         /**Get source position*/
         std::array<double, 3> sourcePosition() const;
-        /**Get normal to detector ending at 0*/
+        /**Get normal to detector. The normal to the detector will points from the detector towards source.*/
         std::array<double, 3> normalToDetector() const;
         /**Get normalized vector from source to detector ending at (px,py)*/
         std::array<double, 3> projectedToPosition(double px, double py) const;

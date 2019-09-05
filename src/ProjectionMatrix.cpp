@@ -35,36 +35,51 @@ namespace matrix {
     std::array<double, 3> ProjectionMatrix::tangentToDetectorXDirection() const
     {
         std::array<double, 3> tangent;
-        double normThirdRow = std::sqrt(A[8] * A[8] + A[9] * A[9] + A[10] * A[10] + A[11] * A[11]);
-        std::array<double, 4> thirdRowNormalized = { A[8] / normThirdRow, A[9] / normThirdRow,
-                                                     A[10] / normThirdRow, A[11] / normThirdRow };
-        double factor = (A[0] * thirdRowNormalized[0] + A[1] * thirdRowNormalized[1]
-                         + A[2] * thirdRowNormalized[2] + A[3] * thirdRowNormalized[3]);
-        double divisor = A[3] - factor * thirdRowNormalized[3];
-        tangent[0] = (A[0] - factor * thirdRowNormalized[0]) / divisor;
-        tangent[1] = (A[1] - factor * thirdRowNormalized[1]) / divisor;
-        tangent[2] = (A[2] - factor * thirdRowNormalized[2]) / divisor;
-        tangent[0] = tangent[0] - source[0];
-        tangent[1] = tangent[1] - source[1];
-        tangent[2] = tangent[2] - source[2];
+        std::array<double, 4> thirdRow = { A[8], A[9], A[10], A[11] };
+        std::array<double, 4> firstRow = { A[0], A[1], A[2], A[3] };
+        std::array<double, 4> tangentF = reorthogonalize(firstRow, thirdRow);
+        if(std::abs(tangentF[3]) < zeroPrecisionTolerance)
+        { // Vector that projects to infinity is from infinity itself
+          // If the fourth coordinate is zero, then I can add the 3 vector without fourth position
+          // to source location and obtain finite tangent
+            tangent[0] = tangentF[0];
+            tangent[1] = tangentF[1];
+            tangent[2] = tangentF[2];
+        } else
+        {
+            tangent[0] = tangentF[0] / tangentF[3];
+            tangent[1] = tangentF[1] / tangentF[3];
+            tangent[2] = tangentF[2] / tangentF[3];
+            tangent[0] = tangent[0] - source[0];
+            tangent[1] = tangent[1] - source[1];
+            tangent[2] = tangent[2] - source[2];
+        }
         return normalizeVector(tangent);
     }
 
     std::array<double, 3> ProjectionMatrix::tangentToDetectorYDirection() const
     {
         std::array<double, 3> tangent;
-        double normThirdRow = std::sqrt(A[8] * A[8] + A[9] * A[9] + A[10] * A[10] + A[11] * A[11]);
-        std::array<double, 4> thirdRowNormalized = { A[8] / normThirdRow, A[9] / normThirdRow,
-                                                     A[10] / normThirdRow, A[11] / normThirdRow };
-        double factor = (A[5] * thirdRowNormalized[0] + A[6] * thirdRowNormalized[1]
-                         + A[7] * thirdRowNormalized[2] + A[8] * thirdRowNormalized[3]);
-        double divisor = A[8] - factor * thirdRowNormalized[3];
-        tangent[0] = (A[5] - factor * thirdRowNormalized[0]) / divisor;
-        tangent[1] = (A[6] - factor * thirdRowNormalized[1]) / divisor;
-        tangent[2] = (A[7] - factor * thirdRowNormalized[2]) / divisor;
-        tangent[0] = tangent[0] - source[0];
-        tangent[1] = tangent[1] - source[1];
-        tangent[2] = tangent[2] - source[2];
+        std::array<double, 4> thirdRow = { A[8], A[9], A[10], A[11] };
+        std::array<double, 4> secondRow = { A[4], A[5], A[6], A[7] };
+        std::array<double, 4> tangentF = reorthogonalize(secondRow, thirdRow);
+        if(std::abs(tangentF[3]) < zeroPrecisionTolerance)
+        { // Vector that projects to infinity is from infinity itself
+          // If the fourth coordinate is zero, then I can add the 3 vector without fourth position
+          // to source location and obtain finite tangent
+            tangent[0] = tangentF[0];
+            tangent[1] = tangentF[1];
+            tangent[2] = tangentF[2];
+        } else
+        {
+            tangent[0] = tangentF[0] / tangentF[3];
+            tangent[1] = tangentF[1] / tangentF[3];
+            tangent[2] = tangentF[2] / tangentF[3];
+            // I have found a vector in the 0 based coordinates that projects to infinity
+            tangent[0] = tangent[0] - source[0];
+            tangent[1] = tangent[1] - source[1];
+            tangent[2] = tangent[2] - source[2];
+        }
         return normalizeVector(tangent);
     }
 
@@ -82,6 +97,14 @@ namespace matrix {
         normal[0] = tangentxnorm[1] * tangentynorm[2] - tangentxnorm[2] * tangentynorm[1];
         normal[1] = tangentxnorm[2] * tangentynorm[0] - tangentxnorm[0] * tangentynorm[2];
         normal[2] = tangentxnorm[0] * tangentynorm[1] - tangentxnorm[1] * tangentynorm[0];
+        // This however will depend on the right or left handedness of the detector
+        // Lets see if this is codirectional with the approximate normal from 0 to source position
+        if(source[0] * normal[0] + source[1] * normal[1] + source[2] * normal[2] < 0.0)
+        {
+            normal[0] = -normal[0];
+            normal[1] = -normal[1];
+            normal[2] = -normal[2];
+        }
         /*Previous implementation
         std::array<double, 3> normal;
         normal[0] = A[8]; // (*this)(2, 0);
@@ -288,14 +311,12 @@ namespace matrix {
                                                             std::array<double, 4> og) const
     {
         double nogsq = og[0] * og[0] + og[1] * og[1] + og[2] * og[2] + og[3] * og[3];
-        double nog = std::sqrt(nogsq);
-        std::array<double, 4> normalized = { og[0] / nog, og[1] / nog, og[2] / nog, og[3] / nog };
-        double factor = v[0] * normalized[0] + v[1] * normalized[1] + v[2] * normalized[2]
-            + v[3] * normalized[3];
+        double vog = v[0] * og[0] + v[1] * og[1] + v[2] * og[2] + v[3] * og[3];
+        double factor = vog / nogsq;
         std::array<double, 4> orthogonalized;
         for(int i = 0; i != 4; i++)
         {
-            orthogonalized[i] = v[i] - factor * normalized[i];
+            orthogonalized[i] = v[i] - factor * og[i];
         }
         return orthogonalized;
     }

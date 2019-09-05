@@ -9,7 +9,7 @@ int main(int argc, char* argv[])
     if(logging)
     {
         plog::Severity verbosityLevel
-            = plog::debug; // Set to debug to see the debug messages, info messages
+            = plog::info; // Set to debug to see the debug messages, info messages
         std::string csvLogFile = "/tmp/imageRegistrationLog.csv"; // Set NULL to disable
         bool logToConsole = true;
         plog::PlogSetup plogSetup(verbosityLevel, csvLogFile, logToConsole);
