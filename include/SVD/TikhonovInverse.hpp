@@ -86,8 +86,7 @@ public:
             io::throwerr("Info is %d which is nonzero value", info);
         }
         double lambda = lambda_rel * s[0];
-        for(int i = 0; i != n * n; i++)
-            A[i] = 0.0;
+        std::fill(A, A + n * n, float(0.0));
         for(int k = 0; k != n; k++)
         {
             double sigma = regularizeInverted(s[k], lambda);
