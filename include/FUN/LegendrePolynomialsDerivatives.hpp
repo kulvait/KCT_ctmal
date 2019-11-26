@@ -12,46 +12,33 @@ namespace util {
     /** Class for evaluation Legendre polynomials stretched from [-1,1] to a domain [start, end].
      *
      *Values at particular point of the domain are evaluated for Legendre polynomials. Values are
-     *written to the array. Polynomials start from the degree startReportDegree and ends by the
-     *polynomial of the degree.
-     *degree ... degree of polynomial to report last in the resulting vector
-     * startReportDegree ... The degree of polynomial to report first in the resulting vector.
+     *written to the array. Polynomials start from the polynomialDegree startReportDegree and ends by the
+     *polynomial of the polynomialDegree.
+     *polynomialDegree ... polynomialDegree of polynomial to report last in the resulting vector
+     * startReportDegree ... The polynomialDegree of polynomial to report first in the resulting vector.
      */
     class LegendrePolynomialsDerivatives : public VectorFunctionI
     {
     public:
-        LegendrePolynomialsDerivatives(int degree,
+        LegendrePolynomialsDerivatives(int polynomialDegree,
                                        double start,
-                                       double end,
-                                       int startReportDegree = 0)
-            : VectorFunctionI(degree + 1 - startReportDegree, start, end)
+                                       double end)
+            : VectorFunctionI(polynomialDegree + 1, start, end)
             , transformationSlope(double(2.0 / (end - start)))
             , transformationIntercept(-double((end + start) / (end - start)))
         {
-            if(startReportDegree < 0)
-            {
-                io::throwerr("Variable startReportDegree must be non negative but supplied was %d.",
-                             startReportDegree);
-            }
-            if(degree + 1 - startReportDegree < 0)
-            {
-                io::throwerr("Polynomial degree must be greater then startReportDegree and not "
-                             "%d as supplied.",
-                             degree);
-            }
-            this->degree = degree;
-            this->startReportDegree = startReportDegree;
+            this->polynomialDegree = polynomialDegree;
             // Now precompute the values of legendre polynomials
-            legendreCoefficientsD = new double[(degree + 1) * (degree + 1)];
-            legendreCoefficientsF = new float[(degree + 1) * (degree + 1)];
-            derivativeCoefficientsD = new double[(degree + 1) * (degree + 1)];
-            derivativeCoefficientsF = new float[(degree + 1) * (degree + 1)];
-            xnF = new float[degree + 1];
-            xnD = new double[degree + 1];
-            LegendrePolynomialsExplicit::fillLegendreCoefficients(legendreCoefficientsD, degree);
-            LegendrePolynomialsExplicit::fillLegendreCoefficients(legendreCoefficientsF, degree);
-            fillLegendreDerivatives(legendreCoefficientsD, derivativeCoefficientsD, degree);
-            fillLegendreDerivatives(legendreCoefficientsF, derivativeCoefficientsF, degree);
+            legendreCoefficientsD = new double[(polynomialDegree + 1) * (polynomialDegree + 1)];
+            legendreCoefficientsF = new float[(polynomialDegree + 1) * (polynomialDegree + 1)];
+            derivativeCoefficientsD = new double[(polynomialDegree + 1) * (polynomialDegree + 1)];
+            derivativeCoefficientsF = new float[(polynomialDegree + 1) * (polynomialDegree + 1)];
+            xnF = new float[polynomialDegree + 1];
+            xnD = new double[polynomialDegree + 1];
+            LegendrePolynomialsExplicit::fillLegendreCoefficients(legendreCoefficientsD, polynomialDegree);
+            LegendrePolynomialsExplicit::fillLegendreCoefficients(legendreCoefficientsF, polynomialDegree);
+            fillLegendreDerivatives(legendreCoefficientsD, derivativeCoefficientsD, polynomialDegree);
+            fillLegendreDerivatives(legendreCoefficientsF, derivativeCoefficientsF, polynomialDegree);
         } ///< Inits the function
 
         ~LegendrePolynomialsDerivatives()
@@ -66,7 +53,7 @@ namespace util {
 
         LegendrePolynomialsDerivatives(const LegendrePolynomialsDerivatives& other)
             : LegendrePolynomialsDerivatives(
-                  other.degree, other.start, other.end, other.startReportDegree)
+                  other.polynomialDegree, other.start, other.end)
         {
 
         } // Copy constructor
@@ -76,10 +63,9 @@ namespace util {
             if(this != &other)
             {
                 VectorFunctionI::operator=(other);
-                this->startReportDegree = startReportDegree;
-                if(this->degree != other.degree)
+                if(this->polynomialDegree != other.polynomialDegree)
                 {
-                    this->degree = other.degree;
+                    this->polynomialDegree = other.polynomialDegree;
                     double interval = other.end - other.start;
                     this->transformationSlope = double(2.0 / interval);
                     this->transformationIntercept = -double((other.end + other.start) / interval);
@@ -89,24 +75,24 @@ namespace util {
                     delete[] xnD;
                     delete[] derivativeCoefficientsD;
                     delete[] derivativeCoefficientsF;
-                    legendreCoefficientsD = new double[(this->degree + 1) * (this->degree + 1)];
-                    legendreCoefficientsF = new float[(this->degree + 1) * (this->degree + 1)];
-                    derivativeCoefficientsD = new double[(degree + 1) * (degree + 1)];
-                    derivativeCoefficientsF = new float[(degree + 1) * (degree + 1)];
-                    xnF = new float[degree + 1];
-                    xnD = new double[degree + 1];
+                    legendreCoefficientsD = new double[(this->polynomialDegree + 1) * (this->polynomialDegree + 1)];
+                    legendreCoefficientsF = new float[(this->polynomialDegree + 1) * (this->polynomialDegree + 1)];
+                    derivativeCoefficientsD = new double[(polynomialDegree + 1) * (polynomialDegree + 1)];
+                    derivativeCoefficientsF = new float[(polynomialDegree + 1) * (polynomialDegree + 1)];
+                    xnF = new float[polynomialDegree + 1];
+                    xnD = new double[polynomialDegree + 1];
                     LegendrePolynomialsExplicit::fillLegendreCoefficients(legendreCoefficientsD,
-                                                                          degree);
+                                                                          polynomialDegree);
                     LegendrePolynomialsExplicit::fillLegendreCoefficients(legendreCoefficientsF,
-                                                                          degree);
-                    fillLegendreDerivatives(legendreCoefficientsD, derivativeCoefficientsD, degree);
-                    fillLegendreDerivatives(legendreCoefficientsF, derivativeCoefficientsF, degree);
+                                                                          polynomialDegree);
+                    fillLegendreDerivatives(legendreCoefficientsD, derivativeCoefficientsD, polynomialDegree);
+                    fillLegendreDerivatives(legendreCoefficientsF, derivativeCoefficientsF, polynomialDegree);
                 }
             }
             return *this;
         } // Assignment
 
-        /**This function computes coeficients of polynomials of particular degrees to compute
+        /**This function computes coeficients of polynomials of particular polynomialDegrees to compute
          *derivative at particular point of interval [-1,1] that has the value relative to shifted
          *polynomial. To obtain values relative to [-1,1] is needed to divide these values by
          *transformationSlope.
@@ -122,7 +108,7 @@ namespace util {
                 }
         }
 
-        /**This function computes coeficients of polynomials of particular degrees to compute
+        /**This function computes coeficients of polynomials of particular polynomialDegrees to compute
          * derivative at particular point of interval [-1,1] that has the value relative to shifted
          * polynomial. To obtain values relative to [-1,1] is needed to divide these values by
          * transformationSlope.
@@ -141,7 +127,7 @@ namespace util {
         /**Values of the Legendre polynomials derivatives at specific time point.
          *
          */
-        void valuesAt(double t, double* array) const override
+        void valuesAt(double t, double* array, uint32_t startReportDegree) const override
         {
             if(t < start)
             {
@@ -153,17 +139,17 @@ namespace util {
             }
             double x = transformToSupport(t);
             xnD[0] = 1.0;
-            for(int n = 1; n != degree + 1; n++)
+            for(int n = 1; n != polynomialDegree + 1; n++)
             {
                 xnD[n] = xnD[n - 1] * x;
             }
-            std::fill(array, &array[degree - startReportDegree + 1], double(0.0));
-            for(int i = startReportDegree; i < degree + 1; i++)
+            std::fill(array, &array[polynomialDegree - startReportDegree + 1], double(0.0));
+            for(int i = startReportDegree; i < polynomialDegree + 1; i++)
             {
                 for(int n = 0; n != i + 1; n++)
                 {
                     array[i - startReportDegree]
-                        += derivativeCoefficientsD[i * (degree + 1) + n] * xnD[n];
+                        += derivativeCoefficientsD[i * (polynomialDegree + 1) + n] * xnD[n];
                 }
             }
         }
@@ -171,7 +157,7 @@ namespace util {
         /**Values of the Legendre polynomials derivatives at specific time point.
          *
          */
-        void valuesAt(double t, float* array) const override
+        void valuesAt(double t, float* array, uint32_t startReportDegree) const override
         {
             if(t < start)
             {
@@ -183,30 +169,30 @@ namespace util {
             }
             float x = float(transformToSupport(t));
             xnF[0] = 1.0;
-            for(int n = 1; n != degree + 1; n++)
+            for(int n = 1; n != polynomialDegree + 1; n++)
             {
                 xnF[n] = xnF[n - 1] * x;
             }
-            std::fill(array, &array[degree - startReportDegree + 1], float(0.0));
-            for(int i = startReportDegree; i < degree + 1; i++)
+            std::fill(array, &array[polynomialDegree - startReportDegree + 1], float(0.0));
+            for(int i = startReportDegree; i < polynomialDegree + 1; i++)
             {
                 for(int n = 0; n != i + 1; n++)
                 {
                     array[i - startReportDegree]
-                        += derivativeCoefficientsF[i * (degree + 1) + n] * xnF[n];
+                        += derivativeCoefficientsF[i * (polynomialDegree + 1) + n] * xnF[n];
                 }
             }
         }
 
-        /**Print formulas for derivatives of the polynomial of particular degree supported on
+        /**Print formulas for derivatives of the polynomial of particular polynomialDegree supported on
          * interval [-1,1].
          *
          */
         void printLegendreDerivative(int deg)
         {
-            if(deg < 0 || deg > degree)
+            if(deg < 0 || deg > polynomialDegree)
             {
-                io::throwerr("Degree %d must be in [0, %d]!", deg, degree);
+                io::throwerr("Degree %d must be in [0, %d]!", deg, polynomialDegree);
             }
             std::cout << io::xprintf("L_%d'(x) = ", deg);
             bool leadingSignPrinted = false;
@@ -214,7 +200,7 @@ namespace util {
             double c;
             while(e < deg + 1)
             {
-                c = derivativeCoefficientsD[deg * (degree + 1) + e] / transformationSlope;
+                c = derivativeCoefficientsD[deg * (polynomialDegree + 1) + e] / transformationSlope;
                 if(!leadingSignPrinted)
                 {
                     if(c != 0)
@@ -255,14 +241,14 @@ namespace util {
 
         void polynomialValues(int deg, float* array)
         {
-            std::copy(&derivativeCoefficientsF[deg * (degree + 1)],
-                      &derivativeCoefficientsF[deg * (degree + 1) + deg + 1], array);
+            std::copy(&derivativeCoefficientsF[deg * (polynomialDegree + 1)],
+                      &derivativeCoefficientsF[deg * (polynomialDegree + 1) + deg + 1], array);
         }
 
         void polynomialValues(int deg, double* array)
         {
-            std::copy(&derivativeCoefficientsD[deg * (degree + 1)],
-                      &derivativeCoefficientsD[deg * (degree + 1) + deg + 1], array);
+            std::copy(&derivativeCoefficientsD[deg * (polynomialDegree + 1)],
+                      &derivativeCoefficientsD[deg * (polynomialDegree + 1) + deg + 1], array);
         }
         double transformToSupport(double t) const
         {
@@ -277,8 +263,7 @@ namespace util {
         double transformationSlope;
         double transformationIntercept;
 
-        int degree;
-        int startReportDegree;
+        int polynomialDegree;
         double *legendreCoefficientsD, *derivativeCoefficientsD, *xnD;
         float *legendreCoefficientsF, *derivativeCoefficientsF, *xnF;
     };

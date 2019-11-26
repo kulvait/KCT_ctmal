@@ -14,7 +14,7 @@ using namespace CTL;
 
 TEST_CASE("CTL.util.LegendrePolynomialsExplicit.evaluate", "[legendre]")
 {
-    util::LegendrePolynomialsExplicit lp110(110, -1010.0, -20.3, 10);
+    util::LegendrePolynomialsExplicit lp110(110, -1010.0, -20.3);
     for(int i = 0; i != 20; i++)
     {
         lp110.printLegendrePolynomial(i);
@@ -119,7 +119,7 @@ TEST_CASE("CTL.util.LegendrePolynomialsExplicit.evaluate", "[legendre]")
     double targetSupportVal = t * 2 - 1; // transforming [0,1] -> [-1,1]
     REQUIRE((a - targetSupportVal) < 1e-30); // a should be equal to t*2-1
     // LOGD << io::xprintf("Evaluating at %f.", a);
-    lp5.valuesAt(t, values);
+    lp5.valuesAt(t, values, 0);
     double x[6];
     x[0] = 1.0;
     x[1] = 2 * t - 1.0;
@@ -153,7 +153,7 @@ TEST_CASE("CTL.util.LegendrePolynomialsDerivative.values", "[Legendre]")
     x[3] = 60 * t * t - 60 * t + 12.0;
     x[4] = 280 * t * t * t - 420 * t * t + 180 * t - 20.0;
     x[5] = 1260 * t * t * t * t - 2520 * t * t * t + 1680 * t * t - 420 * t + 30;
-    ld5.valuesAt(t, v1);
+    ld5.valuesAt(t, v1, 0);
     for(int i = 0; i != 6; i++)
     {
         ld5.printLegendreDerivative(i);
@@ -174,13 +174,13 @@ TEST_CASE("CTL.util.LegendrePolynomialsDerivative.shifteval", "[Legendre]")
     double start = 0;
     double end = 1;
     double slope = 2.0 / (end - start);
-    util::LegendrePolynomialsDerivatives ld(6, 0, 1.0, 6);
-    util::LegendrePolynomialsDerivatives lx(6, -1.0, 1.0, 6); // Normal support
+    util::LegendrePolynomialsDerivatives ld(6, 0, 1.0);
+    util::LegendrePolynomialsDerivatives lx(6, -1.0, 1.0); // Normal support
     double t = 0.201;
     double x = ld.transformToSupport(t);
     double v1, v2;
-    ld.valuesAt(t, &v1);
-    lx.valuesAt(x, &v2);
+    ld.valuesAt(t, &v1, 6);
+    lx.valuesAt(x, &v2, 6);
     REQUIRE(std::abs(v1 - v2 * slope) < 1e-10);
 }
 

@@ -20,24 +20,12 @@ namespace util {
     class LegendrePolynomialsExplicit : public VectorFunctionI
     {
     public:
-        LegendrePolynomialsExplicit(int degree, double start, double end, int startReportDegree = 0)
-            : VectorFunctionI(degree + 1 - startReportDegree, start, end)
+        LegendrePolynomialsExplicit(int degree, double start, double end)
+            : VectorFunctionI(degree + 1, start, end)
             , transformationSlope(double(2.0 / (end - start)))
             , transformationIntercept(-double((end + start) / (end - start)))
         {
-            if(startReportDegree < 0)
-            {
-                io::throwerr("Variable startReportDegree must be non negative but supplied was %d.",
-                             startReportDegree);
-            }
-            if(degree + 1 - startReportDegree < 0)
-            {
-                io::throwerr("Polynomial degree must be greater then startReportDegree and not "
-                             "%d as supplied.",
-                             degree);
-            }
             this->degree = degree;
-            this->startReportDegree = startReportDegree;
             // Now precompute the values of legendre polynomials
             legendreCoefficientsD = new double[(degree + 1) * (degree + 1)];
             legendreCoefficientsF = new float[(degree + 1) * (degree + 1)];
@@ -57,7 +45,7 @@ namespace util {
 
         LegendrePolynomialsExplicit(const LegendrePolynomialsExplicit& other)
             : LegendrePolynomialsExplicit(
-                  other.degree, other.start, other.end, other.startReportDegree)
+                  other.degree, other.start, other.end)
         {
 
         } // Copy constructor
@@ -67,7 +55,6 @@ namespace util {
             if(this != &other)
             {
                 VectorFunctionI::operator=(other);
-                this->startReportDegree = startReportDegree;
                 if(this->degree != other.degree)
                 {
                     this->degree = other.degree;
@@ -191,7 +178,7 @@ namespace util {
          * This function needs to be protected by mutex due to filling array of powers.
          * Alternative implementation is to create local array of powers.
          */
-        void valuesAt(double t, double* array) const override
+        void valuesAt(double t, double* array, uint32_t startReportDegree) const override
         {
             if(t < start)
             {
@@ -225,7 +212,7 @@ namespace util {
         /**Values of the Legendre polynomials at specific time point.
          *
          */
-        void valuesAt(double t, float* array) const override
+        void valuesAt(double t, float* array, uint32_t startReportDegree) const override
         {
             if(t < start)
             {
@@ -333,7 +320,6 @@ namespace util {
         double transformationIntercept;
 
         int degree;
-        int startReportDegree;
         double* legendreCoefficientsD;
         float* legendreCoefficientsF;
         double* xnD;

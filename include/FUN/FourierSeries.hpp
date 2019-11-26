@@ -9,41 +9,40 @@
 
 namespace CTL {
 namespace util {
-    /** Class for evaluation Legendre polynomials stretched from [-1,1] to a domain [start, end].
+    /** Class for evaluation of Fourier baisis stretched from [0,1] to a domain [start, end].
      *
-     *Values at particular point of the domain are evaluated for Legendre polynomials. Values are
-     *written to the array. Polynomials start from the degree startReportDegree and ends by the
-     *polynomial of the degree.
-     *degree ... degree of polynomial to report last in the resulting vector
-     * startReportDegree ... The degree of polynomial to report first in the resulting vector.
+     *Values at particular point of the domain are evaluated. Values are written to the array
+     *consecutively starting from the function startReportDegree and ends by the number of Fourier
+     *functions.
+     *degree ... Number of functions that this class represents. First function is a constant.
+     *Second function is sin(2*pi), third cos(2*pi), then sin(3*pi), cos(3*pi),
+     *halfPeriodicFunctions... second functions are sin(pi), third cos(pi)
      */
     class FourierSeries : public VectorFunctionI
     {
     public:
-        FourierSeries(int degree, double start, double end, int startReportDegree = 0)
-            : VectorFunctionI(degree - startReportDegree, start, end)
-            , transformationSlope(double(2.0 / (end - start)))
-            , transformationIntercept(-double((end + start) / (end - start)))
+        /**
+         * @brief
+         *
+         * @param degree
+         * @param start
+         * @param end
+         * @param halfPeriodicFunctions
+         */
+        FourierSeries(int degree, double start, double end, bool halfPeriodicFunctions = false)
+            : VectorFunctionI(degree, start, end)
+            , transformationSlope(double(1.0 / (end - start)))
+            , transformationIntercept(-start / (end - start))
         {
-            if(startReportDegree < 0)
-            {
-                io::throwerr("Variable startReportDegree must be non negative but supplied was %d.",
-                             startReportDegree);
-            }
-            if(degree + 1 - startReportDegree < 0)
-            {
-                io::throwerr("Degree must be greater then startReportDegree and not "
-                             "%d as supplied.",
-                             degree);
-            }
             this->degree = degree;
             this->startReportDegree = startReportDegree;
+            this->halfPeriodicFunctions = halfPeriodicFunctions;
         } ///< Inits the function
 
         ~FourierSeries() {}
 
         FourierSeries(const FourierSeries& other)
-            : FourierSeries(other.degree, other.start, other.end, other.startReportDegree)
+            : FourierSeries(other.degree, other.start, other.end, other.halfPeriodicFunctions)
         {
 
         } // Copy constructor
@@ -67,7 +66,8 @@ namespace util {
 
 #ifdef DEBUG
         void plotFunctions(uint32_t granularity = 100,
-                           std::shared_ptr<std::vector<std::string>> names = nullptr) override
+                           std::shared_ptr<std::vector<std::string>> names = nullptr,
+                           uint32_t startReportingDegree = 0) override
         {
             if(names == nullptr)
             {
@@ -77,7 +77,7 @@ namespace util {
                     names->push_back(io::xprintf("Fourier %d", i));
                 }
             }
-            VectorFunctionI::plotFunctions(granularity, names);
+            VectorFunctionI::plotFunctions(granularity, names, startReportingDegree);
         }
 #endif
 
@@ -86,7 +86,7 @@ namespace util {
          * This function needs to be protected by mutex due to filling array of powers.
          * Alternative implementation is to create local array of powers.
          */
-        void valuesAt(double t, double* array) const override
+        void valuesAt(double t, double* array, uint32_t startReportingDegree) const override
         {
             if(t < start)
             {
@@ -98,18 +98,46 @@ namespace util {
             }
             double x = transformToSupport(t);
             int n;
-            for(int i = startReportDegree; i < degree; i++)
+            if(halfPeriodicFunctions)
             {
-                n = (i+1) / 2;
-                if(i == 0)
+                for(int i = startReportDegree; i < degree; i++)
                 {
-                    array[i - startReportDegree] = 1.0;
-                } else if(i % 2 == 1)
+                    if(i == 0)
+                    {
+                        array[i - startReportDegree] = 1.0;
+                    } else if(i == 1)
+                    {
+                        array[i - startReportDegree] = std::sin(x * piD);
+                    } else if(i == 2)
+                    {
+                        array[i - startReportDegree] = std::cos(x * piD);
+                    } else
+                    {
+                        n = (i - 1) / 2;
+                        if(i % 2 == 1)
+                        {
+                            array[i - startReportDegree] = std::sin(x * 2 * piD * n);
+                        } else
+                        {
+                            array[i - startReportDegree] = std::cos(x * 2 * piD * n);
+                        }
+                    }
+                }
+            } else
+            {
+                for(int i = startReportDegree; i < degree; i++)
                 {
-                    array[i - startReportDegree] = std::cos(x * piF * n );
-                } else
-                {
-                    array[i - startReportDegree] = std::sin(x * piF * n );
+                    n = (i + 1) / 2;
+                    if(i == 0)
+                    {
+                        array[i - startReportDegree] = 1.0;
+                    } else if(i % 2 == 1)
+                    {
+                        array[i - startReportDegree] = std::sin(x * 2 * piD * n);
+                    } else
+                    {
+                        array[i - startReportDegree] = std::cos(x * 2 * piD * n);
+                    }
                 }
             }
         }
@@ -117,7 +145,7 @@ namespace util {
         /**Values of the Legendre polynomials at specific time point.
          *
          */
-        void valuesAt(double t, float* array) const override
+        void valuesAt(double t, float* array, uint32_t startReportingDegree) const override
         {
             if(t < start)
             {
@@ -127,20 +155,48 @@ namespace util {
             {
                 t = end;
             }
-            double x = transformToSupport(t);
+            float x = transformToSupport(t);
             int n;
-            for(int i = startReportDegree; i < degree; i++)
+            if(halfPeriodicFunctions)
             {
-                n = (i+1) / 2;
-                if(i == 0)
+                for(int i = startReportDegree; i < degree; i++)
                 {
-                    array[i - startReportDegree] = 1.0;
-                } else if(i % 2 == 1)
+                    if(i == 0)
+                    {
+                        array[i - startReportDegree] = 1.0;
+                    } else if(i == 1)
+                    {
+                        array[i - startReportDegree] = std::sin(x * piD);
+                    } else if(i == 2)
+                    {
+                        array[i - startReportDegree] = std::cos(x * piD);
+                    } else
+                    {
+                        n = (i - 1) / 2;
+                        if(i % 2 == 1)
+                        {
+                            array[i - startReportDegree] = std::sin(x * 2 * piD * n);
+                        } else
+                        {
+                            array[i - startReportDegree] = std::cos(x * 2 * piD * n);
+                        }
+                    }
+                }
+            } else
+            {
+                for(int i = startReportDegree; i < degree; i++)
                 {
-                    array[i - startReportDegree] = std::cos(x * piD * n );
-                } else
-                {
-                    array[i - startReportDegree] = std::sin(x * piD * n );
+                    n = (i + 1) / 2;
+                    if(i == 0)
+                    {
+                        array[i - startReportDegree] = 1.0;
+                    } else if(i % 2 == 1)
+                    {
+                        array[i - startReportDegree] = std::sin(x * 2 * piD * n);
+                    } else
+                    {
+                        array[i - startReportDegree] = std::cos(x * 2 * piD * n);
+                    }
                 }
             }
         }
@@ -163,6 +219,7 @@ namespace util {
 
         int degree;
         int startReportDegree;
+        bool halfPeriodicFunctions;
     };
 
 } // namespace util

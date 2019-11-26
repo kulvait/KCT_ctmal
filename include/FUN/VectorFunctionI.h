@@ -21,7 +21,7 @@ namespace util {
     public:
         /**Initializes support interval.
          *
-         *Dimension is the size of the vector returned by valuesAt call.
+         *Dimension is the size of the vector represented by the VectorFunctionI derivative class.
          */
         VectorFunctionI(uint32_t dimension, double start, double end)
         {
@@ -52,17 +52,27 @@ namespace util {
          *
          *Array vals is not allocated by function itself but it must be preallocated.
          *The number of elements that needs to be allocated can be obtained by calling
-         *VectorFunctionI::getDimension()
+         *VectorFunctionI::getDimension() and subtracting startReportingDegree
+         *
+         * @param t Time that represents the point of the range [start, end] or possibly is outside
+         *this range.
+         * @param vals Pointer to the first element of the array to fill with dimension values.
+         * @param startReportingDegree Index of the first function to report.
          */
-        virtual void valuesAt(double t, double* vals) const = 0;
+        virtual void valuesAt(double t, double* vals, uint32_t startReportingDegree) const = 0;
 
         /**Provides values of the function at particular point.
          *
          *Array vals is not allocated by function itself but it must be preallocated.
          *The number of elements that needs to be allocated can be obtained by calling
-         *VectorFunctionI::getDimension()
+         *VectorFunctionI::getDimension() and subtracting startReportingDegree
+         *
+         * @param t Time that represents the point of the range [start, end] or possibly is outside
+         *this range.
+         * @param vals Pointer to the first element of the array to fill with dimension values.
+         * @param startReportingDegree Index of the first function to report.
          */
-        virtual void valuesAt(double t, float* vals) const = 0;
+        virtual void valuesAt(double t, float* vals, uint32_t startReportingDegree) const = 0;
 
         /**Start of support.
          */
@@ -74,7 +84,8 @@ namespace util {
 
 #ifdef DEBUG
         virtual void plotFunctions(uint32_t granularity = 100,
-                                   std::shared_ptr<std::vector<std::string>> names = nullptr)
+                                   std::shared_ptr<std::vector<std::string>> names = nullptr,
+                                   uint32_t startReportingDegree = 0)
         {
             if(granularity < 2)
             {
@@ -92,7 +103,7 @@ namespace util {
             for(uint32_t i = 0; i != granularity; i++)
             {
                 taxis.push_back(time);
-                valuesAt(time, val);
+                valuesAt(time, val, startReportingDegree);
                 for(uint32_t j = 0; j != dimension; j++)
                 {
                     values[j].push_back(val[j]);
