@@ -59,7 +59,7 @@ namespace util {
          * @param vals Pointer to the first element of the array to fill with dimension values.
          * @param startReportingDegree Index of the first function to report.
          */
-        virtual void valuesAt(double t, double* vals, uint32_t startReportingDegree) const = 0;
+        virtual void valuesAt(double t, double* vals) const = 0;
 
         /**Provides values of the function at particular point.
          *
@@ -72,7 +72,7 @@ namespace util {
          * @param vals Pointer to the first element of the array to fill with dimension values.
          * @param startReportingDegree Index of the first function to report.
          */
-        virtual void valuesAt(double t, float* vals, uint32_t startReportingDegree) const = 0;
+        virtual void valuesAt(double t, float* vals) const = 0;
 
         /**Start of support.
          */
@@ -84,8 +84,7 @@ namespace util {
 
 #ifdef DEBUG
         virtual void plotFunctions(uint32_t granularity = 100,
-                                   std::shared_ptr<std::vector<std::string>> names = nullptr,
-                                   uint32_t startReportingDegree = 0)
+                                   std::shared_ptr<std::vector<std::string>> names = nullptr)
         {
             if(granularity < 2)
             {
@@ -103,7 +102,7 @@ namespace util {
             for(uint32_t i = 0; i != granularity; i++)
             {
                 taxis.push_back(time);
-                valuesAt(time, val, startReportingDegree);
+                valuesAt(time, val);
                 for(uint32_t j = 0; j != dimension; j++)
                 {
                     values[j].push_back(val[j]);
