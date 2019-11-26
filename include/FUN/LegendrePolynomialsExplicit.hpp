@@ -130,7 +130,7 @@ namespace util {
             if(names == nullptr)
             {
                 names = std::make_shared<std::vector<std::string>>();
-                for(int i = startReportingDegree; i <= polynomialDegree; ++i)
+                for(uint32_t i = startReportingDegree; i <= polynomialDegree; ++i)
                 {
                     names->push_back(io::xprintf("Legendre %d", i));
                 }
