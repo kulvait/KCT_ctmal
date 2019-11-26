@@ -12,9 +12,9 @@ namespace util {
     /** Class for evaluation Legendre polynomials stretched from [-1,1] to a domain [start, end].
      *
      *Values at particular point of the domain are evaluated for Legendre polynomials. Values are
-     *written to the array. Polynomials start from the polynomialDegree startReportingDegree and ends by the
-     *polynomial of the polynomialDegree.
-     *polynomialDegree ... polynomialDegree of polynomial to report last in the resulting vector
+     *written to the array. Polynomials start from the polynomialDegree startReportingDegree and
+     *ends by the polynomial of the polynomialDegree. polynomialDegree ... polynomialDegree of
+     *polynomial to report last in the resulting vector
      */
     class LegendrePolynomialsExplicit : public VectorFunctionI
     {
@@ -43,8 +43,7 @@ namespace util {
         }
 
         LegendrePolynomialsExplicit(const LegendrePolynomialsExplicit& other)
-            : LegendrePolynomialsExplicit(
-                  other.polynomialDegree, other.start, other.end)
+            : LegendrePolynomialsExplicit(other.polynomialDegree, other.start, other.end)
         {
 
         } // Copy constructor
@@ -66,8 +65,10 @@ namespace util {
                     delete[] xnD;
                     xnF = new float[polynomialDegree + 1];
                     xnD = new double[polynomialDegree + 1];
-                    legendreCoefficientsD = new double[(this->polynomialDegree + 1) * (this->polynomialDegree + 1)];
-                    legendreCoefficientsF = new float[(this->polynomialDegree + 1) * (this->polynomialDegree + 1)];
+                    legendreCoefficientsD
+                        = new double[(this->polynomialDegree + 1) * (this->polynomialDegree + 1)];
+                    legendreCoefficientsF
+                        = new float[(this->polynomialDegree + 1) * (this->polynomialDegree + 1)];
                     fillLegendreCoefficients(legendreCoefficientsD, polynomialDegree);
                     fillLegendreCoefficients(legendreCoefficientsF, polynomialDegree);
                 }
@@ -77,7 +78,8 @@ namespace util {
 
 #if DEBUG
         void plotFunctions(uint32_t granularity = 100,
-                           std::shared_ptr<std::vector<std::string>> names = nullptr, uint32_t startReportingDegree) override
+                           std::shared_ptr<std::vector<std::string>> names = nullptr,
+                           uint32_t startReportingDegree = 0) override
         {
             if(names == nullptr)
             {
@@ -244,7 +246,8 @@ namespace util {
             delete[] xn;
         }
 
-        /**Into the array insert the polynomial basis of Legendre polynomial of certain polynomialDegree.
+        /**Into the array insert the polynomial basis of Legendre polynomial of certain
+         * polynomialDegree.
          *
          * array must be prealocated to the size deg+1
          * deg must be between 0 and polynomialDegree including
@@ -259,7 +262,8 @@ namespace util {
                       &legendreCoefficientsF[deg * (polynomialDegree + 1) + deg + 1], array);
         }
 
-        /**Into the array insert the polynomial basis of Legendre polynomial of certain polynomialDegree.
+        /**Into the array insert the polynomial basis of Legendre polynomial of certain
+         * polynomialDegree.
          *
          * array must be prealocated to the size deg+1
          * deg must be between 0 and polynomialDegree including
@@ -283,7 +287,8 @@ namespace util {
             std::cout << io::xprintf("L_%d(x) = ", deg);
             if(legendreCoefficientsD[deg * (polynomialDegree + 1)] != 0)
             {
-                std::cout << io::xprintf(" %.1f", legendreCoefficientsD[deg * (polynomialDegree + 1)]);
+                std::cout << io::xprintf(" %.1f",
+                                         legendreCoefficientsD[deg * (polynomialDegree + 1)]);
             }
             for(int i = 1; i < deg + 1; i++)
             {
@@ -292,12 +297,14 @@ namespace util {
                     double c = legendreCoefficientsD[deg * (polynomialDegree + 1) + i];
                     if(c < 0)
                     {
-                        std::cout << io::xprintf(" %.1fx^%d",
-                                                 legendreCoefficientsD[deg * (polynomialDegree + 1) + i], i);
+                        std::cout << io::xprintf(
+                            " %.1fx^%d", legendreCoefficientsD[deg * (polynomialDegree + 1) + i],
+                            i);
                     } else
                     {
-                        std::cout << io::xprintf(" +%.1fx^%d",
-                                                 legendreCoefficientsD[deg * (polynomialDegree + 1) + i], i);
+                        std::cout << io::xprintf(
+                            " +%.1fx^%d", legendreCoefficientsD[deg * (polynomialDegree + 1) + i],
+                            i);
                     }
                 }
             }
