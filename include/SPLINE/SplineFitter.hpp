@@ -67,19 +67,34 @@ public:
         status = dfdNewTask1D(&task, numberOfBreakpoints, t, DF_NO_HINT, 1, y, DF_NO_HINT);
         if(status != DF_STATUS_OK)
         {
-            LOGE << "Can not create task.";
+            LOGE << io::xprintf("Can not create task, error %d! See mkl_df_defines.h", status);
         }
         // See https://software.intel.com/en-us/mkl-developer-reference-c-df-editppspline1d
         status = dfdEditPPSpline1D(task, s_order, s_type, bc_type, bc, DF_NO_IC, nullptr, coeffs,
                                    DF_NO_HINT);
         if(status != DF_STATUS_OK)
         {
-            LOGE << "Can not create spline interpolation.";
+            LOGE << io::xprintf(
+                "Can not create spline interpolation, error %d! See mkl_df_defines.h", status);
         }
         status = dfdConstruct1D(task, DF_PP_SPLINE, DF_METHOD_STD);
         if(status != DF_STATUS_OK)
         {
-            LOGE << "Can not construct spline from task.";
+            if(status == DF_ERROR_BAD_NX)
+            {
+                LOGE << io::xprintf("Can not construct spline from task, DF_ERROR_BAD_NX ... "
+                                    "Invalid number of breakpoints. For Akima splines, minimum 5 "
+                                    "breakpoints is required.");
+            } else if(status == DF_ERROR_BAD_IC)
+            {
+                LOGE << io::xprintf("Can not construct spline from task, DF_ERROR_BAD_IC ... Array "
+                                    "of internal conditions for spline construction is not "
+                                    "defined.");
+            } else
+            {
+                LOGE << io::xprintf(
+                    "Can not construct spline from task, error %d! See mkl_df_defines.h", status);
+            }
         }
     }
 
