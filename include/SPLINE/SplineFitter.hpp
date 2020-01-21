@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mkl.h"
+#include "rawop.h"
 #include <cmath>
 
 namespace CTL::math {
