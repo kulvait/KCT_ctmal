@@ -24,7 +24,7 @@ public:
         this->triplesFile = triplesFile;
         this->bufferSize = bufferSize;
         this->bufferSize64 = bufferSize;
-        if(io::fileExists(triplesFile))
+        if(io::pathExists(triplesFile))
         {
             totalFileSize = io::getFileSize(triplesFile);
             if(totalFileSize % 12 != 0)

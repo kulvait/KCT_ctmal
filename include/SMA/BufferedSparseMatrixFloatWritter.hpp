@@ -23,7 +23,7 @@ public:
         // format (uint32,uint32,double)
         this->triplesFile = triplesFile;
         this->bufferSize = bufferSize;
-        if(io::fileExists(triplesFile))
+        if(io::pathExists(triplesFile))
         {
             if(overwrite)
             {

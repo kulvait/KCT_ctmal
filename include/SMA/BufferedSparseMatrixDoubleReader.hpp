@@ -23,7 +23,7 @@ public:
         // format (uint32,uint32,double)
         this->triplesFile = triplesFile;
         this->bufferSize = bufferSize;
-        if(io::fileExists(triplesFile))
+        if(io::pathExists(triplesFile))
         {
             totalFileSize = io::getFileSize(triplesFile);
             if(totalFileSize % 16 != 0)
