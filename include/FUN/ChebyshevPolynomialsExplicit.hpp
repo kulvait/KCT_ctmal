@@ -9,20 +9,24 @@
 
 namespace CTL {
 namespace util {
-    /** Class for evaluation Legendre polynomials stretched from [-1,1] to a domain [start, end].
+    /** Class for evaluation Chebyshev polynomials of the first kind stretched from [-1,1] to a
+     domain [start, end].
      *
-     *Values at particular point of the domain are evaluated for Legendre polynomials. Values are
+     *Values at particular point of the domain are evaluated for Chebyshev polynomials. Values are
      *written to the array. Polynomials start from the polynomialDegree startReportingDegree and
      *ends by the polynomial of the polynomialDegree. polynomialDegree ... polynomialDegree of
      *polynomial to report last in the resulting vector
+     *
+     * For the definition see T_i(x) definition from
+     *     https://en.wikipedia.org/wiki/Chebyshev_polynomials
      */
-    class LegendrePolynomialsExplicit : public VectorFunctionI
+    class ChebyshevPolynomialsExplicit : public VectorFunctionI
     {
     public:
-        LegendrePolynomialsExplicit(uint32_t polynomialDegree,
-                                    double start,
-                                    double end,
-                                    uint32_t startReportingDegree=0)
+        ChebyshevPolynomialsExplicit(uint32_t polynomialDegree,
+                                     double start,
+                                     double end,
+                                     uint32_t startReportingDegree = 0)
             : VectorFunctionI(polynomialDegree + 1 - startReportingDegree, start, end)
             , transformationSlope(double(2.0 / (end - start)))
             , transformationIntercept(-double((end + start) / (end - start)))
@@ -38,24 +42,24 @@ namespace util {
                 LOGD << msg;
                 throw std::runtime_error(msg);
             }
-            // Now precompute the values of legendre polynomials
-            legendreCoefficientsD = new double[(polynomialDegree + 1) * (polynomialDegree + 1)];
-            legendreCoefficientsF = new float[(polynomialDegree + 1) * (polynomialDegree + 1)];
+            // Now precompute the values of chebyshev polynomials
+            chebyshevCoefficientsD = new double[(polynomialDegree + 1) * (polynomialDegree + 1)];
+            chebyshevCoefficientsF = new float[(polynomialDegree + 1) * (polynomialDegree + 1)];
             xnF = new float[polynomialDegree + 1];
             xnD = new double[polynomialDegree + 1];
-            fillLegendreCoefficients(legendreCoefficientsD, polynomialDegree);
-            fillLegendreCoefficients(legendreCoefficientsF, polynomialDegree);
+            fillChebyshevCoefficients(chebyshevCoefficientsD, polynomialDegree);
+            fillChebyshevCoefficients(chebyshevCoefficientsF, polynomialDegree);
         } ///< Inits the function
 
-        ~LegendrePolynomialsExplicit()
+        ~ChebyshevPolynomialsExplicit()
         {
-            if(legendreCoefficientsD != nullptr)
+            if(chebyshevCoefficientsD != nullptr)
             {
-                delete[] legendreCoefficientsD;
+                delete[] chebyshevCoefficientsD;
             }
-            if(legendreCoefficientsF != nullptr)
+            if(chebyshevCoefficientsF != nullptr)
             {
-                delete[] legendreCoefficientsF;
+                delete[] chebyshevCoefficientsF;
             }
             if(xnF != nullptr)
             {
@@ -65,20 +69,20 @@ namespace util {
             {
                 delete[] xnD;
             }
-            legendreCoefficientsD = nullptr;
-            legendreCoefficientsF = nullptr;
+            chebyshevCoefficientsD = nullptr;
+            chebyshevCoefficientsF = nullptr;
             xnF = nullptr;
             xnD = nullptr;
         }
 
-        LegendrePolynomialsExplicit(const LegendrePolynomialsExplicit& other)
-            : LegendrePolynomialsExplicit(
+        ChebyshevPolynomialsExplicit(const ChebyshevPolynomialsExplicit& other)
+            : ChebyshevPolynomialsExplicit(
                   other.polynomialDegree, other.start, other.end, other.startReportingDegree)
         {
 
         } // Copy constructor
 
-        LegendrePolynomialsExplicit& operator=(LegendrePolynomialsExplicit other)
+        ChebyshevPolynomialsExplicit& operator=(ChebyshevPolynomialsExplicit other)
         {
             if(this != &other)
             {
@@ -90,13 +94,13 @@ namespace util {
                 if(this->polynomialDegree != other.polynomialDegree)
                 {
                     this->polynomialDegree = other.polynomialDegree;
-                    if(legendreCoefficientsD != nullptr)
+                    if(chebyshevCoefficientsD != nullptr)
                     {
-                        delete[] legendreCoefficientsD;
+                        delete[] chebyshevCoefficientsD;
                     }
-                    if(legendreCoefficientsF != nullptr)
+                    if(chebyshevCoefficientsF != nullptr)
                     {
-                        delete[] legendreCoefficientsF;
+                        delete[] chebyshevCoefficientsF;
                     }
                     if(xnF != nullptr)
                     {
@@ -106,18 +110,18 @@ namespace util {
                     {
                         delete[] xnD;
                     }
-                    legendreCoefficientsD = nullptr;
-                    legendreCoefficientsF = nullptr;
+                    chebyshevCoefficientsD = nullptr;
+                    chebyshevCoefficientsF = nullptr;
                     xnF = nullptr;
                     xnD = nullptr;
                     xnF = new float[polynomialDegree + 1];
                     xnD = new double[polynomialDegree + 1];
-                    legendreCoefficientsD
+                    chebyshevCoefficientsD
                         = new double[(this->polynomialDegree + 1) * (this->polynomialDegree + 1)];
-                    legendreCoefficientsF
+                    chebyshevCoefficientsF
                         = new float[(this->polynomialDegree + 1) * (this->polynomialDegree + 1)];
-                    fillLegendreCoefficients(legendreCoefficientsD, polynomialDegree);
-                    fillLegendreCoefficients(legendreCoefficientsF, polynomialDegree);
+                    fillChebyshevCoefficients(chebyshevCoefficientsD, polynomialDegree);
+                    fillChebyshevCoefficients(chebyshevCoefficientsF, polynomialDegree);
                 }
             }
             return *this;
@@ -132,13 +136,13 @@ namespace util {
                 names = std::make_shared<std::vector<std::string>>();
                 for(uint32_t i = startReportingDegree; i <= polynomialDegree; ++i)
                 {
-                    names->push_back(io::xprintf("Legendre %d", i));
+                    names->push_back(io::xprintf("Chebyshev %d", i));
                 }
             }
             VectorFunctionI::plotFunctions(granularity, names);
         }
 #endif
-        /*Construct the Legendre polynomials using polynomial basis.
+        /*Construct the Chebyshev polynomials using polynomial basis.
          *
          * It is based on the formulas
          *
@@ -147,10 +151,10 @@ namespace util {
          *\f}
          *
          *\f{equation}{
-         *  P_n = \frac{(2n-1) x P_{n-1}(x)-(n-1)P_{n-2}}{n}.
+         *  P_n = 2 x P_{n-1}(x)-P_{n-2}.
          *\f}
          */
-        static void fillLegendreCoefficients(double* c, int deg)
+        static void fillChebyshevCoefficients(double* c, int deg)
         {
             std::fill(c, &c[(deg + 1) * (deg + 1)], double(0.0));
             c[0] = double(1.0);
@@ -160,16 +164,9 @@ namespace util {
             }
             if(deg > 1)
             {
-                c[2 * (deg + 1)] = double(-0.5);
-                c[2 * (deg + 1) + 2] = double(1.5);
-            }
-            if(deg > 2)
-            {
-                double factor_1, factor_2;
-                for(int n = 3; n != deg + 1; n++)
+                double factor_1 = 2.0, factor_2 = -1.0;
+                for(int n = 2; n != deg + 1; n++)
                 {
-                    factor_1 = double(2 * n - 1) / double(n);
-                    factor_2 = -double(n - 1) / double(n);
                     for(int i = 0; i != n; i++)
                     {
                         c[n * (deg + 1) + 1 + i] = factor_1 * c[(n - 1) * (deg + 1) + i];
@@ -179,7 +176,7 @@ namespace util {
             }
         }
 
-        /*Construct the Legendre polynomials using polynomial basis.
+        /*Construct the Chebyshev polynomials using polynomial basis.
          *
          * It is based on the formulas
          *
@@ -191,7 +188,7 @@ namespace util {
          *  P_n = \frac{(2n-1) x P_{n-1}(x)-(n-1)P_{n-2}}{n}.
          *\f}
          */
-        static void fillLegendreCoefficients(float* c, int deg)
+        static void fillChebyshevCoefficients(float* c, int deg)
         {
             std::fill(c, &c[(deg + 1) * (deg + 1)], float(0.0));
             c[0] = float(1.0);
@@ -201,16 +198,9 @@ namespace util {
             }
             if(deg > 1)
             {
-                c[2 * (deg + 1)] = float(-0.5);
-                c[2 * (deg + 1) + 2] = float(1.5);
-            }
-            if(deg > 2)
-            {
-                float factor_1, factor_2;
-                for(int n = 3; n != deg + 1; n++)
+                double factor_1 = 2.0f, factor_2 = -1.0f;
+                for(int n = 2; n != deg + 1; n++)
                 {
-                    factor_1 = float(2 * n - 1) / float(n);
-                    factor_2 = -float(n - 1) / float(n);
                     for(int i = 0; i != n; i++)
                     {
                         c[n * (deg + 1) + 1 + i] = factor_1 * c[(n - 1) * (deg + 1) + i];
@@ -220,7 +210,7 @@ namespace util {
             }
         }
 
-        /**Values of the Legendre polynomials at specific time point.
+        /**Values of the Chebyshev polynomials at specific time point.
          *
          * This function needs to be protected by mutex due to filling array of powers.
          * Alternative implementation is to create local array of powers.
@@ -250,13 +240,13 @@ namespace util {
                 for(uint32_t n = 0; n != i + 1; n++)
                 {
                     array[i - startReportingDegree]
-                        += legendreCoefficientsD[i * (polynomialDegree + 1) + n] * xn[n];
+                        += chebyshevCoefficientsD[i * (polynomialDegree + 1) + n] * xn[n];
                 }
             }
             delete[] xn;
         }
 
-        /**Values of the Legendre polynomials at specific time point.
+        /**Values of the Chebyshev polynomials at specific time point.
          *
          */
         void valuesAt(double t, float* array) const override
@@ -286,13 +276,13 @@ namespace util {
                 for(uint32_t n = 0; n != i + 1; n++)
                 {
                     array[i - startReportingDegree]
-                        += legendreCoefficientsF[i * (polynomialDegree + 1) + n] * xn[n];
+                        += chebyshevCoefficientsF[i * (polynomialDegree + 1) + n] * xn[n];
                 }
             }
             delete[] xn;
         }
 
-        /**Into the array insert the polynomial basis of Legendre polynomial of certain
+        /**Into the array insert the polynomial basis of Chebyshev polynomial of certain
          * polynomialDegree.
          *
          * array must be prealocated to the size deg+1
@@ -304,11 +294,11 @@ namespace util {
             {
                 io::throwerr("Degree %d must be in [0, %d]!", deg, polynomialDegree);
             }
-            std::copy(&legendreCoefficientsF[deg * (polynomialDegree + 1)],
-                      &legendreCoefficientsF[deg * (polynomialDegree + 1) + deg + 1], array);
+            std::copy(&chebyshevCoefficientsF[deg * (polynomialDegree + 1)],
+                      &chebyshevCoefficientsF[deg * (polynomialDegree + 1) + deg + 1], array);
         }
 
-        /**Into the array insert the polynomial basis of Legendre polynomial of certain
+        /**Into the array insert the polynomial basis of Chebyshev polynomial of certain
          * polynomialDegree.
          *
          * array must be prealocated to the size deg+1
@@ -316,40 +306,40 @@ namespace util {
          */
         void polynomialValues(uint32_t deg, double* array)
         {
-            if( deg > polynomialDegree)
+            if(deg > polynomialDegree)
             {
                 io::throwerr("Degree %d must be in [0, %d]!", deg, polynomialDegree);
             }
-            std::copy(&legendreCoefficientsD[deg * (polynomialDegree + 1)],
-                      &legendreCoefficientsD[deg * (polynomialDegree + 1) + deg + 1], array);
+            std::copy(&chebyshevCoefficientsD[deg * (polynomialDegree + 1)],
+                      &chebyshevCoefficientsD[deg * (polynomialDegree + 1) + deg + 1], array);
         }
 
-        void printLegendrePolynomial(uint32_t deg)
+        void printChebyshevPolynomial(uint32_t deg)
         {
             if(deg > polynomialDegree)
             {
                 io::throwerr("Degree %d must be in [0, %d]!", deg, polynomialDegree);
             }
-            std::cout << io::xprintf("L_%d(x) = ", deg);
-            if(legendreCoefficientsD[deg * (polynomialDegree + 1)] != 0)
+            std::cout << io::xprintf("T_%d(x) = ", deg);
+            if(chebyshevCoefficientsD[deg * (polynomialDegree + 1)] != 0)
             {
                 std::cout << io::xprintf(" %.1f",
-                                         legendreCoefficientsD[deg * (polynomialDegree + 1)]);
+                                         chebyshevCoefficientsD[deg * (polynomialDegree + 1)]);
             }
             for(uint32_t i = 1; i < deg + 1; i++)
             {
-                if(legendreCoefficientsD[deg * (polynomialDegree + 1) + i] != 0)
+                if(chebyshevCoefficientsD[deg * (polynomialDegree + 1) + i] != 0)
                 {
-                    double c = legendreCoefficientsD[deg * (polynomialDegree + 1) + i];
+                    double c = chebyshevCoefficientsD[deg * (polynomialDegree + 1) + i];
                     if(c < 0)
                     {
                         std::cout << io::xprintf(
-                            " %.1fx^%d", legendreCoefficientsD[deg * (polynomialDegree + 1) + i],
+                            " %.1fx^%d", chebyshevCoefficientsD[deg * (polynomialDegree + 1) + i],
                             i);
                     } else
                     {
                         std::cout << io::xprintf(
-                            " +%.1fx^%d", legendreCoefficientsD[deg * (polynomialDegree + 1) + i],
+                            " +%.1fx^%d", chebyshevCoefficientsD[deg * (polynomialDegree + 1) + i],
                             i);
                     }
                 }
@@ -365,7 +355,7 @@ namespace util {
 
     private:
         /**Function that transforms the value t on the interval [start, end] to the value t' on the
-         * interval [-1,1] that is support of Legendre polynomials.
+         * interval [-1,1] that is support of Chebyshev polynomials.
          *
          */
         double transformationSlope;
@@ -373,8 +363,8 @@ namespace util {
         uint32_t polynomialDegree;
         uint32_t startReportingDegree;
 
-        double* legendreCoefficientsD;
-        float* legendreCoefficientsF;
+        double* chebyshevCoefficientsD;
+        float* chebyshevCoefficientsF;
         double* xnD;
         float* xnF;
         mutable std::mutex powerProtectionMutex;
