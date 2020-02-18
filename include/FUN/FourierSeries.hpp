@@ -33,13 +33,15 @@ namespace util {
                       double start,
                       double end,
                       uint32_t startReportingDegree = 0,
-                      bool halfPeriodicFunctions = false)
+                      bool halfPeriodicFunctions = false,
+                      bool constantOutsideInterval = true)
             : VectorFunctionI(numberOfFunctions - startReportingDegree, start, end)
             , transformationSlope(double(1.0 / (end - start)))
             , transformationIntercept(-start / (end - start))
             , numberOfFunctions(numberOfFunctions)
             , startReportingDegree(startReportingDegree)
             , halfPeriodicFunctions(halfPeriodicFunctions)
+            , constantOutsideInterval(constantOutsideInterval)
         {
             if(startReportingDegree >= numberOfFunctions)
             {
@@ -104,10 +106,20 @@ namespace util {
         {
             if(t < start)
             {
+                if(constantOutsideInterval)
+                {
+                    valuesOutsideInterval(array);
+                    return;
+                }
                 t = start;
             }
             if(t > end)
             {
+                if(constantOutsideInterval)
+                {
+                    valuesOutsideInterval(array);
+                    return;
+                }
                 t = end;
             }
             double x = transformToSupport(t);
@@ -163,10 +175,20 @@ namespace util {
         {
             if(t < start)
             {
+                if(constantOutsideInterval)
+                {
+                    valuesOutsideInterval(array);
+                    return;
+                }
                 t = start;
             }
             if(t > end)
             {
+                if(constantOutsideInterval)
+                {
+                    valuesOutsideInterval(array);
+                    return;
+                }
                 t = end;
             }
             float x = transformToSupport(t);
@@ -222,8 +244,34 @@ namespace util {
         }
 
     private:
-        /**Function that transforms the value t on the interval [start, end] to the value t' on the
-         * interval [-1,1] that is support of Legendre polynomials.
+        void valuesOutsideInterval(float* array) const
+        {
+            for(uint32_t i = startReportingDegree; i < numberOfFunctions; i++)
+            {
+                if(i == 0)
+                {
+                    array[i - startReportingDegree] = 1.0f;
+                } else
+                {
+                    array[i - startReportingDegree] = 0.0f;
+                }
+            }
+        }
+
+        void valuesOutsideInterval(double* array) const
+        {
+            for(uint32_t i = startReportingDegree; i < numberOfFunctions; i++)
+            {
+                if(i == 0)
+                {
+                    array[i - startReportingDegree] = 1.0;
+                } else
+                {
+                    array[i - startReportingDegree] = 0.0;
+                }
+            }
+        }
+        /**Function that transforms the value [start, end] to [0,1].
          *
          */
         double transformationSlope;
@@ -234,6 +282,7 @@ namespace util {
         uint32_t numberOfFunctions;
         uint32_t startReportingDegree;
         bool halfPeriodicFunctions;
+        bool constantOutsideInterval;
     };
 
 } // namespace util

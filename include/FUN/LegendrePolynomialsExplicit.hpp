@@ -22,11 +22,13 @@ namespace util {
         LegendrePolynomialsExplicit(uint32_t polynomialDegree,
                                     double start,
                                     double end,
-                                    uint32_t startReportingDegree=0)
+                                    bool constantOutsideInterval = true,
+                                    uint32_t startReportingDegree = 0)
             : VectorFunctionI(polynomialDegree + 1 - startReportingDegree, start, end)
             , transformationSlope(double(2.0 / (end - start)))
             , transformationIntercept(-double((end + start) / (end - start)))
             , polynomialDegree(polynomialDegree)
+            , constantOutsideInterval(constantOutsideInterval)
             , startReportingDegree(startReportingDegree)
         {
             if(startReportingDegree > polynomialDegree)
@@ -41,8 +43,6 @@ namespace util {
             // Now precompute the values of legendre polynomials
             legendreCoefficientsD = new double[(polynomialDegree + 1) * (polynomialDegree + 1)];
             legendreCoefficientsF = new float[(polynomialDegree + 1) * (polynomialDegree + 1)];
-            xnF = new float[polynomialDegree + 1];
-            xnD = new double[polynomialDegree + 1];
             fillLegendreCoefficients(legendreCoefficientsD, polynomialDegree);
             fillLegendreCoefficients(legendreCoefficientsF, polynomialDegree);
         } ///< Inits the function
@@ -57,69 +57,36 @@ namespace util {
             {
                 delete[] legendreCoefficientsF;
             }
-            if(xnF != nullptr)
-            {
-                delete[] xnF;
-            }
-            if(xnD != nullptr)
-            {
-                delete[] xnD;
-            }
             legendreCoefficientsD = nullptr;
             legendreCoefficientsF = nullptr;
-            xnF = nullptr;
-            xnD = nullptr;
         }
 
         LegendrePolynomialsExplicit(const LegendrePolynomialsExplicit& other)
-            : LegendrePolynomialsExplicit(
-                  other.polynomialDegree, other.start, other.end, other.startReportingDegree)
+            : LegendrePolynomialsExplicit(other.polynomialDegree,
+                                          other.start,
+                                          other.end,
+                                          other.constantOutsideInterval,
+                                          other.startReportingDegree)
         {
 
         } // Copy constructor
 
+        friend void swap(LegendrePolynomialsExplicit& x, LegendrePolynomialsExplicit& y) // nothrow
+        {
+            using std::swap;
+            swap(static_cast<VectorFunctionI&>(x), static_cast<VectorFunctionI&>(y));
+            swap(x.transformationSlope, x.transformationSlope);
+            swap(x.transformationIntercept, x.transformationIntercept);
+            swap(x.polynomialDegree, x.polynomialDegree);
+            swap(x.constantOutsideInterval, x.constantOutsideInterval);
+            swap(x.startReportingDegree, x.startReportingDegree);
+            swap(x.legendreCoefficientsD, x.legendreCoefficientsD);
+            swap(x.legendreCoefficientsF, x.legendreCoefficientsF);
+        }
+
         LegendrePolynomialsExplicit& operator=(LegendrePolynomialsExplicit other)
         {
-            if(this != &other)
-            {
-                VectorFunctionI::operator=(other);
-                double interval = other.end - other.start;
-                this->transformationSlope = double(2.0 / interval);
-                this->transformationIntercept = -double((other.end + other.start) / interval);
-                this->startReportingDegree = other.startReportingDegree;
-                if(this->polynomialDegree != other.polynomialDegree)
-                {
-                    this->polynomialDegree = other.polynomialDegree;
-                    if(legendreCoefficientsD != nullptr)
-                    {
-                        delete[] legendreCoefficientsD;
-                    }
-                    if(legendreCoefficientsF != nullptr)
-                    {
-                        delete[] legendreCoefficientsF;
-                    }
-                    if(xnF != nullptr)
-                    {
-                        delete[] xnF;
-                    }
-                    if(xnD != nullptr)
-                    {
-                        delete[] xnD;
-                    }
-                    legendreCoefficientsD = nullptr;
-                    legendreCoefficientsF = nullptr;
-                    xnF = nullptr;
-                    xnD = nullptr;
-                    xnF = new float[polynomialDegree + 1];
-                    xnD = new double[polynomialDegree + 1];
-                    legendreCoefficientsD
-                        = new double[(this->polynomialDegree + 1) * (this->polynomialDegree + 1)];
-                    legendreCoefficientsF
-                        = new float[(this->polynomialDegree + 1) * (this->polynomialDegree + 1)];
-                    fillLegendreCoefficients(legendreCoefficientsD, polynomialDegree);
-                    fillLegendreCoefficients(legendreCoefficientsF, polynomialDegree);
-                }
-            }
+            swap(*this, other);
             return *this;
         } // Assignment
 
@@ -229,10 +196,20 @@ namespace util {
         {
             if(t < start)
             {
+                if(constantOutsideInterval)
+                {
+                    valuesOutsideInterval(array);
+                    return;
+                }
                 t = start;
             }
             if(t > end)
             {
+                if(constantOutsideInterval)
+                {
+                    valuesOutsideInterval(array);
+                    return;
+                }
                 t = end;
             }
             // std::lock_guard<std::mutex> guard(powerProtectionMutex);//Big overhead
@@ -263,10 +240,20 @@ namespace util {
         {
             if(t < start)
             {
+                if(constantOutsideInterval)
+                {
+                    valuesOutsideInterval(array);
+                    return;
+                }
                 t = start;
             }
             if(t > end)
             {
+                if(constantOutsideInterval)
+                {
+                    valuesOutsideInterval(array);
+                    return;
+                }
                 t = end;
             }
             // std::lock_guard<std::mutex> guard(powerProtectionMutex);//Big overhead
@@ -316,7 +303,7 @@ namespace util {
          */
         void polynomialValues(uint32_t deg, double* array)
         {
-            if( deg > polynomialDegree)
+            if(deg > polynomialDegree)
             {
                 io::throwerr("Degree %d must be in [0, %d]!", deg, polynomialDegree);
             }
@@ -364,6 +351,34 @@ namespace util {
         }
 
     private:
+        void valuesOutsideInterval(float* array) const
+        {
+            for(uint32_t i = startReportingDegree; i < polynomialDegree + 1; i++)
+            {
+                if(i == 0)
+                {
+                    array[i - startReportingDegree] = 1.0f;
+                } else
+                {
+                    array[i - startReportingDegree] = 0.0f;
+                }
+            }
+        }
+
+        void valuesOutsideInterval(double* array) const
+        {
+            for(uint32_t i = startReportingDegree; i < polynomialDegree + 1; i++)
+            {
+                if(i == 0)
+                {
+                    array[i - startReportingDegree] = 1.0;
+                } else
+                {
+                    array[i - startReportingDegree] = 0.0;
+                }
+            }
+        }
+
         /**Function that transforms the value t on the interval [start, end] to the value t' on the
          * interval [-1,1] that is support of Legendre polynomials.
          *
@@ -371,13 +386,11 @@ namespace util {
         double transformationSlope;
         double transformationIntercept;
         uint32_t polynomialDegree;
+        bool constantOutsideInterval;
         uint32_t startReportingDegree;
 
         double* legendreCoefficientsD;
         float* legendreCoefficientsF;
-        double* xnD;
-        float* xnF;
-        mutable std::mutex powerProtectionMutex;
     };
 
 } // namespace util

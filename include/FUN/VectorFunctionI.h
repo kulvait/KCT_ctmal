@@ -36,10 +36,6 @@ namespace util {
                              "start needs to be less then the value of end.",
                              start, end);
             }
-            if(dimension < 1)
-            {
-                io::throwerr("Dimension must be one or more but you have provided %d", dimension);
-            }
             this->dimension = dimension;
         }
 
@@ -124,8 +120,9 @@ namespace util {
             delete[] val;
         }
 
-        virtual void storeFunctions(const std::string & imageFile, uint32_t granularity = 100,
-                                   std::shared_ptr<std::vector<std::string>> names = nullptr)
+        virtual void storeFunctions(const std::string& imageFile,
+                                    uint32_t granularity = 100,
+                                    std::shared_ptr<std::vector<std::string>> names = nullptr)
         {
             if(granularity < 2)
             {
@@ -165,6 +162,14 @@ namespace util {
             delete[] val;
         }
 #endif
+
+        friend void swap(VectorFunctionI& a, VectorFunctionI& b)
+        {
+            using std::swap;
+            swap(a.end, b.end);
+            swap(a.start, b.start);
+            swap(a.dimension, b.dimension);
+        }
 
     protected:
         double start; ///< Start of interval of the support.

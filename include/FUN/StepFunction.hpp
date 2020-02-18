@@ -7,6 +7,7 @@
 
 // Internal includes
 #include "DEN/DenFrame2DReader.hpp"
+#include "DEN/DenSupportedType.hpp"
 #include "Frame2DReaderI.hpp"
 #include "VectorFunctionI.h"
 #include "stringFormatter.h"
@@ -29,14 +30,16 @@ namespace util {
     {
     public:
         StepFunction(double* values,
-                     int baseSize,
-                     int valuesPerFunction,
+                     uint32_t baseSize,
+                     uint32_t valuesPerFunction,
                      double start,
                      double end,
-                     int startReportDegree = 0)
+                     double timeShift = 0.0,
+                     uint32_t startReportDegree = 0)
             : VectorFunctionI(baseSize - startReportDegree, start, end)
             , transformationSlope((double(valuesPerFunction) - 1.0) / (end - start))
             , transformationIntercept(-start * (double(valuesPerFunction) - 1.0) / (end - start))
+            , timeShift(timeShift)
         {
             if(startReportDegree < 0)
             {
@@ -53,9 +56,9 @@ namespace util {
             this->valuesD = new double[baseSize * valuesPerFunction];
             this->valuesF = new float[baseSize * valuesPerFunction];
             this->valuesPerFunction = valuesPerFunction;
-            for(int i = 0; i != baseSize; i++)
+            for(uint32_t i = 0; i != baseSize; i++)
             {
-                for(int j = 0; j != valuesPerFunction; j++)
+                for(uint32_t j = 0; j != valuesPerFunction; j++)
                 {
                     valuesD[i * valuesPerFunction + j] = values[i * valuesPerFunction + j];
                     valuesF[i * valuesPerFunction + j] = values[i * valuesPerFunction + j];
@@ -66,49 +69,72 @@ namespace util {
             // Now precompute the values of legendre polynomials
         } ///< Inits the function
 
-        StepFunction(int baseSize,
-                     std::string sampledBasis,
+        StepFunction(std::string inputFunctionsFile,
+                     uint32_t basisSize,
                      double start,
                      double end,
-                     int startReportDegree = 0)
-            : VectorFunctionI(baseSize - startReportDegree, start, end)
+                     double timeShift = 0.0,
+                     uint32_t startReportDegree = 0)
+            : VectorFunctionI(basisSize - startReportDegree, start, end)
+            , baseSize(basisSize)
+            , startReportDegree(startReportDegree)
+            , timeShift(timeShift)
         {
+            std::string err;
             if(startReportDegree < 0)
             {
-                io::throwerr("Variable startReportDegree must be non negative but supplied was %d.",
-                             startReportDegree);
+                err = io::xprintf(
+                    "Variable startReportDegree must be non negative but supplied was %d.",
+                    startReportDegree);
+                LOGE << err;
+                throw std::runtime_error(err);
             }
             if(baseSize - startReportDegree < 0)
             {
-                io::throwerr("Base size must be greater then startReportDegree and not "
-                             "%d as supplied.",
-                             baseSize);
+                err = io::xprintf("Base size must be greater then startReportDegree and not "
+                                  "%d as supplied.",
+                                  baseSize);
+                LOGE << err;
+                throw std::runtime_error(err);
             }
-            io::DenFileInfo bfi(sampledBasis);
+            io::DenFileInfo bfi(inputFunctionsFile);
+            if(basisSize > bfi.dimz())
+            {
+                err = io::xprintf(
+                    "Basis size %d is greater than the number of functions in file %s, %d!",
+                    basisSize, inputFunctionsFile.c_str(), bfi.dimz());
+                LOGE << err;
+                throw std::runtime_error(err);
+            }
             this->valuesPerFunction = bfi.dimx();
-            this->baseSize = bfi.dimz();
-            transformationSlope = ((double(valuesPerFunction) - 1.0) / (end - start));
-            transformationIntercept = (-start * (double(valuesPerFunction) - 1.0) / (end - start));
+            // The following needs to be defined after previous line
+            transformationSlope = (double(valuesPerFunction) - 1.0) / (end - start);
+            transformationIntercept = -start * (double(valuesPerFunction) - 1.0) / (end - start);
             this->valuesD = new double[baseSize * valuesPerFunction];
             this->valuesF = new float[baseSize * valuesPerFunction];
             // Fill this array only by values without offset.
-            std::shared_ptr<io::Frame2DReaderI<double>> pr
-                = std::make_shared<io::DenFrame2DReader<double>>(sampledBasis);
-            std::shared_ptr<io::Frame2DI<double>> f;
-            for(int i = 0; i != baseSize; i++)
+            if(bfi.getDataType() == io::DenSupportedType::double_)
             {
-                f = pr->readFrame(i);
-
-                for(int j = 0; j != valuesPerFunction; j++)
+                std::shared_ptr<io::Frame2DReaderI<double>> pr
+                    = std::make_shared<io::DenFrame2DReader<double>>(inputFunctionsFile);
+                std::shared_ptr<io::Frame2DI<double>> f;
+                for(uint32_t i = 0; i != baseSize; i++)
                 {
-                    valuesD[i * valuesPerFunction + j] = f->get(j, 0);
-                    valuesF[i * valuesPerFunction + j] = float(f->get(j, 0));
+                    f = pr->readFrame(i);
+                    for(uint32_t j = 0; j != valuesPerFunction; j++)
+                    {
+                        valuesD[i * valuesPerFunction + j] = f->get(j, 0);
+                        valuesF[i * valuesPerFunction + j] = float(f->get(j, 0));
+                    }
                 }
+            } else
+            {
+                err = io::xprintf("Basis should be encoded in double file!");
+                LOGE << err;
+                throw std::runtime_error(err);
             }
-            this->startReportDegree = startReportDegree;
-
-            // Now precompute the values of legendre polynomials
         } ///< Inits the function
+
         ~StepFunction()
         {
             delete[] valuesD;
@@ -122,7 +148,8 @@ namespace util {
                            other.valuesPerFunction,
                            other.start,
                            other.end,
-                           other.startReportDegree)
+                           other.startReportDegree,
+                           other.timeShift)
         {
         }
 
@@ -144,9 +171,9 @@ namespace util {
                     valuesF = new float[baseSize * valuesPerFunction];
                     valuesD = new double[baseSize * valuesPerFunction];
                 }
-                for(int i = 0; i != baseSize; i++)
+                for(uint32_t i = 0; i != baseSize; i++)
                 {
-                    for(int j = 0; j != valuesPerFunction; j++)
+                    for(uint32_t j = 0; j != valuesPerFunction; j++)
                     {
                         valuesD[i * valuesPerFunction + j]
                             = other.valuesD[i * valuesPerFunction + j];
@@ -165,6 +192,7 @@ namespace util {
          */
         void valuesAt(double t, double* array) const override
         {
+            t = t + timeShift;
             if(t < start)
             {
                 t = start;
@@ -173,11 +201,9 @@ namespace util {
             {
                 t = end;
             }
-            // std::lock_guard<std::mutex> guard(powerProtectionMutex);//Big overhead
             int index = std::max(
-                std::min(valuesPerFunction - 1, int(std::lround(transformToIndex(t)))), 0);
-            std::fill(array, &array[baseSize - startReportDegree], double(0.0));
-            for(int i = startReportDegree; i < baseSize; i++)
+                std::min(int(valuesPerFunction) - 1, int(std::lround(transformToIndex(t)))), 0);
+            for(uint32_t i = startReportDegree; i < baseSize; i++)
             {
                 array[i - startReportDegree] = valuesD[valuesPerFunction * i + index];
             }
@@ -188,6 +214,7 @@ namespace util {
          */
         void valuesAt(double t, float* array) const override
         {
+            t = t + timeShift;
             if(t < start)
             {
                 t = start;
@@ -196,13 +223,11 @@ namespace util {
             {
                 t = end;
             }
-            // std::lock_guard<std::mutex> guard(powerProtectionMutex);//Big overhead
             int index = std::max(
-                std::min(valuesPerFunction - 1, int(std::lround(transformToIndex(t)))), 0);
-            std::fill(array, &array[baseSize - startReportDegree], float(0.0));
-            for(int i = startReportDegree; i < baseSize; i++)
+                std::min(int(valuesPerFunction) - 1, int(std::lround(transformToIndex(t)))), 0);
+            for(uint32_t i = startReportDegree; i < baseSize; i++)
             {
-                array[i - startReportDegree] = valuesD[valuesPerFunction * i + index];
+                array[i - startReportDegree] = valuesF[valuesPerFunction * i + index];
             }
         }
 
@@ -215,18 +240,18 @@ namespace util {
 
     private:
         /**Function that transforms the value t on the interval [start, end] to the value t' on the
-         * interval [-1,1] that is support of Legendre polynomials.
+         * interval [0,valuesPerFunction-1] to quickly evaluate function at any t.
          *
          */
         double transformationSlope;
         double transformationIntercept;
 
-        int valuesPerFunction;
-        int baseSize;
-        int startReportDegree;
+        uint32_t baseSize;
+        uint32_t startReportDegree;
+        uint32_t valuesPerFunction;
         double* valuesD;
         float* valuesF;
-        mutable std::mutex powerProtectionMutex;
+        double timeShift;
     };
 
 } // namespace util
