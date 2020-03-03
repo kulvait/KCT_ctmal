@@ -35,7 +35,9 @@ namespace util {
                      double start,
                      double end,
                      double timeShift = 0.0,
-                     uint32_t startReportDegree = 0)
+                     uint32_t startReportDegree = 0,
+                     double* valuesBeforeStart = nullptr,
+                     double* valuesAfterEnd = nullptr)
             : VectorFunctionI(baseSize - startReportDegree, start, end)
             , transformationSlope((double(valuesPerFunction) - 1.0) / (end - start))
             , transformationIntercept(-start * (double(valuesPerFunction) - 1.0) / (end - start))
@@ -65,6 +67,22 @@ namespace util {
                 }
             }
             this->startReportDegree = startReportDegree;
+            if(valuesBeforeStart != nullptr)
+            {
+                this->valuesBeforeStart = new double[baseSize];
+                std::copy(valuesBeforeStart, valuesBeforeStart + baseSize, this->valuesBeforeStart);
+            } else
+            {
+                this->valuesBeforeStart = nullptr;
+            }
+            if(valuesAfterEnd != nullptr)
+            {
+                this->valuesAfterEnd = new double[baseSize];
+                std::copy(valuesAfterEnd, valuesAfterEnd + baseSize, this->valuesAfterEnd);
+            } else
+            {
+                this->valuesAfterEnd = nullptr;
+            }
 
             // Now precompute the values of legendre polynomials
         } ///< Inits the function
@@ -74,7 +92,9 @@ namespace util {
                      double start,
                      double end,
                      double timeShift = 0.0,
-                     uint32_t startReportDegree = 0)
+                     uint32_t startReportDegree = 0,
+                     double* valuesBeforeStart = nullptr,
+                     double* valuesAfterEnd = nullptr)
             : VectorFunctionI(basisSize - startReportDegree, start, end)
             , baseSize(basisSize)
             , startReportDegree(startReportDegree)
@@ -133,12 +153,36 @@ namespace util {
                 LOGE << err;
                 throw std::runtime_error(err);
             }
+            if(valuesBeforeStart != nullptr)
+            {
+                this->valuesBeforeStart = new double[baseSize];
+                std::copy(valuesBeforeStart, valuesBeforeStart + baseSize, this->valuesBeforeStart);
+            } else
+            {
+                this->valuesBeforeStart = nullptr;
+            }
+            if(valuesAfterEnd != nullptr)
+            {
+                this->valuesAfterEnd = new double[baseSize];
+                std::copy(valuesAfterEnd, valuesAfterEnd + baseSize, this->valuesAfterEnd);
+            } else
+            {
+                this->valuesAfterEnd = nullptr;
+            }
         } ///< Inits the function
 
         ~StepFunction()
         {
             delete[] valuesD;
             delete[] valuesF;
+            if(valuesBeforeStart != nullptr)
+            {
+                delete[] valuesBeforeStart;
+            }
+            if(valuesAfterEnd != nullptr)
+            {
+                delete[] valuesAfterEnd;
+            }
         }
 
         // Copy constructor
@@ -153,37 +197,33 @@ namespace util {
         {
         }
 
+        friend void swap(StepFunction& x, StepFunction& y) // nothrow
+        {
+            using std::swap;
+            swap(static_cast<VectorFunctionI&>(x), static_cast<VectorFunctionI&>(y));
+            swap(x.baseSize, y.baseSize);
+            swap(x.valuesPerFunction, y.valuesPerFunction);
+            swap(x.timeShift, y.timeShift);
+            swap(x.startReportDegree, y.startReportDegree);
+            swap(x.valuesBeforeStart, y.valuesBeforeStart);
+            swap(x.valuesAfterEnd, y.valuesAfterEnd);
+        }
+
         StepFunction& operator=(StepFunction other)
         {
-            if(this != &other)
-            {
-                VectorFunctionI::operator=(other);
-                this->startReportDegree = other.startReportDegree;
-                this->start = other.start;
-                this->end = other.end;
-                if(this->baseSize != other.baseSize
-                   || this->valuesPerFunction != other.valuesPerFunction)
-                {
-                    this->baseSize = other.baseSize;
-                    this->valuesPerFunction = other.valuesPerFunction;
-                    delete[] valuesF;
-                    delete[] valuesD;
-                    valuesF = new float[baseSize * valuesPerFunction];
-                    valuesD = new double[baseSize * valuesPerFunction];
-                }
-                for(uint32_t i = 0; i != baseSize; i++)
-                {
-                    for(uint32_t j = 0; j != valuesPerFunction; j++)
-                    {
-                        valuesD[i * valuesPerFunction + j]
-                            = other.valuesD[i * valuesPerFunction + j];
-                        valuesF[i * valuesPerFunction + j]
-                            = other.valuesF[i * valuesPerFunction + j];
-                    }
-                }
-            }
+            swap(*this, other);
             return *this;
         } // Assignment
+
+        StepFunction(StepFunction&& other) noexcept
+            : StepFunction(nullptr,
+                           0,
+                           0,
+                           0.0,
+                           0.0) // initialize with 0 breakpoints just to be able to destruct it
+        {
+            swap(*this, other);
+        }
 
         /**Values of the function at specific time point.
          *
@@ -192,6 +232,22 @@ namespace util {
          */
         void valuesAt(double t, double* array) const override
         {
+            if(t < start && valuesBeforeStart != nullptr)
+            {
+                for(uint32_t i = startReportDegree; i < baseSize; i++)
+                {
+                    array[i - startReportDegree] = valuesBeforeStart[i];
+                }
+                return;
+            }
+            if(t > end && valuesAfterEnd != nullptr)
+            {
+                for(uint32_t i = startReportDegree; i < baseSize; i++)
+                {
+                    array[i - startReportDegree] = valuesAfterEnd[i];
+                }
+                return;
+            }
             t = t + timeShift;
             if(t < start)
             {
@@ -214,6 +270,22 @@ namespace util {
          */
         void valuesAt(double t, float* array) const override
         {
+            if(t < start && valuesBeforeStart != nullptr)
+            {
+                for(uint32_t i = startReportDegree; i < baseSize; i++)
+                {
+                    array[i - startReportDegree] = valuesBeforeStart[i];
+                }
+                return;
+            }
+            if(t > end && valuesAfterEnd != nullptr)
+            {
+                for(uint32_t i = startReportDegree; i < baseSize; i++)
+                {
+                    array[i - startReportDegree] = valuesAfterEnd[i];
+                }
+                return;
+            }
             t = t + timeShift;
             if(t < start)
             {
@@ -252,6 +324,8 @@ namespace util {
         double* valuesD;
         float* valuesF;
         double timeShift;
+        double* valuesBeforeStart;
+        double* valuesAfterEnd;
     };
 
 } // namespace util

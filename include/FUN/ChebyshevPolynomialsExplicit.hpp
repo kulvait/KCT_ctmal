@@ -26,11 +26,13 @@ namespace util {
         ChebyshevPolynomialsExplicit(uint32_t polynomialDegree,
                                      double start,
                                      double end,
+                                     bool constantOutsideInterval = true,
                                      uint32_t startReportingDegree = 0)
             : VectorFunctionI(polynomialDegree + 1 - startReportingDegree, start, end)
             , transformationSlope(double(2.0 / (end - start)))
             , transformationIntercept(-double((end + start) / (end - start)))
             , polynomialDegree(polynomialDegree)
+            , constantOutsideInterval(constantOutsideInterval)
             , startReportingDegree(startReportingDegree)
         {
             if(startReportingDegree > polynomialDegree)
@@ -219,10 +221,20 @@ namespace util {
         {
             if(t < start)
             {
+                if(constantOutsideInterval)
+                {
+                    valuesOutsideInterval(array);
+                    return;
+                }
                 t = start;
             }
             if(t > end)
             {
+                if(constantOutsideInterval)
+                {
+                    valuesOutsideInterval(array);
+                    return;
+                }
                 t = end;
             }
             // std::lock_guard<std::mutex> guard(powerProtectionMutex);//Big overhead
@@ -253,10 +265,20 @@ namespace util {
         {
             if(t < start)
             {
+                if(constantOutsideInterval)
+                {
+                    valuesOutsideInterval(array);
+                    return;
+                }
                 t = start;
             }
             if(t > end)
             {
+                if(constantOutsideInterval)
+                {
+                    valuesOutsideInterval(array);
+                    return;
+                }
                 t = end;
             }
             // std::lock_guard<std::mutex> guard(powerProtectionMutex);//Big overhead
@@ -354,6 +376,33 @@ namespace util {
         }
 
     private:
+        void valuesOutsideInterval(float* array) const
+        {
+            for(uint32_t i = startReportingDegree; i < polynomialDegree + 1; i++)
+            {
+                if(i == 0)
+                {
+                    array[i - startReportingDegree] = 1.0f;
+                } else
+                {
+                    array[i - startReportingDegree] = 0.0f;
+                }
+            }
+        }
+
+        void valuesOutsideInterval(double* array) const
+        {
+            for(uint32_t i = startReportingDegree; i < polynomialDegree + 1; i++)
+            {
+                if(i == 0)
+                {
+                    array[i - startReportingDegree] = 1.0;
+                } else
+                {
+                    array[i - startReportingDegree] = 0.0;
+                }
+            }
+        }
         /**Function that transforms the value t on the interval [start, end] to the value t' on the
          * interval [-1,1] that is support of Chebyshev polynomials.
          *
@@ -361,6 +410,7 @@ namespace util {
         double transformationSlope;
         double transformationIntercept;
         uint32_t polynomialDegree;
+        bool constantOutsideInterval;
         uint32_t startReportingDegree;
 
         double* chebyshevCoefficientsD;
