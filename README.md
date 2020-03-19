@@ -4,13 +4,13 @@ Mathematic/Algebraic algorithms for supporting CT data manipulation.
 
 ## Cloning repository:
 
-Basic clone can be done via
+Clone over ssh, for those with ssh keys ready in gitlab
 ```
-git clone https://gitlab.stimulate.ovgu.de/vojtech.kulvait/CTIOL.git
+git clone ssh://git@gitlab.stimulate.ovgu.de:2200/vojtech.kulvait/CTMAL.git
 ```
-Or over ssh
+Basic clone can be performed over https
 ```
-git clone ssh://git@gitlab.stimulate.ovgu.de:2200/vojtech.kulvait/CTIOL.git
+git clone https://gitlab.stimulate.ovgu.de/vojtech.kulvait/CTMAL.git
 ```
 However to populate submodules directories it is then needed to issue
 ```
@@ -19,7 +19,19 @@ git submodule update
 ```
 
 ## Submodules
-The project contains submodules in the subdirectory submodules. 
+
+Submodules lives in the submodules directory. To clone project including submodules one have to use the following commands
+
+```
+git submodule init
+git submodule update
+```
+or use the following command when cloning repository
+
+```
+git clone --recurse-submodules
+```
+We use relative [url](https://www.gniibe.org/memo/software/git/using-submodule.html) to improve experience for http protocol users.
 
 ### [Plog](https://github.com/SergiusTheBest/plog) logger
 
@@ -29,9 +41,11 @@ Logger Plog is used for logging. It is licensed under the Mozilla Public License
 
 Testing framework. Licensed under Boost Software License 1.0.
 
-### [CTIOL](ssh://git@gitlab.stimulate.ovgu.de:2200/vojtech.kulvait/CTIOL.git)
+### [CTIOL](https://gitlab.stimulate.ovgu.de/vojtech.kulvait/CTIOL)
 
 Input output routines for asynchronous thread safe reading/writing CT data. The DEN format read/write is implemented.
+
+
 
 ## How to build:
 For build process, make and cmake utilities are required. Install them using

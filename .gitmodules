@@ -3,7 +3,7 @@
 	url = https://github.com/SergiusTheBest/plog
 [submodule "submodules/CTIOL"]
 	path = submodules/CTIOL
-	url = ssh://git@gitlab.stimulate.ovgu.de:2200/vojtech.kulvait/CTIOL.git
+	url = ../CTIOL.git
 [submodule "submodules/matplotlib-cpp"]
 	path = submodules/matplotlib-cpp
 	url = https://github.com/lava/matplotlib-cpp
