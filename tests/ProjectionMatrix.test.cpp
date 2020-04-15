@@ -207,7 +207,7 @@ TEST_CASE("CreateTestMatrices", "Circular trajectory matrices")
     matrix::Matrix pm(3, 4, { fx, 0.0, 0.0, 0.0, 0.0, fy, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0 });
     LOGE << pm.toString("pm");
     matrix::Matrix shift = matrix::Matrix::unitDiagonal(4, 4);
-    shift(2, 3) = sourceToDetector / 2.0;
+    shift(2, 3) = -2*sourceToDetector / 2.0;
     LOGE << shift.toString("SHIFT");
     matrix::Matrix detectorShift(3, 3,
                                  { 1.0, 0.0, detector_dim_x * 0.5 - 0.5, 0.0, 1.0,
@@ -215,11 +215,11 @@ TEST_CASE("CreateTestMatrices", "Circular trajectory matrices")
     for(int i = 0; i != numAngles; ++i)
     {
         matrix::Matrix rotation(4, 4);
-        rotation(0, 0) = std::cos(i * 2 * pi / numAngles);
-        rotation(0, 1) = std::sin(i * 2 * pi / numAngles);
+        rotation(2, 0) = std::cos(i * 2 * pi / numAngles);
+        rotation(2, 1) = std::sin(i * 2 * pi / numAngles);
         rotation(1, 2) = 1.0;
-        rotation(2, 0) = std::sin(i * 2 * pi / numAngles);
-        rotation(2, 1) = -std::cos(i * 2 * pi / numAngles);
+        rotation(0, 0) = std::sin(i * 2 * pi / numAngles);
+        rotation(0, 1) = -std::cos(i * 2 * pi / numAngles);
         rotation(3, 3) = 1.0;
         LOGE << rotation.toString("ROTATION");
         matrix::Matrix PM = detectorShift * pm * shift * rotation;
