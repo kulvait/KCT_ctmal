@@ -19,6 +19,9 @@ include_directories(${GLOBAL_INCLUDE_DIR})
 #Includes relative to submodules directories
 include_directories(${CMAKE_SOURCE_DIR}/submodules)
 
+#CLI11 comand line parser library
+include_directories(${CMAKE_SOURCE_DIR}/submodules/CLI11/include)
+
 #Plog logger
 include_directories(${CMAKE_SOURCE_DIR}/submodules/plog/include)
 
@@ -34,7 +37,7 @@ find_package(PythonLibs 2.7)
 include_directories(${PYTHON_INCLUDE_DIRS})
 
 #CT input output library
-FILE( GLOB CTIOL_SRC ${CMAKE_SOURCE_DIR}/submodules/CTIOL/src/*.cpp ${CMAKE_SOURCE_DIR}/submodules/CTIOL/src/ARGPARSE/*.cpp)
+FILE( GLOB CTIOL_SRC ${CMAKE_SOURCE_DIR}/submodules/CTIOL/src/*.cpp ${CMAKE_SOURCE_DIR}/submodules/CTIOL/src/PROG/*.cpp)
 add_library(ctiol ${CTIOL_SRC})
 include_directories(${CMAKE_SOURCE_DIR}/submodules/CTIOL/include)
 target_link_libraries(ctiol stdc++fs)#include <experimental/filesystem>

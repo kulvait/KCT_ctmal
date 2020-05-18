@@ -5,3 +5,4 @@ testRun
 *.swp
 .vscode
 tests/integerByteManipulations/*_
+tests/Source*
