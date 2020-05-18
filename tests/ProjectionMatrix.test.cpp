@@ -195,6 +195,10 @@ TEST_CASE("ProjectionMatrix.normalToDetector.siemens", "Create aligned matrices.
     matrix::Matrix A21(3, 3,
                        { 1.0, 0.0, (4 * detector_dim_x - 1.0) * 0.5, 0.0, 1.0,
                          (4 * detector_dim_y - 1.0) * 0.5, 0.0, 0.0, 1.0 });
+    matrix::Matrix A3(3, 3,
+                       { 1.0, 0.0, 0.0,
+ 0.0, 1.0,0.0, 
+0.0, 0.0, 1.0 });
     double avgSourceDetector = 0.0;
     double avgSourceIsocenter = 0.0;
     double alpha;
@@ -260,17 +264,17 @@ TEST_CASE("ProjectionMatrix.normalToDetector.siemens", "Create aligned matrices.
              << io::xprintf("Distances are (x, y) = (%f, %f).", sd1, sd2) << std::endl;
         REQUIRE(std::abs(sd1 - 1200.0) < 15);
         REQUIRE(std::abs(sd2 - 1200.0) < 15);
-        alpha = std::atan2(s[1], s[0]);
+        alpha = std::atan2(-s[1], -s[0]);
         matrix::Matrix X1(4, 4);
-        X1(0, 0) = -std::sin(alpha);
-        X1(0, 1) = std::cos(alpha);
+        X1(0, 0) = std::sin(alpha);
+        X1(0, 1) = -std::cos(alpha);
         X1(1, 0) = std::cos(alpha);
         X1(1, 1) = std::sin(alpha);
         X1(2, 2) = -1.0;
         X1(3, 3) = 1.0;
-        matrix::Matrix PM4 = A24 * A14 * E * X2 * X1;
-        matrix::Matrix PM2 = A22 * A12 * E * X2 * X1;
-        matrix::Matrix PM1 = A21 * A11 * E * X2 * X1;
+        matrix::Matrix PM4 = A3 * A24 * A14 * E * X2 * X1;
+        matrix::Matrix PM2 = A3 * A22 * A12 * E * X2 * X1;
+        matrix::Matrix PM1 = A3 * A21 * A11 * E * X2 * X1;
         Q4.writeFrame(io::FrameMemoryViewer2D<double>(ProjectionMatrix(PM4).getPtr(), 4, 3), k);
         Q2.writeFrame(io::FrameMemoryViewer2D<double>(ProjectionMatrix(PM2).getPtr(), 4, 3), k);
         Q1.writeFrame(io::FrameMemoryViewer2D<double>(ProjectionMatrix(PM1).getPtr(), 4, 3), k);
