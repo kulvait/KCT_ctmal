@@ -133,31 +133,35 @@ Camera matrices ArtisQ.matrix are taken from
 ArtisQMagdeburg/PM/export/PM20161006.RUN01.matrices
 These were used for many of experiments in the past.
 It describes calibrated geometry of ArtisQ system for the first sweep of perfusion scan.
-The  distance  from  the  source  to  theisocenter  is 749mm and  the  distance  from  source to the detector is 1198mm.
-Detector  matrix  consists  of 2464×1920detector cells of the dimensions 0.154 mm×0.154 mm. 
-For  differentprotocols  there  is  applied  tiling  of 2×2 with  merged  pixelsize merged pixel size 0.308 mm×0.308 mm and 1232x960 pixels.
-ArtisQ.matrix were generated for 4×4 tiling, pixel size is 0.616 mm×0.616 mm and 616x480 pixels.
+The  distance  from  the  source  to  theisocenter  is 749mm and  the  distance  from  source to the
+detector is 1198mm. Detector  matrix  consists  of 2464×1920detector cells of the dimensions 0.154
+mm×0.154 mm. For  differentprotocols  there  is  applied  tiling  of 2×2 with  merged  pixelsize
+merged pixel size 0.308 mm×0.308 mm and 1232x960 pixels. ArtisQ.matrix were generated for 4×4
+tiling, pixel size is 0.616 mm×0.616 mm and 616x480 pixels.
 
 ===SourceQ4.matrix 248 views, 0.616mmx0.616mm pixels, 616x480 grid===
-Camera matrix derived from ArtisQ.matrix. 
-For each given source position it computes the normal vector n from the x,y projection of the source position. The source is placed 749mm in this direction.
-The isocenter is taken to be 0 and z is taken as axis of the rotation, principial ray goes through 0 and source to detector distance is 1198mm.
-Matrix is constructed for 4x4 tiling with pixel size 0.616 mm×0.616 mm and 616x480 pixels.
-Projected position (0,0) on the detector is on the upper left pixel. 
+Camera matrix derived from ArtisQ.matrix.
+For each given source position it computes the normal vector n from the x,y projection of the source
+position. The source is placed 749mm in this direction. The isocenter is taken to be 0 and z is
+taken as axis of the rotation, principial ray goes through 0 and source to detector distance is
+1198mm. Matrix is constructed for 4x4 tiling with pixel size 0.616 mm×0.616 mm and 616x480 pixels.
+Projected position (0,0) on the detector is on the upper left pixel.
 
 ===SourceQ2.matrix 248 views, 0.308mmx0.308mm pixels, 1232x960 grid===
-Camera matrix derived from ArtisQ.matrix. 
-For each given source position it computes the normal vector n from the x,y projection of the source position. The source is placed 749mm in this direction.
-The isocenter is taken to be 0 and z is taken as axis of the rotation, principial ray goes through 0 and source to detector distance is 1198mm.
-Matrix is constructed for 2x2 tiling with pixel size 0.308 mm×0.308 mm and 1232x960 pixels.
-Projected position (0,0) on the detector is on the upper left pixel. 
+Camera matrix derived from ArtisQ.matrix.
+For each given source position it computes the normal vector n from the x,y projection of the source
+position. The source is placed 749mm in this direction. The isocenter is taken to be 0 and z is
+taken as axis of the rotation, principial ray goes through 0 and source to detector distance is
+1198mm. Matrix is constructed for 2x2 tiling with pixel size 0.308 mm×0.308 mm and 1232x960 pixels.
+Projected position (0,0) on the detector is on the upper left pixel.
 
 ===SourceQ1.matrix 248 views, 0.154mmx0.154mm pixels, 2464x1920 grid===
-Camera matrix derived from ArtisQ.matrix. 
-For each given source position it computes the normal vector n from the x,y projection of the source position. The source is placed 749mm in this direction.
-The isocenter is taken to be 0 and z is taken as axis of the rotation, principial ray goes through 0 and source to detector distance is 1198mm.
-Matrix is constructed for 2x2 tiling with pixel size 0.154 mm×0.154 mm and 2464x1920 pixels.
-Projected position (0,0) on the detector is on the upper left pixel. 
+Camera matrix derived from ArtisQ.matrix.
+For each given source position it computes the normal vector n from the x,y projection of the source
+position. The source is placed 749mm in this direction. The isocenter is taken to be 0 and z is
+taken as axis of the rotation, principial ray goes through 0 and source to detector distance is
+1198mm. Matrix is constructed for 2x2 tiling with pixel size 0.154 mm×0.154 mm and 2464x1920 pixels.
+Projected position (0,0) on the detector is on the upper left pixel.
 */
 TEST_CASE("ProjectionMatrix.normalToDetector.siemens", "Create aligned matrices.")
 {
@@ -166,9 +170,12 @@ TEST_CASE("ProjectionMatrix.normalToDetector.siemens", "Create aligned matrices.
     std::string pth = rti.getExecutableDirectoryPath();
     io::DenProjectionMatrixReader dpr(io::xprintf("%s/../tests/camera.matrix", pth.c_str()));
     uint32_t numAngles = dpr.count();
-    io::DenAsyncFrame2DWritter<double> Q4(io::xprintf("%s/../tests/SourceQ4.matrix", pth.c_str()), 4, 3, numAngles);
-    io::DenAsyncFrame2DWritter<double> Q2(io::xprintf("%s/../tests/SourceQ2.matrix", pth.c_str()), 4, 3, numAngles);
-    io::DenAsyncFrame2DWritter<double> Q1(io::xprintf("%s/../tests/SourceQ1.matrix", pth.c_str()), 4, 3, numAngles);
+    io::DenAsyncFrame2DWritter<double> Q4(io::xprintf("%s/../tests/SourceQ4.matrix", pth.c_str()),
+                                          4, 3, numAngles);
+    io::DenAsyncFrame2DWritter<double> Q2(io::xprintf("%s/../tests/SourceQ2.matrix", pth.c_str()),
+                                          4, 3, numAngles);
+    io::DenAsyncFrame2DWritter<double> Q1(io::xprintf("%s/../tests/SourceQ1.matrix", pth.c_str()),
+                                          4, 3, numAngles);
     double sourceToDetector = 1198;
     double sourceToCenter = 749;
     double pixel_size_x = 0.616;
@@ -195,10 +202,7 @@ TEST_CASE("ProjectionMatrix.normalToDetector.siemens", "Create aligned matrices.
     matrix::Matrix A21(3, 3,
                        { 1.0, 0.0, (4 * detector_dim_x - 1.0) * 0.5, 0.0, 1.0,
                          (4 * detector_dim_y - 1.0) * 0.5, 0.0, 0.0, 1.0 });
-    matrix::Matrix A3(3, 3,
-                       { 1.0, 0.0, 0.0,
- 0.0, 1.0,0.0, 
-0.0, 0.0, 1.0 });
+    matrix::Matrix A3(3, 3, { 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0 });
     double avgSourceDetector = 0.0;
     double avgSourceIsocenter = 0.0;
     double alpha;
