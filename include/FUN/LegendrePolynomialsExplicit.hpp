@@ -198,7 +198,7 @@ namespace util {
             {
                 if(constantOutsideInterval)
                 {
-                    valuesOutsideInterval(array);
+                    valuesOutsideIntervalLeft(array);
                     return;
                 }
                 t = start;
@@ -207,7 +207,7 @@ namespace util {
             {
                 if(constantOutsideInterval)
                 {
-                    valuesOutsideInterval(array);
+                    valuesOutsideIntervalRight(array);
                     return;
                 }
                 t = end;
@@ -242,7 +242,7 @@ namespace util {
             {
                 if(constantOutsideInterval)
                 {
-                    valuesOutsideInterval(array);
+                    valuesOutsideIntervalLeft(array);
                     return;
                 }
                 t = start;
@@ -251,7 +251,7 @@ namespace util {
             {
                 if(constantOutsideInterval)
                 {
-                    valuesOutsideInterval(array);
+                    valuesOutsideIntervalRight(array);
                     return;
                 }
                 t = end;
@@ -351,34 +351,49 @@ namespace util {
         }
 
     private:
-        void valuesOutsideInterval(float* array) const
+        void valuesOutsideIntervalLeft(float* array) const
         {
             for(uint32_t i = startReportingDegree; i < polynomialDegree + 1; i++)
             {
-                if(i == 0)
+                if(i % 2 == 0)
                 {
                     array[i - startReportingDegree] = 1.0f;
                 } else
                 {
-                    array[i - startReportingDegree] = 0.0f;
+                    array[i - startReportingDegree] = -1.0f;
                 }
             }
         }
 
-        void valuesOutsideInterval(double* array) const
+        void valuesOutsideIntervalLeft(double* array) const
         {
             for(uint32_t i = startReportingDegree; i < polynomialDegree + 1; i++)
             {
-                if(i == 0)
+                if(i % 2 == 0)
                 {
                     array[i - startReportingDegree] = 1.0;
                 } else
                 {
-                    array[i - startReportingDegree] = 0.0;
+                    array[i - startReportingDegree] = -1.0;
                 }
             }
         }
 
+        void valuesOutsideIntervalRight(float* array) const
+        {
+            for(uint32_t i = startReportingDegree; i < polynomialDegree + 1; i++)
+            {
+                array[i - startReportingDegree] = 1.0f;
+            }
+        }
+
+        void valuesOutsideIntervalRight(double* array) const
+        {
+            for(uint32_t i = startReportingDegree; i < polynomialDegree + 1; i++)
+            {
+                array[i - startReportingDegree] = 1.0;
+            }
+        }
         /**Function that transforms the value t on the interval [start, end] to the value t' on the
          * interval [-1,1] that is support of Legendre polynomials.
          *
