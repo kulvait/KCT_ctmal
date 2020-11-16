@@ -32,54 +32,73 @@ namespace matrix {
         return (out);
     }
 
+    double ProjectionMatrix::pixelSkew() const
+    {
+        std::array<double, 3> VX = directionVectorVX();
+        std::array<double, 3> VY = directionVectorVY();
+        VX = normalizeVector<3>(VX);
+        VY = normalizeVector<3>(VY);
+        return vectorDotProduct<3>(VX, VY);
+    }
+
+    std::array<double, 3> ProjectionMatrix::directionVectorVN() const
+    {
+        std::array<double, 3> VN = normalToDetector();
+        return matrix::multiplyVectorByConstant<3>(VN, -1.0);
+    }
+
+    std::array<double, 3> ProjectionMatrix::directionVectorVX() const
+    {
+        std::array<double, 3> VN = directionVectorVN();
+        std::array<double, 3> VXn = tangentToDetectorXDirection();
+        double px, px0, py;
+        project0(VN[0] + VXn[0], VN[1] + VXn[1], VN[2] + VXn[2], &px, &py);
+        project0(VN[0], VN[1], VN[2], &px0, &py);
+        return matrix::multiplyVectorByConstant<3>(VXn, px - px0);
+    }
+    std::array<double, 3> ProjectionMatrix::directionVectorVY() const
+    {
+
+        std::array<double, 3> VN = directionVectorVN();
+        std::array<double, 3> VYn = tangentToDetectorYDirection();
+        double px, py, py0;
+        project0(VN[0] + VYn[0], VN[1] + VYn[1], VN[2] + VYn[2], &px, &py);
+        project0(VN[0], VN[1], VN[2], &px, &py0);
+        return matrix::multiplyVectorByConstant<3>(VYn, py - py0);
+    }
+
+    void ProjectionMatrix::directionVectorVN(double* vector3) const
+    {
+        std::array<double, 3> V = directionVectorVN();
+        std::copy(std::begin(V), std::begin(V) + 3, vector3);
+    }
+
+    void ProjectionMatrix::directionVectorVX(double* vector3) const
+    {
+        std::array<double, 3> V = directionVectorVX();
+        std::copy(std::begin(V), std::begin(V) + 3, vector3);
+    }
+    void ProjectionMatrix::directionVectorVY(double* vector3) const
+    {
+        std::array<double, 3> V = directionVectorVY();
+        std::copy(std::begin(V), std::begin(V) + 3, vector3);
+    }
+
     std::array<double, 3> ProjectionMatrix::tangentToDetectorXDirection() const
     {
-        std::array<double, 3> tangent;
-        std::array<double, 4> thirdRow = { A[8], A[9], A[10], A[11] };
-        std::array<double, 4> firstRow = { A[0], A[1], A[2], A[3] };
-        std::array<double, 4> tangentF = reorthogonalize(firstRow, thirdRow);
-        if(std::abs(tangentF[3]) < zeroPrecisionTolerance)
-        { // Vector that projects to infinity is from infinity itself
-          // If the fourth coordinate is zero, then I can add the 3 vector without fourth position
-          // to source location and obtain finite tangent
-            tangent[0] = tangentF[0];
-            tangent[1] = tangentF[1];
-            tangent[2] = tangentF[2];
-        } else
-        {
-            tangent[0] = tangentF[0] / tangentF[3];
-            tangent[1] = tangentF[1] / tangentF[3];
-            tangent[2] = tangentF[2] / tangentF[3];
-            tangent[0] = tangent[0] - source[0];
-            tangent[1] = tangent[1] - source[1];
-            tangent[2] = tangent[2] - source[2];
-        }
+        std::array<double, 3> thirdRow = { A[8], A[9], A[10] };
+        std::array<double, 3> firstRow = { A[0], A[1], A[2] };
+        std::array<double, 3> tangent
+            = orthogonalPartOfVectorWithRespectToSecondVector<3>(firstRow, thirdRow);
         return normalizeVector(tangent);
     }
 
     std::array<double, 3> ProjectionMatrix::tangentToDetectorYDirection() const
     {
-        std::array<double, 3> tangent;
-        std::array<double, 4> thirdRow = { A[8], A[9], A[10], A[11] };
-        std::array<double, 4> secondRow = { A[4], A[5], A[6], A[7] };
-        std::array<double, 4> tangentF = reorthogonalize(secondRow, thirdRow);
-        if(std::abs(tangentF[3]) < zeroPrecisionTolerance)
-        { // Vector that projects to infinity is from infinity itself
-          // If the fourth coordinate is zero, then I can add the 3 vector without fourth position
-          // to source location and obtain finite tangent
-            tangent[0] = tangentF[0];
-            tangent[1] = tangentF[1];
-            tangent[2] = tangentF[2];
-        } else
-        {
-            tangent[0] = tangentF[0] / tangentF[3];
-            tangent[1] = tangentF[1] / tangentF[3];
-            tangent[2] = tangentF[2] / tangentF[3];
-            // I have found a vector in the 0 based coordinates that projects to infinity
-            tangent[0] = tangent[0] - source[0];
-            tangent[1] = tangent[1] - source[1];
-            tangent[2] = tangent[2] - source[2];
-        }
+        std::array<double, 3> thirdRow = { A[8], A[9], A[10] };
+        std::array<double, 3> secondRow = { A[4], A[5], A[6] };
+        std::array<double, 3> tangent
+            = orthogonalPartOfVectorWithRespectToSecondVector<3>(secondRow, thirdRow);
         return normalizeVector(tangent);
     }
 
@@ -105,12 +124,6 @@ namespace matrix {
             normal[1] = -normal[1];
             normal[2] = -normal[2];
         }
-        /*Previous implementation
-        std::array<double, 3> normal;
-        normal[0] = A[8]; // (*this)(2, 0);
-        normal[1] = A[9]; //(*this)(2, 1);
-        normal[2] = A[10]; //(*this)(2, 2);
-        */
         // Renormalization
         return (normalizeVector(normal));
     }
@@ -128,43 +141,70 @@ namespace matrix {
      *
      * @return
      */
-    std::array<double, 3> ProjectionMatrix::projectedToPosition(double px, double py) const
+    std::array<double, 3> ProjectionMatrix::directionToPosition(const double pi,
+                                                                const double pj) const
     {
-        Matrix rot = this->colSubMatrix(3);
-        Matrix shift = Matrix(3, 3, { 1.0, 0.0, -px, 0.0, 1.0, -py, 0.0, 0.0, 1.0 });
-        Matrix B = shift * rot; // First part of projection matrix that projects (x,y,z) to (0,0,?)
-        std::array<double, 3> normal;
-        // normal[0] = LUDoolittleForm::determinant(B.minorSubMatrix(2, 0));
-        // normal[1] = -LUDoolittleForm::determinant(B.minorSubMatrix(2, 1));
-        // normal[2] = LUDoolittleForm::determinant(B.minorSubMatrix(2, 2));
-        normal[0] = B(0, 1) * B(1, 2) - B(0, 2) * B(1, 1);
-        normal[1] = B(0, 2) * B(1, 0) - B(0, 0) * B(1, 2);
-        normal[2] = B(0, 0) * B(1, 1) - B(0, 1) * B(1, 0);
-        // Renormalization
-        double normvec
-            = std::sqrt(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
-        normal[0] /= normvec;
-        normal[1] /= normvec;
-        normal[2] /= normvec;
-        return normal;
+        Matrix toinvert = this->colSubMatrix(3);
+        LUDoolittleForm lf = LUDoolittleForm::LUDecomposeDoolittle(toinvert, 1e-10);
+        SquareMatrix inv = lf.inverseMatrix();
+        Matrix P(3, 1, { pi, pj, 1.0 });
+        Matrix v = inv * P;
+        std::array<double, 3> x;
+        x[0] = v(0, 0);
+        x[1] = v(1, 0);
+        x[2] = v(2, 0);
+        // Want projection on VN to be 1
+        std::array<double, 3> VN = directionVectorVN();
+        double product = vectorDotProduct<3>(x, VN);
+        return multiplyVectorByConstant<3>(x, 1.0 / product);
     }
 
     /**
      *Actual projection
      */
-    void ProjectionMatrix::project(double x, double y, double z, double* px, double* py)
+
+    void ProjectionMatrix::project0(
+        const double X0, const double X1, const double X2, double* pi, double* pj) const
     {
-        double divideByMe
-            = x * (*this)(2, 0) + y * (*this)(2, 1) + z * (*this)(2, 2) + (*this)(2, 3);
+        // We are using vector (X,Y,Z,0)+S and use fact that rows are orthogonal to S
+        // So its sufficient to use just first three items
+        double divideByMe = X0 * (*this)(2, 0) + X1 * (*this)(2, 1) + X2 * (*this)(2, 2);
         if(std::abs(divideByMe) < zeroPrecisionTolerance)
         {
-            *px = NAN;
-            *py = NAN;
+            *pi = NAN;
+            *pj = NAN;
         } else
         {
-            *px = (x * (*this)(0, 0) + y * (*this)(0, 1) + z * (*this)(0, 2) + (*this)(0, 3))
+            *pi = (X0 * (*this)(0, 0) + X1 * (*this)(0, 1) + X2 * (*this)(0, 2)) / divideByMe;
+            *pj = (X0 * (*this)(1, 0) + X1 * (*this)(1, 1) + X2 * (*this)(1, 2)) / divideByMe;
+        }
+    }
+
+    void ProjectionMatrix::project0(
+        const float X0, const float X1, const float X2, float* pi, float* pj) const
+    {
+        // We are using vector (X,Y,Z,0)+S and use fact that rows are orthogonal to S
+        // So its sufficient to use just first three items
+        double pxd, pyd;
+        project0(double(X0), double(X1), double(X2), &pxd, &pyd);
+        *pi = float(pxd);
+        *pj = float(pyd);
+    }
+
+    void ProjectionMatrix::project(
+        const double x0, const double x1, const double x2, double* pi, double* pj) const
+    {
+        double divideByMe
+            = x0 * (*this)(2, 0) + x1 * (*this)(2, 1) + x2 * (*this)(2, 2) + (*this)(2, 3);
+        if(std::abs(divideByMe) < zeroPrecisionTolerance)
+        {
+            *pi = NAN;
+            *pj = NAN;
+        } else
+        {
+            *pi = (x0 * (*this)(0, 0) + x1 * (*this)(0, 1) + x2 * (*this)(0, 2) + (*this)(0, 3))
                 / divideByMe;
-            *py = (x * (*this)(1, 0) + y * (*this)(1, 1) + z * (*this)(1, 2) + (*this)(1, 3))
+            *pj = (x0 * (*this)(1, 0) + x1 * (*this)(1, 1) + x2 * (*this)(1, 2) + (*this)(1, 3))
                 / divideByMe;
         }
     }
@@ -172,23 +212,13 @@ namespace matrix {
     /**
      *Actual projection
      */
-    void ProjectionMatrix::project(float x, float y, float z, float* px, float* py)
+    void ProjectionMatrix::project(
+        const float x0, const float x1, const float x2, float* pi, float* pj) const
     {
-        double divideByMe
-            = x * (*this)(2, 0) + y * (*this)(2, 1) + z * (*this)(2, 2) + (*this)(2, 3);
-        if(std::abs(divideByMe) < zeroPrecisionTolerance)
-        {
-            *px = NAN;
-            *py = NAN;
-        } else
-        {
-            double pxd = (x * (*this)(0, 0) + y * (*this)(0, 1) + z * (*this)(0, 2) + (*this)(0, 3))
-                / divideByMe;
-            double pyd = (x * (*this)(1, 0) + y * (*this)(1, 1) + z * (*this)(1, 2) + (*this)(1, 3))
-                / divideByMe;
-            *px = float(pxd);
-            *py = float(pyd);
-        }
+        double pid, pjd;
+        project(double(x0), double(x1), double(x2), &pid, &pjd);
+        *pi = float(pid);
+        *pj = float(pjd);
     }
 
     ProjectionMatrix ProjectionMatrix::shiftDetectorOrigin(double x, double y) const
@@ -291,36 +321,6 @@ namespace matrix {
         return os.str();
     }
 
-    double ProjectionMatrix::vectorNorm(std::array<double, 3> v) const
-    {
-        double normsq = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-        return std::sqrt(normsq);
-    }
-
-    std::array<double, 3> ProjectionMatrix::normalizeVector(std::array<double, 3> v) const
-    {
-        std::array<double, 3> normal;
-        double normvec = vectorNorm(v);
-        normal[0] = v[0] / normvec;
-        normal[1] = v[1] / normvec;
-        normal[2] = v[2] / normvec;
-        return normal;
-    }
-
-    std::array<double, 4> ProjectionMatrix::reorthogonalize(std::array<double, 4> v,
-                                                            std::array<double, 4> og) const
-    {
-        double nogsq = og[0] * og[0] + og[1] * og[1] + og[2] * og[2] + og[3] * og[3];
-        double vog = v[0] * og[0] + v[1] * og[1] + v[2] * og[2] + v[3] * og[3];
-        double factor = vog / nogsq;
-        std::array<double, 4> orthogonalized;
-        for(int i = 0; i != 4; i++)
-        {
-            orthogonalized[i] = v[i] - factor * og[i];
-        }
-        return orthogonalized;
-    }
-
     void ProjectionMatrix::computeSourcePosition() // Called during construction
     {
         std::array<double, 4> s;
@@ -329,10 +329,159 @@ namespace matrix {
         s[2] = LUDoolittleForm::determinant(this->colSubMatrix(2));
         s[3] = -LUDoolittleForm::determinant(this->colSubMatrix(3));
         std::array<double, 4> r3 = { A[8], A[9], A[10], A[11] };
-        s = reorthogonalize(s, r3); // Probably not effective
+        s = matrix::orthogonalPartOfVectorWithRespectToSecondVector(s,
+                                                                    r3); // Probably not effective
         source[0] = s[0] / s[3];
         source[1] = s[1] / s[3];
         source[2] = s[2] / s[3];
+    }
+
+    std::array<double, 2> ProjectionMatrix::principalRayProjection() const
+    {
+        std::array<double, 3> VN = directionVectorVN();
+        std::array<double, 2> PRP;
+        project0(VN[0], VN[1], VN[2], &PRP[0], &PRP[1]);
+        return PRP;
+    }
+
+    std::array<double, 2> ProjectionMatrix::focalLength() const
+    {
+        std::array<double, 2> FL;
+        FL[0] = matrix::vectorNorm(directionVectorVX());
+        FL[1] = matrix::vectorNorm(directionVectorVY());
+        return FL;
+    }
+
+    std::array<double, 2> ProjectionMatrix::pixelSizes(const double sourceToDetector) const
+    {
+        std::array<double, 2> FL = focalLength();
+        std::array<double, 2> X;
+        X[0] = sourceToDetector / FL[0];
+        X[1] = sourceToDetector / FL[1];
+        return X;
+    }
+
+    double ProjectionMatrix::sourceToDetectorFromPX(const double PX) const
+    {
+        return PX * matrix::vectorNorm(directionVectorVX());
+    }
+
+    double ProjectionMatrix::sourceToDetectorFromPY(const double PY) const
+    {
+        return PY * matrix::vectorNorm(directionVectorVY());
+    }
+
+    void ProjectionMatrix::sourcePosition(double* vector3) const
+    {
+        std::copy(std::begin(source), std::begin(source) + 3, vector3);
+    }
+    void ProjectionMatrix::normalToDetector(double* vector3) const
+
+    {
+        std::array<double, 3> V = normalToDetector();
+        std::copy(std::begin(V), std::begin(V) + 3, vector3);
+    }
+    void ProjectionMatrix::principalRayProjection(double* vector2) const
+    {
+        std::array<double, 2> V = principalRayProjection();
+        std::copy(std::begin(V), std::begin(V) + 2, vector2);
+    }
+    void ProjectionMatrix::focalLength(double* vector2) const
+    {
+        std::array<double, 2> V = focalLength();
+        std::copy(std::begin(V), std::begin(V) + 2, vector2);
+    }
+    void ProjectionMatrix::pixelSizes(const double sourceToDetector, double* vector2) const
+    {
+        std::array<double, 2> V = pixelSizes(sourceToDetector);
+        std::copy(std::begin(V), std::begin(V) + 2, vector2);
+    }
+    void
+    ProjectionMatrix::directionToPosition(const double pi, const double pj, double* vector3) const
+    {
+        std::array<double, 3> V = directionToPosition(pi, pj);
+        std::copy(std::begin(V), std::begin(V) + 3, vector3);
+    }
+    void ProjectionMatrix::projectionMatrixAsVector12(double* vector12) const
+    {
+        for(uint32_t i = 0; i != 3; i++)
+        {
+            for(uint32_t j = 0; j != 4; j++)
+            {
+                vector12[i * 4 + j] = (*this)(i, j);
+            }
+        }
+    }
+
+    void ProjectionMatrix::projectionMatrixAsVector9(double* vector9) const
+    {
+        for(uint32_t i = 0; i != 3; i++)
+        {
+            for(uint32_t j = 0; j != 3; j++)
+            {
+                vector9[i * 3 + j] = (*this)(i, j);
+            }
+        }
+    }
+
+    void ProjectionMatrix::inverseProjectionMatrixAsVector16(double* vector16) const
+    {
+        Matrix extendedMatrix(4, 4,
+                              { (*this)(0, 0), (*this)(0, 1), (*this)(0, 2), (*this)(0, 3),
+                                (*this)(1, 0), (*this)(1, 1), (*this)(1, 2), (*this)(1, 3),
+                                (*this)(2, 0), (*this)(2, 1), (*this)(2, 2), (*this)(2, 3),
+                                source[0], source[1], source[2], 1.0 });
+        std::shared_ptr<CTL::matrix::SquareMatrix> ex
+            = std::make_shared<CTL::matrix::SquareMatrix>(extendedMatrix);
+        LUDoolittleForm lf = LUDoolittleForm::LUDecomposeDoolittle(*ex, 1e-10);
+        SquareMatrix inv = lf.inverseMatrix();
+        for(uint32_t i = 0; i != 4; i++)
+        {
+            for(uint32_t j = 0; j != 4; j++)
+            {
+                vector16[i * 4 + j] = inv(i, j);
+            }
+        }
+    }
+
+    void ProjectionMatrix::inverseProjectionMatrixAsVector9(double* vector9) const
+    {
+        SquareMatrix toinvert = this->colSubMatrix(3);
+        LUDoolittleForm lf = LUDoolittleForm::LUDecomposeDoolittle(toinvert, 1e-10);
+        SquareMatrix inv = lf.inverseMatrix();
+        for(uint32_t i = 0; i != 3; i++)
+        {
+            for(uint32_t j = 0; j != 3; j++)
+            {
+                vector9[i * 3 + j] = inv(i, j);
+            }
+        }
+    }
+    std::array<double, 12> ProjectionMatrix::projectionMatrixAsVector12() const
+    {
+        std::array<double, 12> v;
+        projectionMatrixAsVector12(std::begin(v));
+        return v;
+    }
+    std::array<double, 9> ProjectionMatrix::projectionMatrixAsVector9() const
+    {
+
+        std::array<double, 9> v;
+        projectionMatrixAsVector9(std::begin(v));
+        return v;
+    }
+    std::array<double, 16> ProjectionMatrix::inverseProjectionMatrixAsVector16() const
+    {
+
+        std::array<double, 16> v;
+        inverseProjectionMatrixAsVector16(std::begin(v));
+        return v;
+    }
+    std::array<double, 9> ProjectionMatrix::inverseProjectionMatrixAsVector9() const
+    {
+        std::array<double, 9> v;
+        inverseProjectionMatrixAsVector9(std::begin(v));
+        return v;
     }
 
 } // namespace matrix

@@ -8,17 +8,19 @@
 #include <iostream>
 
 // Internal libraries
+#include "MATRIX/CameraI.hpp"
 #include "MATRIX/LUDoolittleForm.hpp"
 #include "MATRIX/Matrix.hpp"
 #include "MATRIX/RQFactorization.hpp"
 #include "MATRIX/SquareMatrix.hpp"
+#include "MATRIX/utils.hpp"
 
 namespace CTL {
 namespace matrix {
     /**
      *Class to represent projection matrices.
      */
-    class ProjectionMatrix : public Matrix
+    class ProjectionMatrix : public Matrix, CameraI
     {
     private:
         void computeSourcePosition();
@@ -64,17 +66,43 @@ namespace matrix {
             }
             return true;
         }
-        /**Get source position*/
+        // Implements CameraI
         std::array<double, 3> sourcePosition() const;
-        /**Get normal to detector. The normal to the detector will points from the detector towards source.*/
+        double pixelSkew() const;
+        std::array<double, 3> directionVectorVN() const;
+        std::array<double, 3> directionVectorVX() const;
+        std::array<double, 3> directionVectorVY() const;
+        std::array<double, 2> principalRayProjection() const;
         std::array<double, 3> normalToDetector() const;
-        /**Get normalized vector from source to detector ending at (px,py)*/
-        std::array<double, 3> projectedToPosition(double px, double py) const;
-        /**
-         *
-         * @return Normalized vector that multiples of can be added to the source position to get
-         * the normal to the detector in the x pixel direction.
-         */
+        std::array<double, 3> directionToPosition(const double pi, const double pj) const;
+        void
+        project(const double x0, const double x1, const double x2, double* pi, double* pj) const;
+        void project(const float x0, const float x1, const float x2, float* pi, float* pj) const;
+        void
+        project0(const double X0, const double X1, const double X2, double* pi, double* pj) const;
+        void project0(const float X0, const float X1, const float X2, float* pi, float* pj) const;
+        std::array<double, 2> focalLength() const;
+        std::array<double, 2> pixelSizes(const double sourceToDetector) const;
+        double sourceToDetectorFromPX(const double PX) const;
+        double sourceToDetectorFromPY(const double PY) const;
+        void sourcePosition(double* vector3) const;
+        void directionVectorVN(double* vector3) const;
+        void directionVectorVX(double* vector3) const;
+        void directionVectorVY(double* vector3) const;
+        void normalToDetector(double* vector3) const;
+        void principalRayProjection(double* vector2) const;
+        void focalLength(double* vector2) const;
+        void pixelSizes(const double sourceToDetector, double* vector2) const;
+        void directionToPosition(const double pi, const double pj, double* vector3) const;
+        void projectionMatrixAsVector12(double* vector12) const;
+        void projectionMatrixAsVector9(double* vector9) const;
+        void inverseProjectionMatrixAsVector16(double* vector16) const;
+        void inverseProjectionMatrixAsVector9(double* vector9) const;
+        std::array<double, 12> projectionMatrixAsVector12() const;
+        std::array<double, 9> projectionMatrixAsVector9() const;
+        std::array<double, 16> inverseProjectionMatrixAsVector16() const;
+        std::array<double, 9> inverseProjectionMatrixAsVector9() const;
+
         std::array<double, 3> tangentToDetectorXDirection() const;
         /**
          *
@@ -85,8 +113,6 @@ namespace matrix {
         /*Get 3x3 submatrix of projection matrix, where i-th row is removed.*/
         SquareMatrix colSubMatrix(int i) const;
         /**Compute projection of volume point to the projector point*/
-        void project(double x, double y, double z, double* px, double* py);
-        void project(float x, float y, float z, float* px, float* py);
 
         /**Compute the projection matrix with origin shifted by (x,y) detector pixels
          *
@@ -99,24 +125,6 @@ namespace matrix {
         std::string toString(std::string name = "P") const;
 
     private:
-        /**
-         * Compute normalized vector with respect to l2 norm of a 3D vector.
-         *
-         * @param v
-         *
-         * @return
-         */
-        inline std::array<double, 3> normalizeVector(std::array<double, 3> v) const;
-        /**
-         * Compute l2 norm of a 3D vector.
-         *
-         * @param v
-         *
-         * @return
-         */
-        std::array<double, 4> reorthogonalize(std::array<double, 4> v,
-                                              std::array<double, 4> og) const;
-        inline double vectorNorm(std::array<double, 3> v) const;
         bool sourceComputed = false;
         std::array<double, 3> source;
         const double zeroPrecisionTolerance = 1e-10;

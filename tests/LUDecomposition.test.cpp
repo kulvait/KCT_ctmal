@@ -32,9 +32,9 @@ TEST_CASE("TEST: SquareMatrix class, test basic operations.", "SquareMatrix.test
                      1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1 });
     Matrix b(8, 1, { 20, 20, 10, 10, 20, 20, 10, 10 });
     Matrix p(8, 1, { 18, 18, 8, 8, 18, 18, 8, 8 });
-    LOGD << std::endl << A.toString("A");
+    //LOGD << std::endl << A.toString("A");
     SquareMatrix AA(A.T() * A);
-    LOGD << AA.toString("\nA^TA");
+    //LOGD << AA.toString("\nA^TA");
     Matrix AA_result(4, 4, { 3, 1, 1, 0, 1, 3, 0, 1, 1, 0, 3, 1, 0, 1, 1, 3 });
     REQUIRE((AA - AA_result).norm()
             == 0.0); // Polymorphism ... derived class might act as superclass

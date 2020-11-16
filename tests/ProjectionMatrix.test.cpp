@@ -9,8 +9,10 @@
 #include "DEN/DenAsyncFrame2DWritter.hpp"
 #include "DEN/DenProjectionMatrixReader.hpp"
 #include "FrameMemoryViewer2D.hpp"
+#include "MATRIX/LightProjectionMatrix.hpp"
 #include "MATRIX/Matrix.hpp"
 #include "MATRIX/ProjectionMatrix.hpp"
+#include "MATRIX/utils.hpp"
 #include "PROG/Program.hpp"
 #include "PROG/RunTimeInfo.hpp"
 #include "catch.hpp"
@@ -58,6 +60,196 @@ TEST_CASE("ProjectionMatrix.toString", "[print]")
     LOGD << std::endl << pm_shift.toString();
 }
 
+bool almostEqual(double x, double y, double tol = 1e-10)
+{
+    double dif = x - y;
+    if(std::abs(dif) < tol)
+    {
+        return true;
+    } else
+    {
+        return false;
+    }
+}
+
+template <int N>
+bool almostEqual(std::array<double, N> x, std::array<double, N> y, double tol = 1e-10)
+{
+    std::array<double, N> minusx = multiplyVectorByConstant<N>(x, -1.0);
+    std::array<double, N> vdf = vectorSum<N>(minusx, y);
+    double n = vectorNorm<N>(vdf);
+    if(n < tol)
+    {
+        return true;
+    } else
+    {
+        return false;
+    }
+}
+
+template <int N>
+bool almostEqualRelative(std::array<double, N> x, std::array<double, N> y, double tol = 1e-10)
+{
+    std::array<double, N> minusx = multiplyVectorByConstant<N>(x, -1.0);
+    std::array<double, N> vdf = vectorSum<N>(minusx, y);
+    double basenorm = vectorNorm<N>(x);
+    double n = vectorNorm<N>(vdf);
+    if(n / basenorm < tol)
+    {
+        return true;
+    } else
+    {
+        return false;
+    }
+}
+
+template <int N>
+std::string printVector(std::string name, std::array<double, N> x)
+{
+    std::string s = io::xprintf("%s: (", name.c_str());
+    for(uint32_t i = 0; i < N - 1; i++)
+    {
+        s += io::xprintf("%f, ", x[i]);
+    }
+    s += io::xprintf("%f)", x[N - 1]);
+    return s;
+}
+
+TEST_CASE("LightProjectionMatrix.cpp.testing", "[PM]")
+{
+    util::Program prog(0, nullptr);
+    util::RunTimeInfo rti;
+    std::string pth = rti.getExecutableDirectoryPath();
+    io::DenProjectionMatrixReader dpr(io::xprintf("%s/../tests/ArtisQ.matrix", pth.c_str()));
+    double pixelSpacingX = 0.616, pixelSpacingY = 0.616;
+
+    uint32_t numAngles = dpr.count();
+    for(uint32_t k = 0; k != numAngles; k++)
+    {
+        ProjectionMatrix pm = dpr.readMatrix(k);
+        LightProjectionMatrix lpm(pm);
+        std::array<double, 3> va, vb;
+        std::array<double, 2> pa, pb;
+        std::array<double, 12> pea, peb;
+        std::array<double, 9> pma, pmb;
+        std::array<double, 16> iea, ieb;
+
+        REQUIRE(almostEqual<3>(pm.sourcePosition(), lpm.sourcePosition()));
+        pm.sourcePosition(std::begin(va));
+        lpm.sourcePosition(std::begin(vb));
+        REQUIRE(almostEqual<3>(va, vb));
+
+        REQUIRE(almostEqual<3>(pm.directionVectorVN(), lpm.directionVectorVN()));
+        pm.directionVectorVN(std::begin(va));
+        lpm.directionVectorVN(std::begin(vb));
+        REQUIRE(almostEqual<3>(va, vb));
+
+        pm.directionVectorVX(std::begin(va));
+        lpm.directionVectorVX(std::begin(vb));
+        REQUIRE(almostEqual<3>(va, vb));
+        REQUIRE(almostEqual<3>(pm.directionVectorVX(), lpm.directionVectorVX()));
+
+        REQUIRE(almostEqual<3>(pm.directionVectorVY(), lpm.directionVectorVY()));
+        pm.directionVectorVY(std::begin(va));
+        lpm.directionVectorVY(std::begin(vb));
+        REQUIRE(almostEqual<3>(va, vb));
+
+        REQUIRE(almostEqual(pm.pixelSkew(), lpm.pixelSkew()));
+
+        REQUIRE(almostEqual<3>(pm.normalToDetector(), lpm.normalToDetector()));
+        pm.normalToDetector(std::begin(va));
+        lpm.normalToDetector(std::begin(vb));
+        REQUIRE(almostEqual<3>(va, vb));
+
+        pm.principalRayProjection(std::begin(pa));
+        lpm.principalRayProjection(std::begin(pb));
+        REQUIRE(almostEqual<2>(pa, pb));
+        REQUIRE(almostEqual<2>(pm.principalRayProjection(), lpm.principalRayProjection()));
+
+        REQUIRE(almostEqual<2>(pm.focalLength(), lpm.focalLength()));
+        pm.focalLength(std::begin(pa));
+        lpm.focalLength(std::begin(pb));
+        REQUIRE(almostEqual<2>(pa, pb));
+
+        double sourceToDetector = 1200;
+        REQUIRE(almostEqual<2>(pm.pixelSizes(sourceToDetector), lpm.pixelSizes(sourceToDetector)));
+        pm.pixelSizes(sourceToDetector, std::begin(pa));
+        lpm.pixelSizes(sourceToDetector, std::begin(pb));
+        REQUIRE(almostEqual<2>(pa, pb));
+        // std::cout << "Iter " << k << " pixel dimensions " << printVector<2>("PA", pa) <<
+        // std::endl;
+        REQUIRE(almostEqual(pa[0], 0.616, 0.01));
+        REQUIRE(almostEqual(pa[1], 0.616, 0.01));
+        REQUIRE(almostEqual(pb[0], 0.616, 0.01));
+        REQUIRE(almostEqual(pb[1], 0.616, 0.01));
+
+        REQUIRE(almostEqual(pm.sourceToDetectorFromPX(0.616), lpm.sourceToDetectorFromPX(0.616)));
+        REQUIRE(almostEqual(pm.sourceToDetectorFromPX(0.616), 1200, 10.0));
+
+        for(double pi = -1000; pi < 1000; pi += 100)
+        {
+            for(double pj = -1000; pj < 1000; pj += 100)
+            {
+
+                pm.directionToPosition(pi, pj, std::begin(va));
+                lpm.directionToPosition(pi, pj, std::begin(vb));
+                REQUIRE(almostEqual<3>(va, vb));
+                REQUIRE(almostEqual<3>(pm.directionToPosition(pi, pj),
+                                       lpm.directionToPosition(pi, pj)));
+            }
+        }
+        for(double x0 = -10; x0 < 10; x0 += 1)
+        {
+            for(double x1 = -10; x1 < 10; x1 += 1)
+            {
+                for(double x2 = -10; x2 < 10; x2 += 1)
+                {
+                    pm.project(x0, x1, x2, &pa[0], &pa[1]);
+                    lpm.project(x0, x1, x2, &pb[0], &pb[1]);
+                    REQUIRE(almostEqual<2>(pa, pb));
+                    if(x0 != 0.0 || x1 != 0.0 || x2 != 0.0)
+                    {
+                        pm.project0(x0, x1, x2, &pa[0], &pa[1]);
+                        lpm.project0(x0, x1, x2, &pb[0], &pb[1]);
+                        REQUIRE(almostEqualRelative<2>(pa, pb));
+                    }
+                }
+            }
+        }
+        pm.projectionMatrixAsVector12(std::begin(pea));
+        lpm.projectionMatrixAsVector12(std::begin(peb));
+        REQUIRE(almostEqual<12>(normalizeVector<12>(pea), normalizeVector<12>(peb)));
+        pm.projectionMatrixAsVector9(std::begin(pma));
+        lpm.projectionMatrixAsVector9(std::begin(pmb));
+        REQUIRE(almostEqual<9>(normalizeVector<9>(pma), normalizeVector<9>(pmb)));
+        pm.inverseProjectionMatrixAsVector9(std::begin(pma));
+        lpm.inverseProjectionMatrixAsVector9(std::begin(pmb));
+        REQUIRE(almostEqual<9>(normalizeVector<9>(pma), normalizeVector<9>(pmb)));
+        pm.inverseProjectionMatrixAsVector16(std::begin(iea));
+        lpm.inverseProjectionMatrixAsVector16(std::begin(ieb));
+        REQUIRE(almostEqual<16>(normalizeVector<16>(iea), normalizeVector<16>(ieb)));
+
+        double xoveryspacing = pixelSpacingX / pixelSpacingY;
+        double yoverxspacing = pixelSpacingY / pixelSpacingX;
+        double x1, x2, y1, y2;
+        std::array<double, 3> sourcePosition = pm.sourcePosition();
+        std::array<double, 3> normalToDetector = pm.normalToDetector();
+        std::array<double, 3> tangentToDetector = pm.tangentToDetectorYDirection();
+        pm.project(sourcePosition[0] - normalToDetector[0], sourcePosition[1] - normalToDetector[1],
+                   sourcePosition[2] - normalToDetector[2], &x1, &y1);
+        pm.project(sourcePosition[0] - normalToDetector[0] + tangentToDetector[0],
+                   sourcePosition[1] - normalToDetector[1] + tangentToDetector[1],
+                   sourcePosition[2] - normalToDetector[2] + tangentToDetector[2], &x2, &y2);
+        double scalingFactor
+            = (x1 - x2) * (x1 - x2) * xoveryspacing + (y1 - y2) * (y1 - y2) * yoverxspacing;
+        va = lpm.directionVectorVX();
+        vb = lpm.directionVectorVY();
+        double sf = vectorNorm<3>(va) * vectorNorm<3>(vb);
+        LOGI << io::xprintf("Scaling factor A %f B %f", scalingFactor, sf);
+        REQUIRE(almostEqual(sf, scalingFactor, 1e-3));
+    }
+}
+
 TEST_CASE("ProjectionMatrix.normalToDetector.synthetic", "Normal to detector")
 {
     util::RunTimeInfo rti;
@@ -101,7 +293,7 @@ TEST_CASE("ProjectionMatrix.normalToDetector.synthetic", "Normal to detector")
         REQUIRE(std::isnan(psx));
         REQUIRE(std::isnan(psy));
         std::array<double, 3> n_center
-            = pm.projectedToPosition(616.0 * 0.5 - 0.5, 480.0 * 0.5 - 0.5);
+            = pm.directionToPosition(616.0 * 0.5 - 0.5, 480.0 * 0.5 - 0.5);
         n_center = { -n_center[0], -n_center[1], -n_center[2] };
         REQUIRE(normdiff<3>(n, n_center) < 0.0000001);
         double px, py;
@@ -242,7 +434,7 @@ TEST_CASE("ProjectionMatrix.normalToDetector.siemens", "Create aligned matrices.
         REQUIRE(std::isnan(psx));
         REQUIRE(std::isnan(psy));
         std::array<double, 3> n_center
-            = pm.projectedToPosition(616.0 * 0.5 - 0.5, 480.0 * 0.5 - 0.5);
+            = pm.directionToPosition(616.0 * 0.5 - 0.5, 480.0 * 0.5 - 0.5);
         n_center = { -n_center[0], -n_center[1], -n_center[2] };
         LOGD << "Normal to detector by projection to the center" << std::endl
              << io::xprintf("Normal=(%f, %f, %f).\n", n_center[0], n_center[1], n_center[2]);
@@ -301,11 +493,11 @@ TEST_CASE("ProjectionMatrix.normalToDetector.siemens", "Create aligned matrices.
 ===ArtisP.matrix 496 views, 0.308mmx0.308mm pixels, 1232x960 grid===
 Camera matrices ArtisP.matrix are taken from Robert Frysch, original name was
 matrices_file01_run1.bin
-The  distance  from  the source  to  theisocenter  is 749mm and  the  distance  from  source to the detector is 1198mm.
-Detector  matrix  consists  of 2464×1920detector cells of the dimensions 0.154 mm×0.154 mm. For
-differentprotocols  there  is  applied  tiling  of 2×2 with  merged  pixelsize merged pixel size
-0.308 mm×0.308 mm and 1232x960 pixels. ArtisP.matrix were generated for 2×2 tiling, pixel size is
-0.308 mm×0.308 mm and 1232x960 pixels.
+The  distance  from  the source  to  theisocenter  is 749mm and  the  distance  from  source to the
+detector is 1198mm. Detector  matrix  consists  of 2464×1920detector cells of the dimensions 0.154
+mm×0.154 mm. For differentprotocols  there  is  applied  tiling  of 2×2 with  merged  pixelsize
+merged pixel size 0.308 mm×0.308 mm and 1232x960 pixels. ArtisP.matrix were generated for 2×2
+tiling, pixel size is 0.308 mm×0.308 mm and 1232x960 pixels.
 
 ===SourceP4.matrix 496 views, 0.616mmx0.616mm pixels, 616x480 grid===
 Camera matrix derived from ArtisQ.matrix.
@@ -354,19 +546,20 @@ TEST_CASE("ProjectionMatrix.variousALgorithms.siemens", "Create matrices.")
     X2(1, 3) = sourceToCenter;
     matrix::Matrix E(3, 4,
                      { 1, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1 / sourceToDetector, 0.0, 0.0 });
-    matrix::Matrix A14(3, 3,
-                       { 1 / (2*pixel_size_x), 0.0, 0.0, 0.0, 1 / (2*pixel_size_y), 0.0, 0.0, 0.0, 1.0 });
+    matrix::Matrix A14(
+        3, 3,
+        { 1 / (2 * pixel_size_x), 0.0, 0.0, 0.0, 1 / (2 * pixel_size_y), 0.0, 0.0, 0.0, 1.0 });
     matrix::Matrix A24(3, 3,
-                       { 1.0, 0.0, (0.5*detector_dim_x - 1.0) * 0.5, 0.0, 1.0,
-                         (0.5*detector_dim_y - 1.0) * 0.5, 0.0, 0.0, 1.0 });
+                       { 1.0, 0.0, (0.5 * detector_dim_x - 1.0) * 0.5, 0.0, 1.0,
+                         (0.5 * detector_dim_y - 1.0) * 0.5, 0.0, 0.0, 1.0 });
     matrix::Matrix A12(3, 3,
                        { 1 / pixel_size_x, 0.0, 0.0, 0.0, 1 / pixel_size_y, 0.0, 0.0, 0.0, 1.0 });
     matrix::Matrix A22(3, 3,
                        { 1.0, 0.0, (detector_dim_x - 1.0) * 0.5, 0.0, 1.0,
                          (detector_dim_y - 1.0) * 0.5, 0.0, 0.0, 1.0 });
-    matrix::Matrix A11(3, 3,
-                       { 1 / (0.5 * pixel_size_x), 0.0, 0.0, 0.0, 1 / (0.5 * pixel_size_y), 0.0,
-                         0.0, 0.0, 1.0 });
+    matrix::Matrix A11(
+        3, 3,
+        { 1 / (0.5 * pixel_size_x), 0.0, 0.0, 0.0, 1 / (0.5 * pixel_size_y), 0.0, 0.0, 0.0, 1.0 });
     matrix::Matrix A21(3, 3,
                        { 1.0, 0.0, (2 * detector_dim_x - 1.0) * 0.5, 0.0, 1.0,
                          (2 * detector_dim_y - 1.0) * 0.5, 0.0, 0.0, 1.0 });
@@ -402,7 +595,7 @@ TEST_CASE("ProjectionMatrix.variousALgorithms.siemens", "Create matrices.")
         REQUIRE(std::isnan(psx));
         REQUIRE(std::isnan(psy));
         std::array<double, 3> n_center
-            = pm.projectedToPosition(detector_dim_x * 0.5 - 0.5, detector_dim_y * 0.5 - 0.5);
+            = pm.directionToPosition(detector_dim_x * 0.5 - 0.5, detector_dim_y * 0.5 - 0.5);
         n_center = { -n_center[0], -n_center[1], -n_center[2] };
         LOGD << "Normal to detector by projection to the center" << std::endl
              << io::xprintf("Normal=(%f, %f, %f).\n", n_center[0], n_center[1], n_center[2]);
@@ -471,10 +664,10 @@ TEST_CASE("CreateTestMatrices", "Circular trajectory matrices")
     const double pi = std::acos(-1);
     matrix::Matrix X2 = matrix::Matrix::unitDiagonal(4, 4);
     X2(1, 3) = sourceToCenter;
-    LOGE << X2.toString("SHIFT");
+    // LOGE << X2.toString("SHIFT");
     matrix::Matrix E(3, 4,
                      { 1, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1 / sourceToDetector, 0.0, 0.0 });
-    LOGE << E.toString("E");
+    // LOGE << E.toString("E");
     matrix::Matrix A1(3, 3,
                       { 1 / pixel_size_x, 0.0, 0.0, 0.0, 1 / pixel_size_y, 0.0, 0.0, 0.0, 1.0 });
     matrix::Matrix A2(3, 3,
@@ -489,12 +682,12 @@ TEST_CASE("CreateTestMatrices", "Circular trajectory matrices")
         X1(1, 1) = std::sin(pi + i * 2 * pi / numAngles);
         X1(2, 2) = -1.0;
         X1(3, 3) = 1.0;
-        LOGE << X1.toString("ROTATION");
+        // LOGE << X1.toString("ROTATION");
         matrix::Matrix PM = A2 * A1 * E * X2 * X1;
         ProjectionMatrix projmat(PM);
         io::FrameMemoryViewer2D<double> f(projmat.getPtr(), 4, 3);
-        std::cout << PM.toString("PM");
-        std::cout << projmat.toString("PM");
+        // std::cout << PM.toString("PM");
+        // std::cout << projmat.toString("PM");
         cmw.writeFrame(f, i);
     }
 }
