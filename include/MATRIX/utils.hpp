@@ -22,6 +22,11 @@ namespace matrix {
     template <std::size_t N>
     std::array<double, N> vectorSum(std::array<double, N> v, std::array<double, N> w);
     /**
+     * @return v - w
+     */
+    template <std::size_t N>
+    std::array<double, N> vectorDiff(std::array<double, N> v, std::array<double, N> w);
+    /**
      * @return Unit vector with the direction of v
      */
     template <std::size_t N>
@@ -69,6 +74,17 @@ namespace matrix {
             sum[i] = v[i] + w[i];
         }
         return sum;
+    }
+
+    template <std::size_t N>
+    std::array<double, N> vectorDiff(std::array<double, N> v, std::array<double, N> w)
+    {
+        std::array<double, N> diff;
+        for(std::size_t i = 0; i != N; i++)
+        {
+            diff[i] = v[i] - w[i];
+        }
+        return diff;
     }
 
     template <std::size_t N>
