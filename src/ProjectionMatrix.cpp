@@ -433,7 +433,7 @@ namespace matrix {
                                 source[0], source[1], source[2], 1.0 });
         std::shared_ptr<CTL::matrix::SquareMatrix> ex
             = std::make_shared<CTL::matrix::SquareMatrix>(extendedMatrix);
-        LUDoolittleForm lf = LUDoolittleForm::LUDecomposeDoolittle(*ex, 1e-10);
+        LUDoolittleForm lf = LUDoolittleForm::LUDecomposeDoolittle(*ex, 0.001);
         SquareMatrix inv = lf.inverseMatrix();
         for(uint32_t i = 0; i != 4; i++)
         {
