@@ -139,7 +139,6 @@ namespace util {
         {
             plotMatplotlib(granularity, names, title);
             plt::save(imageFile);
-            delete[] val;
         }
 #endif
 

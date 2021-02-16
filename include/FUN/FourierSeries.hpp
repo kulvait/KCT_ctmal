@@ -83,7 +83,8 @@ namespace util {
 
 #ifdef DEBUG
         void plotFunctions(uint32_t granularity = 100,
-                           std::shared_ptr<std::vector<std::string>> names = nullptr) override
+                           std::shared_ptr<std::vector<std::string>> names = nullptr,
+                           std::string title = "") override
         {
             if(names == nullptr)
             {
@@ -93,7 +94,13 @@ namespace util {
                     names->push_back(io::xprintf("Funtion %d", i));
                 }
             }
-            VectorFunctionI::plotFunctions(granularity, names, "Harmonic basis");
+            if(title == "")
+            {
+                VectorFunctionI::plotFunctions(granularity, names, "Harmonic basis");
+            } else
+            {
+                VectorFunctionI::plotFunctions(granularity, names, title);
+            }
         }
 #endif
 
