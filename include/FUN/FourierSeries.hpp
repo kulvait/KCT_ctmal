@@ -90,10 +90,10 @@ namespace util {
                 names = std::make_shared<std::vector<std::string>>();
                 for(uint32_t i = startReportingDegree; i <= numberOfFunctions; ++i)
                 {
-                    names->push_back(io::xprintf("Fourier %d", i));
+                    names->push_back(io::xprintf("Funtion %d", i));
                 }
             }
-            VectorFunctionI::plotFunctions(granularity, names);
+            VectorFunctionI::plotFunctions(granularity, names, "Harmonic basis");
         }
 #endif
 
@@ -248,7 +248,7 @@ namespace util {
         {
             for(uint32_t i = startReportingDegree; i < numberOfFunctions; i++)
             {
-                if(i == 0)
+                if(i % 2 == 0)
                 {
                     array[i - startReportingDegree] = 1.0f;
                 } else
@@ -262,7 +262,7 @@ namespace util {
         {
             for(uint32_t i = startReportingDegree; i < numberOfFunctions; i++)
             {
-                if(i == 0)
+                if(i % 2 == 0)
                 {
                     array[i - startReportingDegree] = 1.0;
                 } else

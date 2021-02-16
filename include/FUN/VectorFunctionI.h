@@ -79,8 +79,9 @@ namespace util {
         double getEnd() { return end; }
 
 #ifdef DEBUG
-        virtual void plotFunctions(uint32_t granularity = 100,
-                                   std::shared_ptr<std::vector<std::string>> names = nullptr)
+        virtual void plotMatplotlib(uint32_t granularity = 100,
+                                    std::shared_ptr<std::vector<std::string>> names = nullptr,
+                                    std::string title = "")
         {
             if(granularity < 2)
             {
@@ -115,49 +116,28 @@ namespace util {
                     plt::named_plot((*names)[j], taxis, values[j]);
                 }
             }
+            if(title != "")
+            {
+                plt::title(title);
+            }
             plt::legend();
-            plt::show();
             delete[] val;
+        }
+
+        virtual void plotFunctions(uint32_t granularity = 100,
+                                   std::shared_ptr<std::vector<std::string>> names = nullptr,
+                                   std::string title = "")
+        {
+            plotMatplotlib(granularity, names, title);
+            plt::show();
         }
 
         virtual void storeFunctions(const std::string& imageFile,
                                     uint32_t granularity = 100,
-                                    std::shared_ptr<std::vector<std::string>> names = nullptr)
+                                    std::shared_ptr<std::vector<std::string>> names = nullptr,
+                                    std::string title = "")
         {
-            if(granularity < 2)
-            {
-                io::throwerr("It is not possible to plot functions with granularity less than 2");
-            }
-            std::vector<double> taxis;
-            std::vector<std::vector<double>> values;
-            for(uint32_t j = 0; j != dimension; j++)
-            {
-                values.push_back(std::vector<double>());
-            }
-            float* val = new float[dimension];
-            double time = start;
-            double increment = (end - start) / double(granularity - 1);
-            for(uint32_t i = 0; i != granularity; i++)
-            {
-                taxis.push_back(time);
-                valuesAt(time, val);
-                for(uint32_t j = 0; j != dimension; j++)
-                {
-                    values[j].push_back(val[j]);
-                }
-                time += increment;
-            }
-            for(uint32_t j = 0; j != dimension; j++)
-            {
-                if(names == nullptr)
-                {
-                    plt::named_plot(io::xprintf("Function %d", j), taxis, values[j]);
-                } else
-                {
-                    plt::named_plot((*names)[j], taxis, values[j]);
-                }
-            }
-            plt::legend();
+            plotMatplotlib(granularity, names, title);
             plt::save(imageFile);
             delete[] val;
         }
