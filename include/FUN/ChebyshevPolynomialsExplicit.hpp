@@ -131,7 +131,8 @@ namespace util {
 
 #if DEBUG
         void plotFunctions(uint32_t granularity = 100,
-                           std::shared_ptr<std::vector<std::string>> names = nullptr) override
+                           std::shared_ptr<std::vector<std::string>> names = nullptr,
+                           std::string title = "") override
         {
             if(names == nullptr)
             {
@@ -141,7 +142,13 @@ namespace util {
                     names->push_back(io::xprintf("Chebyshev %d", i));
                 }
             }
-            VectorFunctionI::plotFunctions(granularity, names);
+            if(title == "")
+            {
+                VectorFunctionI::plotFunctions(granularity, names, "Chebyshev polynomial basis");
+            } else
+            {
+                VectorFunctionI::plotFunctions(granularity, names, title);
+            }
         }
 #endif
         /*Construct the Chebyshev polynomials using polynomial basis.
