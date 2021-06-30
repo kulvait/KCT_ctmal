@@ -264,7 +264,7 @@ namespace matrix {
         {
             LUDoolittleForm lu = LUDoolittleForm::LUDecomposeDoolittle(A, 0.000001);
             return lu.getDeterminant();
-        } catch(const matrix::PivotingException e)
+        } catch(const matrix::PivotingException& e)
         { // Pivoting failed so that determinant is close to zero, attempt to compute it anyway
             double det = 0.0;
             for(uint32_t j = 0; j != A.dimn(); j++)
