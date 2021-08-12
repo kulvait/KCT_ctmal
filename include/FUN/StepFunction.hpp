@@ -147,9 +147,24 @@ namespace util {
                         valuesF[i * valuesPerFunction + j] = float(f->get(j, 0));
                     }
                 }
+            } else if(bfi.getDataType() == io::DenSupportedType::float_)
+            {
+
+                std::shared_ptr<io::Frame2DReaderI<float>> pr
+                    = std::make_shared<io::DenFrame2DReader<float>>(inputFunctionsFile);
+                std::shared_ptr<io::Frame2DI<double>> f;
+                for(uint32_t i = 0; i != baseSize; i++)
+                {
+                    f = pr->readFrame(i);
+                    for(uint32_t j = 0; j != valuesPerFunction; j++)
+                    {
+                        valuesD[i * valuesPerFunction + j] = f->get(j, 0);
+                        valuesF[i * valuesPerFunction + j] = f->get(j, 0);
+                    }
+                }
             } else
             {
-                err = io::xprintf("Basis should be encoded in double file!");
+                err = io::xprintf("Basis should be encoded in double or float file!");
                 LOGE << err;
                 throw std::runtime_error(err);
             }
@@ -311,8 +326,8 @@ namespace util {
         }
 
     private:
-        /**Function that transforms the value t on the interval [start, end] to the value t' on the
-         * interval [0,valuesPerFunction-1] to quickly evaluate function at any t.
+        /**Function that transforms the value t on the interval [start, end] to the value t' on
+         * the interval [0,valuesPerFunction-1] to quickly evaluate function at any t.
          *
          */
         double transformationSlope;
