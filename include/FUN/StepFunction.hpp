@@ -152,7 +152,7 @@ namespace util {
 
                 std::shared_ptr<io::Frame2DReaderI<float>> pr
                     = std::make_shared<io::DenFrame2DReader<float>>(inputFunctionsFile);
-                std::shared_ptr<io::Frame2DI<double>> f;
+                std::shared_ptr<io::Frame2DI<float>> f;
                 for(uint32_t i = 0; i != baseSize; i++)
                 {
                     f = pr->readFrame(i);
