@@ -1,7 +1,7 @@
 #include "MATRIX/utils.hpp"
 
-namespace CTL {
+namespace KCT {
 namespace matrix {
 
 } // namespace matrix
-} // namespace CTL
+} // namespace KCT

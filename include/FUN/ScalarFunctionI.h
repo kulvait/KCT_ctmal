@@ -2,7 +2,7 @@
 
 #include "stringFormatter.h"
 
-namespace CTL {
+namespace KCT {
 namespace util {
     /**Interface that will be implemented to contain actual scalar function supported on the
      * interval [start, end]
@@ -41,4 +41,4 @@ namespace util {
     };
 
 } // namespace util
-} // namespace CTL
+} // namespace KCT

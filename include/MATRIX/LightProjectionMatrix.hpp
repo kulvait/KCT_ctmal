@@ -11,7 +11,7 @@
 #include "MATRIX/CameraI.hpp"
 #include "MATRIX/ProjectionMatrix.hpp"
 
-namespace CTL {
+namespace KCT {
 namespace matrix {
     /**
      *Class to represent projection matrices.
@@ -62,4 +62,4 @@ namespace matrix {
     };
 
 } // namespace matrix
-} // namespace CTL
+} // namespace KCT

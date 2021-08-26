@@ -7,7 +7,7 @@
 #include "VectorFunctionI.h"
 #include "stringFormatter.h"
 
-namespace CTL {
+namespace KCT {
 namespace util {
     /** Class for evaluation of Fourier baisis stretched from [0,1] to a domain [start, end].
      *
@@ -293,4 +293,4 @@ namespace util {
     };
 
 } // namespace util
-} // namespace CTL
+} // namespace KCT

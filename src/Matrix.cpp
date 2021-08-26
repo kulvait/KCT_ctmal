@@ -1,6 +1,6 @@
 #include "MATRIX/Matrix.hpp"
 
-namespace CTL {
+namespace KCT {
 namespace matrix {
 
     Matrix::Matrix(uint32_t m, uint32_t n)
@@ -234,4 +234,4 @@ namespace matrix {
         }
     }
 } // namespace matrix
-} // namespace CTL
+} // namespace KCT

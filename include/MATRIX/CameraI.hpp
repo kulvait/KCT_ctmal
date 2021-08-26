@@ -9,7 +9,7 @@
 
 // Internal libraries
 
-namespace CTL {
+namespace KCT {
 namespace matrix {
     /**
      *Class to represent camera and projective system.
@@ -151,4 +151,4 @@ namespace matrix {
         virtual std::array<double, 9> inverseProjectionMatrixAsVector9() const = 0;
     };
 } // namespace matrix
-} // namespace CTL
+} // namespace KCT

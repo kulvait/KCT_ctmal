@@ -4,7 +4,7 @@
 #include "rawop.h"
 #include <mutex>
 
-namespace CTL::matrix {
+namespace KCT::matrix {
 /**
  * Buffered sparse matrix is a structure
  *
@@ -199,4 +199,4 @@ private:
     mutable std::recursive_mutex writingMutex;
 };
 
-} // namespace CTL::matrix
+} // namespace KCT::matrix

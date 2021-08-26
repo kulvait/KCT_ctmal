@@ -5,7 +5,7 @@
 // Internal libraries
 #include "MATRIX/Matrix.hpp"
 
-namespace CTL {
+namespace KCT {
 namespace matrix {
     class SquareMatrix : public Matrix
     {
@@ -43,4 +43,4 @@ namespace matrix {
     };
 
 } // namespace matrix
-} // namespace CTL
+} // namespace KCT

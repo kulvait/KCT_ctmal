@@ -7,7 +7,7 @@
 #include "FUN/VectorFunctionI.h"
 #include "stringFormatter.h"
 
-namespace CTL {
+namespace KCT {
 namespace util {
     /** Class for evaluation Legendre polynomials stretched from [-1,1] to a domain [start, end].
      *
@@ -340,4 +340,4 @@ namespace util {
     };
 
 } // namespace util
-} // namespace CTL
+} // namespace KCT

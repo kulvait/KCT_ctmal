@@ -14,7 +14,7 @@
 #include "MATRIX/SquareMatrix.hpp"
 #include "stringFormatter.h"
 
-namespace CTL {
+namespace KCT {
 namespace matrix {
     /**RQ factorization is a Gramm Shmidt orthogonalization of rows of A from the last row.
      *
@@ -46,4 +46,4 @@ namespace matrix {
                        // https://software.intel.com/en-us/mkl-developer-reference-c-orgrq m*1
     };
 } // namespace matrix
-} // namespace CTL
+} // namespace KCT

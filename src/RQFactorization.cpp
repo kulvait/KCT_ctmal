@@ -1,6 +1,6 @@
 #include "MATRIX/RQFactorization.hpp"
 
-namespace CTL {
+namespace KCT {
 namespace matrix {
     void RQFactorization::factorize(std::shared_ptr<Matrix> A)
     {
@@ -83,4 +83,4 @@ namespace matrix {
     }
 
 } // namespace matrix
-} // namespace CTL
+} // namespace KCT

@@ -5,7 +5,7 @@
 #include "rawop.h"
 #include <algorithm>
 
-namespace CTL::matrix {
+namespace KCT::matrix {
 /**
  * Buffered sparse matrix is a structure
  *
@@ -222,4 +222,4 @@ private:
     uint64_t totalFileSize, numberOfElements;
 };
 
-} // namespace CTL::matrix
+} // namespace KCT::matrix

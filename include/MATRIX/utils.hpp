@@ -3,7 +3,7 @@
 #include <array>
 #include <cmath>
 
-namespace CTL {
+namespace KCT {
 namespace matrix {
 
     /**
@@ -125,4 +125,4 @@ namespace matrix {
         return orthogonalized;
     }
 } // namespace matrix
-} // namespace CTL
+} // namespace KCT

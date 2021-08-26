@@ -3,7 +3,7 @@
 #include "MATRIX/ProjectionMatrix.hpp"
 #include "MATRIX/ProjectionMatrixComparatorI.hpp"
 
-namespace CTL {
+namespace KCT {
 namespace matrix {
     /**
     Interface to compare two projection matrices.
@@ -15,4 +15,4 @@ namespace matrix {
         /**Get the distance between two compared matrices*/
     };
 } // namespace matrix
-} // namespace CTL
+} // namespace KCT

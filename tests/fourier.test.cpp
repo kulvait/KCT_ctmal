@@ -10,8 +10,8 @@
 #include "stringFormatter.h"
 namespace plt = matplotlibcpp;
 
-using namespace CTL;
-TEST_CASE("CTL.util.FourierSeries", "[fourier]")
+using namespace KCT;
+TEST_CASE("KCT.util.FourierSeries", "[fourier]")
 {
     util::FourierSeries ff(5, 1.0, 2.0, 0);
     ff.plotFunctions();

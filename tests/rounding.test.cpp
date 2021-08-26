@@ -5,11 +5,11 @@
 #include "MATH/round.h"
 #include "stringFormatter.h"
 
-using namespace CTL;
+using namespace KCT;
 
 /// Testing correctness of legendre polynomials and its derivatives
 
-TEST_CASE("CTL.math.round.h", "[rounding]")
+TEST_CASE("KCT.math.round.h", "[rounding]")
 {
     REQUIRE(math::roundLow(float(-3.5)) == float(-4));
     REQUIRE(math::roundLow(float(-2.5)) == float(-3));

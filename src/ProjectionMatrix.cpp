@@ -1,6 +1,6 @@
 #include "MATRIX/ProjectionMatrix.hpp"
 
-namespace CTL {
+namespace KCT {
 namespace matrix {
 
     SquareMatrix ProjectionMatrix::colSubMatrix(int j) const
@@ -233,8 +233,8 @@ namespace matrix {
     {
         std::ostringstream os;
         matrix::RQFactorization rq;
-        std::shared_ptr<CTL::matrix::Matrix> F
-            = std::make_shared<CTL::matrix::Matrix>(this->colSubMatrix(3));
+        std::shared_ptr<KCT::matrix::Matrix> F
+            = std::make_shared<KCT::matrix::Matrix>(this->colSubMatrix(3));
         Matrix p4(3, 1, { (*this)(0, 3), (*this)(1, 3), (*this)(2, 3) });
         rq.factorize(F);
         auto C = rq.getRMatrix();
@@ -431,8 +431,8 @@ namespace matrix {
                                 (*this)(1, 0), (*this)(1, 1), (*this)(1, 2), (*this)(1, 3),
                                 (*this)(2, 0), (*this)(2, 1), (*this)(2, 2), (*this)(2, 3),
                                 source[0], source[1], source[2], 1.0 });
-        std::shared_ptr<CTL::matrix::SquareMatrix> ex
-            = std::make_shared<CTL::matrix::SquareMatrix>(extendedMatrix);
+        std::shared_ptr<KCT::matrix::SquareMatrix> ex
+            = std::make_shared<KCT::matrix::SquareMatrix>(extendedMatrix);
         LUDoolittleForm lf = LUDoolittleForm::LUDecomposeDoolittle(*ex, 0.001);
         SquareMatrix inv = lf.inverseMatrix();
         for(uint32_t i = 0; i != 4; i++)
@@ -485,4 +485,4 @@ namespace matrix {
     }
 
 } // namespace matrix
-} // namespace CTL
+} // namespace KCT

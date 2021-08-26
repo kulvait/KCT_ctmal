@@ -1,6 +1,6 @@
 #include "MATRIX/SourcePositionComparator.hpp"
 
-namespace CTL {
+namespace KCT {
 namespace matrix {
 
     double SourcePositionComparator::distance(ProjectionMatrix a, ProjectionMatrix b)
@@ -15,4 +15,4 @@ namespace matrix {
         return square;
     }
 } // namespace matrix
-} // namespace CTL
+} // namespace KCT

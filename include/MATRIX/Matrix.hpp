@@ -9,7 +9,7 @@
 #include "mkl.h"
 #include "stringFormatter.h"
 
-namespace CTL {
+namespace KCT {
 namespace matrix {
     /// Row major matrix with m rows and n columns
     class Matrix
@@ -104,4 +104,4 @@ namespace matrix {
     };
 
 } // namespace matrix
-} // namespace CTL
+} // namespace KCT

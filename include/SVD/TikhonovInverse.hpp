@@ -2,7 +2,7 @@
 
 #include "mkl_lapacke.h" //Lapacke
 
-namespace CTL::utils {
+namespace KCT::utils {
 /**Construct approximate inverse of square matrix using SVD, where Tikhonov regularization is
  * utilized.
  *
@@ -112,4 +112,4 @@ private:
     bool truncate;
 };
 
-} // namespace CTL::utils
+} // namespace KCT::utils

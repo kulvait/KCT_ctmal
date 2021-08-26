@@ -2,7 +2,7 @@
 
 #include <exception>
 
-namespace CTL {
+namespace KCT {
 namespace matrix {
     class PivotingException : public std::exception
     {
@@ -18,4 +18,4 @@ namespace matrix {
     };
 
 } // namespace matrix
-} // namespace CTL
+} // namespace KCT

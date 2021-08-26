@@ -9,7 +9,7 @@ namespace plt = matplotlibcpp;
 
 #endif
 
-namespace CTL {
+namespace KCT {
 namespace util {
     /**Interface that will be implemented to contain actual vector function supported on the
      * interval [start, end]
@@ -157,4 +157,4 @@ namespace util {
     };
 
 } // namespace util
-} // namespace CTL
+} // namespace KCT

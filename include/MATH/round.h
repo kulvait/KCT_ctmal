@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace CTL::math {
+namespace KCT::math {
 
 // Rounding in the way that
 // roundLow(1.5) = 1
@@ -56,4 +56,4 @@ long lroundLow(double x)
     }
 }
 
-} // namespace CTL::math
+} // namespace KCT::math

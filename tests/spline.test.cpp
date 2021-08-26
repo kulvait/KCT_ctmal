@@ -8,11 +8,11 @@
 #include "matplotlibcpp.h"
 namespace plt = matplotlibcpp;
 
-using namespace CTL;
+using namespace KCT;
 
 /// Testing correctness of legendre polynomials and its derivatives
 
-TEST_CASE("CTL.math.SplineFitter", "[spline]")
+TEST_CASE("KCT.math.SplineFitter", "[spline]")
 {
     int points = 6;
     math::SplineFitter fitter(points, DF_PP_CUBIC, DF_PP_AKIMA);

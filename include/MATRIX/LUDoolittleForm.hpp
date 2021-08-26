@@ -12,7 +12,7 @@
 #include "MATRIX/SquareMatrix.hpp"
 #include "stringFormatter.h"
 
-namespace CTL {
+namespace KCT {
 namespace matrix {
     class LUDoolittleForm
     {
@@ -59,4 +59,4 @@ namespace matrix {
         bool oddSwapParity;
     };
 } // namespace matrix
-} // namespace CTL
+} // namespace KCT

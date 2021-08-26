@@ -8,11 +8,11 @@
 #include "FUN/LegendrePolynomialsExplicit.hpp"
 #include "stringFormatter.h"
 
-using namespace CTL;
+using namespace KCT;
 
 /// Testing correctness of legendre polynomials and its derivatives
 
-TEST_CASE("CTL.util.LegendrePolynomialsExplicit.evaluate", "[legendre]")
+TEST_CASE("KCT.util.LegendrePolynomialsExplicit.evaluate", "[legendre]")
 {
     util::LegendrePolynomialsExplicit lp110(110, -1010.0, -20.3, 10);
     for(int i = 0; i != 20; i++)
@@ -140,7 +140,7 @@ TEST_CASE("CTL.util.LegendrePolynomialsExplicit.evaluate", "[legendre]")
 /** Test that derivatives of first 5 derivatives of shifted Legendre polynomials agree.
  *
  */
-TEST_CASE("CTL.util.LegendrePolynomialsDerivative.values", "[Legendre]")
+TEST_CASE("KCT.util.LegendrePolynomialsDerivative.values", "[Legendre]")
 {
     util::LegendrePolynomialsDerivatives ld5(5, 0.0, 1.0);
     double t = 0.201;
@@ -169,7 +169,7 @@ TEST_CASE("CTL.util.LegendrePolynomialsDerivative.values", "[Legendre]")
 /**Test that derivative of polynomial L6 on support [-1,1] multiplyed by 2/(end-start) is the same
  *as the derivative of L6 on general support [start, end]
  */
-TEST_CASE("CTL.util.LegendrePolynomialsDerivative.shifteval", "[Legendre]")
+TEST_CASE("KCT.util.LegendrePolynomialsDerivative.shifteval", "[Legendre]")
 {
     double start = 0;
     double end = 1;

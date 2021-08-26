@@ -4,7 +4,7 @@
 #include "rawop.h"
 #include <cmath>
 
-namespace CTL::math {
+namespace KCT::math {
 class SplineFitter
 {
 public:
@@ -272,4 +272,4 @@ private:
     double* bc_internal = nullptr;
     DFTaskPtr task = nullptr; // MKL object
 };
-} // namespace CTL::math
+} // namespace KCT::math

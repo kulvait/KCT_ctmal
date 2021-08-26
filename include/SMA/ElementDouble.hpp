@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace CTL::matrix {
+namespace KCT::matrix {
 /**
  * Buffered sparse matrix is a structure
  *
@@ -72,4 +72,4 @@ public:
     double v;
 };
 
-} // namespace CTL::matrix
+} // namespace KCT::matrix

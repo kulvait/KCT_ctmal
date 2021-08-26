@@ -21,9 +21,9 @@
 /**First test is simple, just computing Sebastian least squares problem from the excercises.
  *
  */
-using namespace CTL;
-using namespace CTL::util;
-using namespace CTL::matrix;
+using namespace KCT;
+using namespace KCT::util;
+using namespace KCT::matrix;
 
 // Helper functions before tests
 std::array<double, 3> vecnorm(std::array<double, 3> v)

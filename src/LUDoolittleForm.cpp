@@ -1,6 +1,6 @@
 #include "MATRIX/LUDoolittleForm.hpp"
 
-namespace CTL {
+namespace KCT {
 namespace matrix {
     bool LUDoolittleForm::getOddSwapParity() { return oddSwapParity; }
 
@@ -285,4 +285,4 @@ namespace matrix {
     }
 
 } // namespace matrix
-} // namespace CTL
+} // namespace KCT

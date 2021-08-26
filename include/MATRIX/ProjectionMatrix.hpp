@@ -15,7 +15,7 @@
 #include "MATRIX/SquareMatrix.hpp"
 #include "MATRIX/utils.hpp"
 
-namespace CTL {
+namespace KCT {
 namespace matrix {
     /**
      *Class to represent projection matrices.
@@ -130,4 +130,4 @@ namespace matrix {
         const double zeroPrecisionTolerance = 1e-10;
     };
 } // namespace matrix
-} // namespace CTL
+} // namespace KCT

@@ -12,7 +12,7 @@
 #include "VectorFunctionI.h"
 #include "stringFormatter.h"
 
-namespace CTL {
+namespace KCT {
 namespace util {
     /** Class for evaluation of sampled functions on a domain [start, end].
      *
@@ -344,4 +344,4 @@ namespace util {
     };
 
 } // namespace util
-} // namespace CTL
+} // namespace KCT

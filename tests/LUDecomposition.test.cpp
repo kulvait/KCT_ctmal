@@ -14,9 +14,9 @@
 /**First test is simple, just computing Sebastian least squares problem from the excercises.
  *
  */
-using namespace CTL;
-using namespace CTL::util;
-using namespace CTL::matrix;
+using namespace KCT;
+using namespace KCT::util;
+using namespace KCT::matrix;
 
 TEST_CASE("TEST: Matrix norm", "Matrix norm properties")
 {

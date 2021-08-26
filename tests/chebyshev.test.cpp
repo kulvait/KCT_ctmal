@@ -6,11 +6,11 @@
 #include "FUN/ChebyshevPolynomialsExplicit.hpp"
 #include "stringFormatter.h"
 
-using namespace CTL;
+using namespace KCT;
 
 /// Testing correctness of legendre polynomials and its derivatives
 
-TEST_CASE("CTL.util.ChebyshevPolynomialsExplicit.evaluate",
+TEST_CASE("KCT.util.ChebyshevPolynomialsExplicit.evaluate",
           "[polynomial][chebyshev][NOPRINT][NOVIZ]")
 {
     // First define Chebyshev Polynomial of degree 110
@@ -37,7 +37,7 @@ TEST_CASE("CTL.util.ChebyshevPolynomialsExplicit.evaluate",
     delete[] values;
 }
 
-TEST_CASE("CTL.util.ChebyshevPolynomialsExplicit.valueAt",
+TEST_CASE("KCT.util.ChebyshevPolynomialsExplicit.valueAt",
           "[polynomial][chebyshevevaluate][NOPRINT][NOVIZ]")
 {
     // First define Chebyshev Polynomial of degree 110
@@ -74,7 +74,7 @@ TEST_CASE("CTL.util.ChebyshevPolynomialsExplicit.valueAt",
     delete[] values;
 }
 
-TEST_CASE("CTL.util.ChebyshevPolynomialsExplicit.printChebyshevPolynomial",
+TEST_CASE("KCT.util.ChebyshevPolynomialsExplicit.printChebyshevPolynomial",
           "[polynomial][chebyshev][PRINT][NOVIZ]")
 {
     // First define Chebyshev Polynomial of degree 110

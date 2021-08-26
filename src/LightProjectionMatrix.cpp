@@ -1,6 +1,6 @@
 #include "MATRIX/LightProjectionMatrix.hpp"
 
-namespace CTL {
+namespace KCT {
 namespace matrix {
     // matrix object will be square with the third row unit vector towards detector
     LightProjectionMatrix::LightProjectionMatrix(const double* sourcePosition,
@@ -389,4 +389,4 @@ vector9[8] = VN[2];
         return v;
     }
 } // namespace matrix
-} // namespace CTL
+} // namespace KCT

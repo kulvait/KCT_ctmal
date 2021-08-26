@@ -12,8 +12,8 @@
 /**First test is simple, just computing Sebastian least squares problem from the excercises.
  *
  */
-using namespace CTL;
-using namespace CTL::matrix;
+using namespace KCT;
+using namespace KCT::matrix;
 
 /**Test if the procedure will find the correct decomposition
  *
