@@ -1,5 +1,6 @@
 #pragma once
 
+#include "PROG/KCTException.hpp"
 #include "stringFormatter.h"
 
 #ifdef DEBUG
@@ -31,10 +32,12 @@ namespace util {
                 this->end = end;
             } else
             {
-                io::throwerr("VectorFunctionI:You have supplied the range [start, end] = [%f, %f] "
-                             "but the value of "
-                             "start needs to be less then the value of end.",
-                             start, end);
+                std::string ERR = io::xprintf(
+                    "VectorFunctionI:You have supplied the range [start, end] = [%f, %f] "
+                    "but the value of "
+                    "start needs to be less then the value of end.",
+                    start, end);
+                KCTERR(ERR);
             }
             this->dimension = dimension;
         }
@@ -85,7 +88,7 @@ namespace util {
         {
             if(granularity < 2)
             {
-                io::throwerr("It is not possible to plot functions with granularity less than 2");
+                KCTERR("It is not possible to plot functions with granularity less than 2");
             }
             std::vector<double> taxis;
             std::vector<std::vector<double>> values;
@@ -139,6 +142,10 @@ namespace util {
         {
             plotMatplotlib(granularity, names, title);
             plt::save(imageFile);
+            // The call plt::show() sanitize behind the scenes but save does not
+            // https://www.activestate.com/resources/quick-reads/how-to-clear-a-plot-in-python/
+            // https://stackoverflow.com/questions/21875356/saving-a-figure-after-invoking-pyplot-show-results-in-an-empty-file
+            plt::clf();
         }
 #endif
 
