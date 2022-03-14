@@ -34,15 +34,15 @@ namespace matrix {
         // Move assignment
         Matrix& operator=(Matrix&& other);
 
-/**
-* @brief Create submatrix formed by removal of the row and column coresponding to m and n.
-*
-* @param m
-* @param n
-*
-* @return 
-*/
-	Matrix minorSubMatrix(uint32_t m, uint32_t n) const;
+        /**
+         * @brief Create submatrix formed by removal of the row and column coresponding to m and n.
+         *
+         * @param m
+         * @param n
+         *
+         * @return
+         */
+        Matrix minorSubMatrix(uint32_t m, uint32_t n) const;
 
         static Matrix unitDiagonal(uint32_t m, uint32_t n)
         {
