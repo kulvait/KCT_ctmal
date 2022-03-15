@@ -6,11 +6,11 @@
 #include <mkl.h>
 
 // Internal libs
-#include "MATRIX/ProjectionMatrix.hpp"
+#include "GEOMETRY/Geometry3DParallelCameraMatrix.hpp"
 #include "MATRIX/utils.hpp"
 
-//Interfaces
-#include "MATRIX/Geometry3DParallelI.hpp"
+// Interfaces
+#include "GEOMETRY/Geometry3DParallelI.hpp"
 
 namespace KCT {
 namespace geometry {
@@ -30,6 +30,14 @@ class Geometry3DParallel : public Geometry3DParallelI {
   // Analogous to ASTRA parallel3d
   Geometry3DParallel(const uint32_t anglesCount, const uint32_t angleNum,
                      const double x_spacing, const double y_spacing);
+  bool operator==(const Geometry3DParallel &rhs) {
+    if (cosDetectorTilt == rhs.cosDetectorTilt &&
+        parallelCameraMatrix == rhs.parallelCameraMatrix) {
+      return true;
+    } else {
+      return false;
+    }
+  }
   // Implements Geometry3DParallelI
   double pixelSkew() const;
   double detectorTilt() const;
@@ -55,8 +63,8 @@ class Geometry3DParallel : public Geometry3DParallelI {
   std::array<double, 8> projectionMatrixAsVector8() const;
 
   private:
-  std::array<double, 8> matrix; // Projection matrix
-  double projectorTilt;
+  Geometry3DParallelCameraMatrix parallelCameraMatrix; // Projection matrix
+  double cosDetectorTilt;
   const double zeroPrecisionTolerance = 1e-10;
 };
 

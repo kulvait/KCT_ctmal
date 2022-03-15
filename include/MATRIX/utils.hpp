@@ -11,6 +11,12 @@ namespace matrix {
      */
     template <std::size_t N>
     double vectorDotProduct(std::array<double, N> v, std::array<double, N> w);
+
+/**
+* @return Vector product of two 3D vectors
+*/
+std::array<double, 3> vectorProduct(std::array<double, 3> v, std::array<double, 3> w);
+
     /**
      * @return l2 norm of a vector v
      */

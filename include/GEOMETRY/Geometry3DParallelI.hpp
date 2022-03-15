@@ -43,14 +43,6 @@ namespace geometry {
         virtual std::array<double, 3> directionVectorVY() const = 0;
 
         /**
-         * Normal to the detector.
-         *
-         * @return Normal to detector pointing towards source.
-         */
-        virtual void normalToDetector(double* vector3) const = 0;
-        virtual std::array<double, 3> normalToDetector() const = 0;
-
-        /**
          * Get minimal vector (x,y,z) that gets projected to (PX, PY).
          * It corresponds to projector crossing origin.
          *
@@ -60,9 +52,9 @@ namespace geometry {
          * @return Vector projecting to (pi,pj).
          */
         virtual void
-        backprojectToPosition(const double pi, const double pj, double* vector3) const = 0;
-        virtual std::array<double, 3> backprojectToPosition(const double pi,
-                                                          const double pj) const = 0;
+        backprojectToPosition(const double PX, const double PY, double* vector3) const = 0;
+        virtual std::array<double, 3> backprojectToPosition(const double PX,
+                                                          const double PY) const = 0;
 
         /**
          * Projection to the detector from the word coordinates.
@@ -74,9 +66,9 @@ namespace geometry {
          * @param pj
          */
         virtual void project(
-            const double x0, const double x1, const double x2, double* pi, double* pj) const = 0;
+            const double x0, const double x1, const double x2, double* PX, double* PY) const = 0;
         virtual void
-        project(const float x0, const float x1, const float x2, float* pi, float* pj) const = 0;
+        project(const float x0, const float x1, const float x2, float* PX, float* PY) const = 0;
 
         virtual void projectionMatrixAsVector8(double* vector8) const = 0;
         virtual std::array<double, 8> projectionMatrixAsVector8() const = 0;

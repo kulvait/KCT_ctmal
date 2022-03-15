@@ -8,12 +8,16 @@
 #include <iostream>
 
 // Internal libraries
+#include "MATRIX/Matrix.hpp"
+
+// Interfaces
 #include "GEOMETRY/Geometry3DParallelCameraMatrixI.hpp"
 
 namespace KCT {
 namespace geometry {
 
-using namespace KCT.matrix;
+using namespace KCT::matrix;
+
 /**
  *Class to represent projection matrices of parallel rays that are 2x4 matrices.
  */
@@ -31,22 +35,27 @@ class Geometry3DParallelCameraMatrix : public Geometry3DParallelCameraMatrixI {
                                  const std::array<double, 3> detectorOrigin,
                                  const std::array<double, 3> VX,
                                  const std::array<double, 3> VY);
-  Geometry3DParallelCameraMatrix(const uint32_t anglesCount, const uint32_t angleNum,
-                     const double x_spacing, const double y_spacing);
+  Geometry3DParallelCameraMatrix(const uint32_t anglesCount,
+                                 const uint32_t angleNum,
+                                 const double x_spacing,
+                                 const double y_spacing);
   bool operator==(const Geometry3DParallelCameraMatrix &rhs) {
-    for (int i = 0; i != 2; i++) {
-      for (int j = 0; j != 4; j++) {
-        if ((*this)(i, j) != (rhs)(i, j))
-          return false;
-      }
+    for (int i = 0; i != 8; i++) {
+      if (this->matrix[i] != rhs.matrix[i])
+        return false;
     }
     return true;
   }
   // Implements Geometry3DParallelCameraMatrixI
   double pixelSkew() const;
+
   void directionVectorVR(double *vector3) const;
   void directionVectorVX(double *vector3) const;
   void directionVectorVY(double *vector3) const;
+  /**
+  *
+  * @return Unit vector in the direction of incomming rays or its oposite.
+  */
   std::array<double, 3> directionVectorVR() const;
   std::array<double, 3> directionVectorVX() const;
   std::array<double, 3> directionVectorVY() const;
