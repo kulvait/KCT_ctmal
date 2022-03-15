@@ -1,14 +1,4 @@
-#pragma once
-// Logging
-#include <plog/Log.h>
-
-// Standard libraries
-#include <array>
-#include <iomanip>
-#include <iostream>
-
-// Internal libraries
-#include "GEOMETRY/Geometry3DParallelCameraMatrixI.hpp"
+#include "GEOMETRY/Geometry3DParallelCameraMatrix.hpp"
 
 namespace KCT {
 namespace geometry {

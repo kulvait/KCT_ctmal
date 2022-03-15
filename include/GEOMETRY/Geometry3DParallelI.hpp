@@ -10,7 +10,7 @@
 // Internal libraries
 
 namespace KCT {
-namespace matrix {
+namespace geometry {
     /**
      *Class to represent parallel ray geometry in 3D.
      */

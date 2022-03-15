@@ -1,16 +1,4 @@
-#pragma once
-// Logging
-#include <plog/Log.h>
-
-// External libs
-#include <mkl.h>
-
-// Internal libs
-#include "MATRIX/ProjectionMatrix.hpp"
-#include "MATRIX/utils.hpp"
-
-//Interfaces
-#include "MATRIX/Geometry3DParallelI.hpp"
+#include "GEOMETRY/Geometry3DParallel.hpp"
 
 namespace KCT {
 namespace geometry {
