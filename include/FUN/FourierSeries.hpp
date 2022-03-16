@@ -209,19 +209,19 @@ namespace util {
                         array[i - startReportingDegree] = 1.0;
                     } else if(i == 1)
                     {
-                        array[i - startReportingDegree] = std::sin(x * piD);
+                        array[i - startReportingDegree] = std::sin(x * piF);
                     } else if(i == 2)
                     {
-                        array[i - startReportingDegree] = std::cos(x * piD);
+                        array[i - startReportingDegree] = std::cos(x * piF);
                     } else
                     {
                         n = (i - 1) / 2;
                         if(i % 2 == 1)
                         {
-                            array[i - startReportingDegree] = std::sin(x * 2 * piD * n);
+                            array[i - startReportingDegree] = std::sin(x * 2 * piF * n);
                         } else
                         {
-                            array[i - startReportingDegree] = std::cos(x * 2 * piD * n);
+                            array[i - startReportingDegree] = std::cos(x * 2 * piF * n);
                         }
                     }
                 }
@@ -235,10 +235,10 @@ namespace util {
                         array[i - startReportingDegree] = 1.0;
                     } else if(i % 2 == 1)
                     {
-                        array[i - startReportingDegree] = std::sin(x * 2 * piD * n);
+                        array[i - startReportingDegree] = std::sin(x * 2 * piF * n);
                     } else
                     {
-                        array[i - startReportingDegree] = std::cos(x * 2 * piD * n);
+                        array[i - startReportingDegree] = std::cos(x * 2 * piF * n);
                     }
                 }
             }
@@ -284,7 +284,7 @@ namespace util {
         double transformationSlope;
         double transformationIntercept;
         const float piF = 3.141592653589793238462643383279502884;
-        const float piD = 3.141592653589793238462643383279502884;
+        const double piD = 3.141592653589793238462643383279502884;
 
         uint32_t numberOfFunctions;
         uint32_t startReportingDegree;

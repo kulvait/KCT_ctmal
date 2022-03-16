@@ -9,6 +9,9 @@
 #include "mkl.h"
 #include "stringFormatter.h"
 
+//Internal libraries
+#include "PROG/KCTException.hpp"
+
 namespace KCT {
 namespace matrix {
     /// Row major matrix with m rows and n columns

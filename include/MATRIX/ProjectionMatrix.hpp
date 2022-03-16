@@ -125,7 +125,6 @@ namespace matrix {
         std::string toString(std::string name = "P") const;
 
     private:
-        bool sourceComputed = false;
         std::array<double, 3> source;
         const double zeroPrecisionTolerance = 1e-10;
     };

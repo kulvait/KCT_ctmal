@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.11)
 project(CTIOL)
 
 set(CMAKE_INSTALL_PREFIX $ENV{HOME}/bin)
-set(CMAKE_CXX_STANDARD 14)#Supported values are 98, 11 and 14.
+set(CMAKE_CXX_STANDARD 17)#Supported values are 98, 11 and 14.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
 message("Current value of flags is ${CMAKE_CXX_FLAGS} and debug is ${CMAKE_CXX_FLAGS_DEBUG} and release is ${CMAKE_CXX_FLAGS_RELEASE}")
@@ -33,8 +33,11 @@ include_directories(${MKL_INCLUDE_DIRS})
 include_directories(${CMAKE_SOURCE_DIR}/submodules/matplotlib-cpp)
 
 #Python for matplotlib
-find_package(PythonLibs 2.7)
-include_directories(${PYTHON_INCLUDE_DIRS})
+#find_package(PythonLibs 2.7)
+#include_directories(${PYTHON_INCLUDE_DIRS})
+find_package (Python3 COMPONENTS Interpreter Development NumPy)
+include_directories(${Python3_INCLUDE_DIRS})
+include_directories(${Python3_NumPy_INCLUDE_DIRS})
 
 #CT input output library
 FILE( GLOB CTIOL_SRC ${CMAKE_SOURCE_DIR}/submodules/CTIOL/src/*.cpp ${CMAKE_SOURCE_DIR}/submodules/CTIOL/src/PROG/*.cpp)
@@ -91,12 +94,12 @@ endif (DOXYGEN_FOUND)
 #Testing
 include_directories(${CMAKE_SOURCE_DIR}/tests)
 add_library(Catch INTERFACE)
-target_include_directories(Catch INTERFACE ${CMAKE_SOURCE_DIR}/submodules/Catch2/single_include/catch2)
+target_include_directories(Catch INTERFACE ${CMAKE_SOURCE_DIR}/submodules/Catch2/single_include)
 FILE( GLOB TST_SRC ${CMAKE_SOURCE_DIR}/tests/*.cpp )
 add_executable(test_ctmal ${TST_SRC})
 target_link_libraries(test_ctmal Catch)
 target_link_libraries(test_ctmal ctiol)
 target_link_libraries(test_ctmal ctmal)
-target_link_libraries(test_ctmal ${PYTHON_LIBRARIES})
+target_link_libraries(test_ctmal ${Python3_LIBRARIES})
 enable_testing()
 add_test(NAME CTMALTest COMMAND test_ctmal)

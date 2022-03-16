@@ -6,7 +6,7 @@ namespace KCT {
 namespace matrix {
     class PivotingException : public std::exception
     {
-        std::string msg;
+        const std::string msg;
 
     public:
         PivotingException(std::string msg)
@@ -14,7 +14,7 @@ namespace matrix {
         {
         }
 
-        const char* what() { return msg.c_str(); }
+        const char* what() const throw() { return msg.c_str(); }
     };
 
 } // namespace matrix

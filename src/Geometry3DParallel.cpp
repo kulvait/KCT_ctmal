@@ -25,26 +25,23 @@ namespace geometry {
         std::array<double, 3> unitRayDirection = parallelCameraMatrix.directionVectorVR();
         cosDetectorTilt = std::abs(vectorDotProduct<3>(normalToDetector, unitRayDirection));
     }
-    // Analogous to ASTRA parallel3d
-    Geometry3DParallel::Geometry3DParallel(const uint32_t anglesCount,
-                                           const uint32_t angleNum,
-                                           const double x_spacing,
-                                           const double y_spacing)
-        : parallelCameraMatrix(anglesCount, angleNum, x_spacing, y_spacing)
+
+    bool Geometry3DParallel::operator==(const Geometry3DParallel& rhs)
     {
-        cosDetectorTilt = 1.0;
+        if(cosDetectorTilt == rhs.cosDetectorTilt
+           && parallelCameraMatrix == rhs.parallelCameraMatrix)
+        {
+            return true;
+        } else
+        {
+            return false;
+        }
     }
 
     // Implements Geometry3DParallelI
-    double Geometry3DParallel::pixelSkew() const
-    {
-        // I have to normalize VX and VY and compute their scalar product
-        std::array<double, 3> VXN = normalizeVector<3>(parallelCameraMatrix.directionVectorVX());
-        std::array<double, 3> VYN = normalizeVector<3>(parallelCameraMatrix.directionVectorVY());
-        // Here without absolute value as the vectors VX and VY direction matters
-        return vectorDotProduct<3>(VXN, VYN);
-    }
+    double Geometry3DParallel::pixelSkew() const { return parallelCameraMatrix.pixelSkew(); }
     double Geometry3DParallel::detectorTilt() const { return cosDetectorTilt; }
+    void Geometry3DParallel::detectorTilt(double* scalar) const { *scalar = cosDetectorTilt; }
     void Geometry3DParallel::directionVectorVR(double* vector3) const
     {
         parallelCameraMatrix.directionVectorVR(vector3);
@@ -105,6 +102,56 @@ namespace geometry {
     std::array<double, 8> Geometry3DParallel::projectionMatrixAsVector8() const
     {
         return parallelCameraMatrix.projectionMatrixAsVector8();
+    }
+
+    // Static functions
+    // Helper ASTRA parallel3d
+    Geometry3DParallel
+    Geometry3DParallel::initializeFromParameters(const double detector_spacing_x,
+                                                 const double detector_spacing_y,
+                                                 const uint32_t projection_size_x,
+                                                 const uint32_t projection_size_y,
+                                                 const double angle)
+    {
+        Geometry3DParallelCameraMatrix parallelCameraMatrix
+            = Geometry3DParallelCameraMatrix::initializeFromParameters(
+                detector_spacing_x, detector_spacing_y, projection_size_x, projection_size_y,
+                angle);
+        double cosDetectorTilt = 1.0;
+        return Geometry3DParallel(parallelCameraMatrix, cosDetectorTilt);
+    }
+
+    // Helper ASTRA parallel3d_vec
+    Geometry3DParallel
+    Geometry3DParallel::initializeFromParameters(const uint32_t projection_size_x,
+                                                 const uint32_t projection_size_y,
+                                                 const std::array<double, 3> rayDirection,
+                                                 const std::array<double, 3> detectorCenter,
+                                                 const std::array<double, 3> VX,
+                                                 const std::array<double, 3> VY)
+    {
+        double x_shift = -0.5 * double(projection_size_x);
+        double y_shift = -0.5 * double(projection_size_y);
+        std::array<double, 3> detector_x_shift = multiplyVectorByConstant<3>(VX, x_shift);
+        std::array<double, 3> detector_y_shift = multiplyVectorByConstant<3>(VY, y_shift);
+        std::array<double, 3> detectorOrigin = vectorSum<3>(detectorCenter, detector_x_shift);
+        detectorOrigin = vectorSum<3>(detectorOrigin, detector_y_shift);
+        return Geometry3DParallel(rayDirection, detectorOrigin, VX, VY);
+    }
+
+    // Helper equidistant angles
+    Geometry3DParallel
+    Geometry3DParallel::initializeFromParameters(const double detector_spacing_x,
+                                                 const double detector_spacing_y,
+                                                 const uint32_t projection_size_x,
+                                                 const uint32_t projection_size_y,
+                                                 const uint32_t anglesCount,
+                                                 const uint32_t angleNum)
+    {
+        double angleIncrement = pi / anglesCount;
+        double angle = angleNum * angleIncrement;
+        return initializeFromParameters(detector_spacing_x, detector_spacing_y, projection_size_x,
+                                        projection_size_y, angle);
     }
 
 } // namespace geometry

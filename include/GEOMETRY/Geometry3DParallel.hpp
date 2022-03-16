@@ -22,30 +22,16 @@ namespace geometry {
     {
     public:
         Geometry3DParallel(const Geometry3DParallelCameraMatrix& pm, const double cosDetectorTilt);
-        // Analogous to ASTRA parallel3d_vec
         Geometry3DParallel(const std::array<double, 3> rayDirection,
                            const std::array<double, 3> detectorOrigin,
                            const std::array<double, 3> VX,
                            const std::array<double, 3> VY);
-        // Analogous to ASTRA parallel3d
-        Geometry3DParallel(const uint32_t anglesCount,
-                           const uint32_t angleNum,
-                           const double x_spacing,
-                           const double y_spacing);
-        bool operator==(const Geometry3DParallel& rhs)
-        {
-            if(cosDetectorTilt == rhs.cosDetectorTilt
-               && parallelCameraMatrix == rhs.parallelCameraMatrix)
-            {
-                return true;
-            } else
-            {
-                return false;
-            }
-        }
+        bool operator==(const Geometry3DParallel& rhs);
+
         // Implements Geometry3DParallelI
         double pixelSkew() const;
         double detectorTilt() const;
+        void detectorTilt(double* scalar) const;
         void directionVectorVR(double* vector3) const;
         void directionVectorVX(double* vector3) const;
         void directionVectorVY(double* vector3) const;
@@ -64,10 +50,83 @@ namespace geometry {
         void projectionMatrixAsVector8(double* vector8) const;
         std::array<double, 8> projectionMatrixAsVector8() const;
 
+        /**
+         * Auxiliary helper function
+         *
+         * It is analogous to ASTRA parallel3d initialization, see
+         * https://www.astra-toolbox.com/docs/geom3d.html#projection-geometries
+         * I am not sure if ASTRA obeys the same convention for angle meaning, needs to be tested.
+         *
+         * @param detector_spacing_x X-distance between two adjacent pixels on detector
+         * @param detector_spacing_y Y-distance between two adjacent pixels on detector
+         * @param projection_size_x Count of X detector pixels
+         * @param projection_size_y Count of Y detector pixels
+         * @param angle Angle in radians between positive X axis and the direction vector VR
+         * computed ccw to the X axis
+         *
+         * @return Geometry3DParallel object with given parameters
+         */
+        static Geometry3DParallel initializeFromParameters(const double detector_spacing_x,
+                                                           const double detector_spacing_y,
+                                                           const uint32_t projection_size_x,
+                                                           const uint32_t projection_size_y,
+                                                           const double angle);
+
+        /**
+         * Auxiliary helper function
+         *
+         * It is analogous to ASTRA parallel3d_vec initialization, see
+         * https://www.astra-toolbox.com/docs/geom3d.html#projection-geometries
+         *
+         * @param projection_size_x Count of X detector pixels
+         * @param projection_size_y Count of Y detector pixels
+         * @param rayDirection See
+         * https://kulvait.github.io/KCT_doc/posts/working-with-kct-cbct-5-parallel-beam-geometry.html
+         * @param detectorCenter See
+         * https://kulvait.github.io/KCT_doc/posts/working-with-kct-cbct-5-parallel-beam-geometry.html
+         * @param VX See
+         * https://kulvait.github.io/KCT_doc/posts/working-with-kct-cbct-5-parallel-beam-geometry.html
+         * @param VY See
+         * https://kulvait.github.io/KCT_doc/posts/working-with-kct-cbct-5-parallel-beam-geometry.html
+         *
+         * @return Geometry3DParallel object with given parameters
+         */
+        static Geometry3DParallel
+        initializeFromParameters(const uint32_t projection_size_x,
+                                 const uint32_t projection_size_y,
+                                 const std::array<double, 3> rayDirection,
+                                 const std::array<double, 3> detectorCenter,
+                                 const std::array<double, 3> VX,
+                                 const std::array<double, 3> VY);
+
+        /**
+         *
+         * Auxiliary helper function
+         *
+         * Intended to distribute directions of incomming rays around [0,pi) for given number of
+         * angles
+         *
+         * @param detector_spacing_x X-distance between two adjacent pixels on detector
+         * @param detector_spacing_y Y-distance between two adjacent pixels on detector
+         * @param projection_size_x Count of X detector pixels
+         * @param projection_size_y Count of Y detector pixels
+         * @param anglesCount Number of anges in the interval [0,pi)
+         * @param angleNum Angle ID.
+         *
+         * @return Geometry3DParallel object with given parameters
+         */
+        static Geometry3DParallel initializeFromParameters(const double detector_spacing_x,
+                                                           const double detector_spacing_y,
+                                                           const uint32_t projection_size_x,
+                                                           const uint32_t projection_size_y,
+                                                           const uint32_t anglesCount,
+                                                           const uint32_t angleNum);
+
     private:
         Geometry3DParallelCameraMatrix parallelCameraMatrix; // Projection matrix
         double cosDetectorTilt;
-        const double zeroPrecisionTolerance = 1e-10;
+        static constexpr double zeroPrecisionTolerance = 1e-10;
+        static constexpr double pi = 3.141592653589793238462643383279502884;
     };
 
 } // namespace geometry
