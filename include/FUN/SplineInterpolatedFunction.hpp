@@ -286,11 +286,11 @@ namespace util {
         // move constructor
         SplineInterpolatedFunction(SplineInterpolatedFunction&& other) noexcept
             : SplineInterpolatedFunction(
-                  nullptr,
-                  0,
-                  0,
-                  0.0,
-                  0.0) // initialize with 0 breakpoints just to be able to destruct it
+                nullptr,
+                0,
+                0,
+                0.0,
+                0.0) // initialize with 0 breakpoints just to be able to destruct it
         {
             swap(*this, other);
         }

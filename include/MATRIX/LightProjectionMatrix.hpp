@@ -2,14 +2,13 @@
 // Logging
 #include <plog/Log.h>
 
-//External libs
+// External libs
 #include <mkl.h>
 
-
-//Internal libs
-#include "MATRIX/utils.hpp"
+// Internal libs
 #include "MATRIX/CameraI.hpp"
 #include "MATRIX/ProjectionMatrix.hpp"
+#include "MATRIX/utils.hpp"
 
 namespace KCT {
 namespace matrix {
@@ -19,7 +18,7 @@ namespace matrix {
     class LightProjectionMatrix : public CameraI
     {
     public:
-        LightProjectionMatrix(const double* sourcePosition,const double* vector9);
+        LightProjectionMatrix(const double* sourcePosition, const double* vector9);
         LightProjectionMatrix(const ProjectionMatrix& pm);
         // Implements CameraI
         std::array<double, 3> sourcePosition() const;
@@ -30,10 +29,12 @@ namespace matrix {
         std::array<double, 2> principalRayProjection() const;
         std::array<double, 3> normalToDetector() const;
         std::array<double, 3> directionToPosition(const double pi, const double pj) const;
-        void project(const double x0, const double x1, const double x2, double* pi, double* pj) const;
+        void
+        project(const double x0, const double x1, const double x2, double* pi, double* pj) const;
         void project(const float x0, const float x1, const float x2, float* pi, float* pj) const;
-        void project0(const double X0, const double X1, const double X2, double* pi, double* pj) const;
-        void project0( const float X0, const float X1, const float X2, float* pi, float* pj) const;
+        void
+        project0(const double X0, const double X1, const double X2, double* pi, double* pj) const;
+        void project0(const float X0, const float X1, const float X2, float* pi, float* pj) const;
         std::array<double, 2> focalLength() const;
         std::array<double, 2> pixelSizes(const double sourceToDetector) const;
         double sourceToDetectorFromPX(const double PX) const;
@@ -58,7 +59,7 @@ namespace matrix {
 
     private:
         std::array<double, 3> source;
-        std::array<double, 9> matrix;//Projection matrix without fourth row
+        std::array<double, 9> matrix; // Projection matrix without fourth row
     };
 
 } // namespace matrix

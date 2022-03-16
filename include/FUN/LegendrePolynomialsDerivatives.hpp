@@ -92,7 +92,7 @@ namespace util {
 
         LegendrePolynomialsDerivatives(const LegendrePolynomialsDerivatives& other)
             : LegendrePolynomialsDerivatives(
-                  other.polynomialDegree, other.start, other.end, other.startReportingDegree)
+                other.polynomialDegree, other.start, other.end, other.startReportingDegree)
         {
 
         } // Copy constructor

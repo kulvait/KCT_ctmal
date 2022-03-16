@@ -144,8 +144,7 @@ namespace matrix {
         virtual std::array<double, 9> projectionMatrixAsVector9() const = 0;
 
         virtual void inverseProjectionMatrixAsVector16(double* vector16) const = 0;
-        virtual std::array<double, 16>
-        inverseProjectionMatrixAsVector16() const = 0;
+        virtual std::array<double, 16> inverseProjectionMatrixAsVector16() const = 0;
 
         virtual void inverseProjectionMatrixAsVector9(double* vector9) const = 0;
         virtual std::array<double, 9> inverseProjectionMatrixAsVector9() const = 0;

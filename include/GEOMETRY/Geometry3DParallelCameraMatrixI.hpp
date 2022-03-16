@@ -48,7 +48,7 @@ namespace geometry {
         virtual void
         backprojectToPosition(const double PX, const double PY, double* vector3) const = 0;
         virtual std::array<double, 3> backprojectToPosition(const double PX,
-                                                          const double PY) const = 0;
+                                                            const double PY) const = 0;
 
         /**
          * Projection to the detector from the word coordinates.
@@ -67,5 +67,5 @@ namespace geometry {
         virtual void projectionMatrixAsVector8(double* vector8) const = 0;
         virtual std::array<double, 8> projectionMatrixAsVector8() const = 0;
     };
-} // namespace matrix
+} // namespace geometry
 } // namespace KCT

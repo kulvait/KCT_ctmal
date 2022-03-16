@@ -168,7 +168,8 @@ public:
      * This function do a spline fitting based on the data in the arrays t and y that are named
      * in https://software.intel.com/en-us/mkl-developer-reference-c-df-newtask1d t=x and y=y We
      * do a memory sanitization by copying memory into the object buffers since we don't know if
-     * MKL internaly does deep copy to avoid possible memory leaks. Default parameters form invalid boundary condition.
+     * MKL internaly does deep copy to avoid possible memory leaks. Default parameters form invalid
+     * boundary condition.
      *
      * @param t
      * @param y

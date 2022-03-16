@@ -79,7 +79,7 @@ namespace util {
 
         ChebyshevPolynomialsExplicit(const ChebyshevPolynomialsExplicit& other)
             : ChebyshevPolynomialsExplicit(
-                  other.polynomialDegree, other.start, other.end, other.startReportingDegree)
+                other.polynomialDegree, other.start, other.end, other.startReportingDegree)
         {
 
         } // Copy constructor
@@ -387,7 +387,7 @@ namespace util {
         {
             for(uint32_t i = startReportingDegree; i < polynomialDegree + 1; i++)
             {
-                if(i %2 == 0)
+                if(i % 2 == 0)
                 {
                     array[i - startReportingDegree] = 1.0f;
                 } else
@@ -401,7 +401,7 @@ namespace util {
         {
             for(uint32_t i = startReportingDegree; i < polynomialDegree + 1; i++)
             {
-                if(i %2 == 0)
+                if(i % 2 == 0)
                 {
                     array[i - startReportingDegree] = 1.0;
                 } else
