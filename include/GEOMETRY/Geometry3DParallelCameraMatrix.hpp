@@ -8,9 +8,9 @@
 #include <iostream>
 
 // Internal libraries
+#include "MATRIX/LUDoolittleForm.hpp"
 #include "MATRIX/Matrix.hpp"
 #include "MATRIX/SquareMatrix.hpp"
-#include "MATRIX/LUDoolittleForm.hpp"
 #include "MATRIX/utils.hpp"
 #include "PROG/KCTException.hpp"
 
@@ -69,10 +69,11 @@ public:
      *
      * @param detector_spacing_x X-distance between two adjacent pixels on detector
      * @param detector_spacing_y Y-distance between two adjacent pixels on detector
-     * @param projection_size_x Count of X detector pixels
-     * @param projection_size_y Count of Y detector pixels
-     * @param angle Angle in radians between positive X axis and the direction vector VR computed
-     * ccw to the X axis
+     * @param projection_size_x Count of X detector pixels, col count
+     * @param projection_size_y Count of Y detector pixels, row count
+     * @param angle Angle in radians between positive X axis and the direction vector VR
+     * computed ccw to the X axis, consistent with Astra toolbox implementation, see
+     * https://github.com/astra-toolbox/astra-toolbox/blob/fa2ec619edb2994e828897e80c06e7fb35c55c44/src/ParallelProjectionGeometry3D.cpp#L178
      *
      * @return Geometry3DParallelCameraMatrix object with given parameters
      */

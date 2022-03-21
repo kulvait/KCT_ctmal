@@ -62,7 +62,8 @@ namespace geometry {
          * @param projection_size_x Count of X detector pixels
          * @param projection_size_y Count of Y detector pixels
          * @param angle Angle in radians between positive X axis and the direction vector VR
-         * computed ccw to the X axis
+         * computed ccw to the X axis, consistent with Astra toolbox implementation, see
+         * https://github.com/astra-toolbox/astra-toolbox/blob/fa2ec619edb2994e828897e80c06e7fb35c55c44/src/ParallelProjectionGeometry3D.cpp#L178
          *
          * @return Geometry3DParallel object with given parameters
          */

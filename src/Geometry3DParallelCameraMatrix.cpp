@@ -81,7 +81,8 @@ void Geometry3DParallelCameraMatrix::directionVectorVR(double* vector3) const
 void Geometry3DParallelCameraMatrix::directionVectorVX(double* vector3) const
 {
     std::array<double, 3> a;
-    std::copy(std::begin(projectionMatrixVector), std::begin(projectionMatrixVector) + 3, std::begin(a));
+    std::copy(std::begin(projectionMatrixVector), std::begin(projectionMatrixVector) + 3,
+              std::begin(a));
     double normSquared = vectorDotProduct<3>(a, a);
     a = multiplyVectorByConstant(a, 1.0 / normSquared);
     std::copy(std::begin(a), std::begin(a) + 3, vector3);
@@ -89,7 +90,8 @@ void Geometry3DParallelCameraMatrix::directionVectorVX(double* vector3) const
 void Geometry3DParallelCameraMatrix::directionVectorVY(double* vector3) const
 {
     std::array<double, 3> b;
-    std::copy(std::begin(projectionMatrixVector) + 4, std::begin(projectionMatrixVector) + 7, std::begin(b));
+    std::copy(std::begin(projectionMatrixVector) + 4, std::begin(projectionMatrixVector) + 7,
+              std::begin(b));
     double normSquared = vectorDotProduct<3>(b, b);
     b = multiplyVectorByConstant(b, 1.0 / normSquared);
     std::copy(std::begin(b), std::begin(b) + 3, vector3);
@@ -124,8 +126,10 @@ std::array<double, 3> Geometry3DParallelCameraMatrix::backprojectToPosition(cons
 {
     // https://kulvait.github.io/KCT_doc/posts/working-with-kct-cbct-5-parallel-beam-geometry.html
     std::array<double, 3> a, b;
-    std::copy(std::begin(projectionMatrixVector), std::begin(projectionMatrixVector) + 3, std::begin(a));
-    std::copy(std::begin(projectionMatrixVector) + 4, std::begin(projectionMatrixVector) + 7, std::begin(b));
+    std::copy(std::begin(projectionMatrixVector), std::begin(projectionMatrixVector) + 3,
+              std::begin(a));
+    std::copy(std::begin(projectionMatrixVector) + 4, std::begin(projectionMatrixVector) + 7,
+              std::begin(b));
     double aa, ab, bb;
     aa = vectorDotProduct<3>(a, a);
     ab = vectorDotProduct<3>(a, b);
@@ -190,6 +194,9 @@ Geometry3DParallelCameraMatrix::initializeFromParameters(const double detector_s
     std::array<double, 8> pvm;
     std::array<double, 3> a, b, VR, VX, VY;
     b[2] = 1.0 / detector_spacing_y;
+    // Astra toolbox consistent
+    // See also
+    // https://github.com/astra-toolbox/astra-toolbox/blob/fa2ec619edb2994e828897e80c06e7fb35c55c44/src/ParallelProjectionGeometry3D.cpp#L178
     VR[0] = std::cos(angle);
     VR[1] = std::sin(angle);
     a = vectorProduct(b, VR);
