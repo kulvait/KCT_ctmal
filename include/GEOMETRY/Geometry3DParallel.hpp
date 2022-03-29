@@ -29,7 +29,20 @@ namespace geometry {
         bool operator==(const Geometry3DParallel& rhs);
 
         // Implements Geometry3DParallelI
+        /**
+         * Cosine of the angle between PX and PY direction on the detector in word coordinates, it
+         * is 0.0 for rectangular pixels.
+         *
+         * @return Cos of the angle between VX and VY, dot product of unit vectors, 0.0 for
+         * rectangular pixels.
+         */
         double pixelSkew() const;
+        /**
+         * Cosine of the angle between the detector and surface orthogonal to incoming rays, for
+         * detector orthogonal to the rays it is 1.0.
+         *
+         * @return Absolute value of cosine of the normal vectors, often 1.0
+         */
         double detectorTilt() const;
         void detectorTilt(double* scalar) const;
         void directionVectorVR(double* vector3) const;

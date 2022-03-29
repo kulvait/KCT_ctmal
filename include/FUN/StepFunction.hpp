@@ -133,7 +133,7 @@ namespace util {
             this->valuesD = new double[baseSize * valuesPerFunction];
             this->valuesF = new float[baseSize * valuesPerFunction];
             // Fill this array only by values without offset.
-            if(bfi.getDataType() == io::DenSupportedType::double_)
+            if(bfi.getDataType() == io::DenSupportedType::FLOAT64)
             {
                 std::shared_ptr<io::Frame2DReaderI<double>> pr
                     = std::make_shared<io::DenFrame2DReader<double>>(inputFunctionsFile);
@@ -147,7 +147,7 @@ namespace util {
                         valuesF[i * valuesPerFunction + j] = float(f->get(j, 0));
                     }
                 }
-            } else if(bfi.getDataType() == io::DenSupportedType::float_)
+            } else if(bfi.getDataType() == io::DenSupportedType::FLOAT32)
             {
 
                 std::shared_ptr<io::Frame2DReaderI<float>> pr

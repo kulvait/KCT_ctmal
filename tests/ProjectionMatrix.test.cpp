@@ -17,6 +17,7 @@
 #include "PROG/RunTimeInfo.hpp"
 #include "catch.hpp"
 #include "stringFormatter.h"
+#include "helpers.test.hpp"
 
 /**First test is simple, just computing Sebastian least squares problem from the excercises.
  *
@@ -25,27 +26,6 @@ using namespace KCT;
 using namespace KCT::util;
 using namespace KCT::matrix;
 
-// Helper functions before tests
-std::array<double, 3> vecnorm(std::array<double, 3> v)
-{
-    std::array<double, 3> n;
-    double na = std::sqrt(v[1] * v[1] + v[2] * v[2] + v[0] * v[0]);
-    n[0] = v[0] / na;
-    n[1] = v[1] / na;
-    n[2] = v[2] / na;
-    return n;
-}
-
-template <uint32_t N>
-double normdiff(std::array<double, N> v, std::array<double, N> w)
-{
-    double nrmsq = 0.0;
-    for(uint32_t i = 0; i != N; i++)
-    {
-        nrmsq += (v[i] - w[i]) * (v[i] - w[i]);
-    }
-    return std::sqrt(nrmsq);
-}
 
 TEST_CASE("ProjectionMatrix.toString", "[print]")
 {
@@ -60,60 +40,6 @@ TEST_CASE("ProjectionMatrix.toString", "[print]")
     LOGD << std::endl << pm_shift.toString();
 }
 
-bool almostEqual(double x, double y, double tol = 1e-10)
-{
-    double dif = x - y;
-    if(std::abs(dif) < tol)
-    {
-        return true;
-    } else
-    {
-        return false;
-    }
-}
-
-template <int N>
-bool almostEqual(std::array<double, N> x, std::array<double, N> y, double tol = 1e-10)
-{
-    std::array<double, N> minusx = multiplyVectorByConstant<N>(x, -1.0);
-    std::array<double, N> vdf = vectorSum<N>(minusx, y);
-    double n = vectorNorm<N>(vdf);
-    if(n < tol)
-    {
-        return true;
-    } else
-    {
-        return false;
-    }
-}
-
-template <int N>
-bool almostEqualRelative(std::array<double, N> x, std::array<double, N> y, double tol = 1e-10)
-{
-    std::array<double, N> minusx = multiplyVectorByConstant<N>(x, -1.0);
-    std::array<double, N> vdf = vectorSum<N>(minusx, y);
-    double basenorm = vectorNorm<N>(x);
-    double n = vectorNorm<N>(vdf);
-    if(n / basenorm < tol)
-    {
-        return true;
-    } else
-    {
-        return false;
-    }
-}
-
-template <int N>
-std::string printVector(std::string name, std::array<double, N> x)
-{
-    std::string s = io::xprintf("%s: (", name.c_str());
-    for(uint32_t i = 0; i < N - 1; i++)
-    {
-        s += io::xprintf("%f, ", x[i]);
-    }
-    s += io::xprintf("%f)", x[N - 1]);
-    return s;
-}
 
 TEST_CASE("LightProjectionMatrix.cpp.testing", "[PM]")
 {

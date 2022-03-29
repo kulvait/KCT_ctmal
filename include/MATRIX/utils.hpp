@@ -38,7 +38,7 @@ namespace matrix {
     template <std::size_t N>
     std::array<double, N> normalizeVector(std::array<double, N> v);
     /**
-     * @return Unit vector with the direction of v
+     * @return c v
      */
     template <std::size_t N>
     std::array<double, N> multiplyVectorByConstant(std::array<double, N> v, const double c);

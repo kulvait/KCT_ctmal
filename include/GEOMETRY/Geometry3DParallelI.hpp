@@ -18,13 +18,19 @@ namespace geometry {
     {
     public:
         /**
-         * @return Cos of the angle between VX and VY, dot product of unit vectors.
+         * Cosine of the angle between PX and PY direction on the detector in word coordinates, it
+         * is 0.0 for rectangular pixels.
+         *
+         * @return Cos of the angle between VX and VY, dot product of unit vectors, 0.0 for
+         * rectangular pixels.
          */
         virtual double pixelSkew() const = 0;
 
         /**
-         * @return Absolute value of cos of the angle between VR and normalToDetector, dot product
-         * of unit vectors.
+         * Cosine of the angle between the detector and surface orthogonal to incoming rays, for
+         * detector orthogonal to the rays it is 1.0.
+         *
+         * @return Absolute value of cosine of the normal vectors, often 1.0
          */
         virtual double detectorTilt() const = 0;
         virtual void detectorTilt(double* scalar) const = 0;

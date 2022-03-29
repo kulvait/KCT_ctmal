@@ -105,6 +105,9 @@ public:
             } else if(s_order == DF_PP_CUBIC)
             {
                 coeffsSize = 4 * (numberOfBreakpoints - 1);
+            } else
+            {
+                KCTERR(io::xprintf("Not supported s_order=%d.", s_order))
             }
             std::copy(other.coeffs, other.coeffs + coeffsSize, coeffs);
             if(other.bc_internal != nullptr)

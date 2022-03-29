@@ -189,25 +189,32 @@ Geometry3DParallelCameraMatrix::initializeFromParameters(const double detector_s
                                                          const double detector_spacing_y,
                                                          const uint32_t projection_size_x,
                                                          const uint32_t projection_size_y,
-                                                         const double angle)
+                                                         const double omega)
 {
     std::array<double, 8> pvm;
     std::array<double, 3> a, b, VR, VX, VY;
-    b[2] = 1.0 / detector_spacing_y;
     // Astra toolbox consistent
     // See also
     // https://github.com/astra-toolbox/astra-toolbox/blob/fa2ec619edb2994e828897e80c06e7fb35c55c44/src/ParallelProjectionGeometry3D.cpp#L178
-    VR[0] = std::cos(angle);
-    VR[1] = std::sin(angle);
-    a = vectorProduct(b, VR);
-    a = normalizeVector<3>(a);
-    a = multiplyVectorByConstant(a, 1.0 / detector_spacing_x);
-    VX = multiplyVectorByConstant(a, detector_spacing_x * detector_spacing_x);
-    VY = multiplyVectorByConstant(b, detector_spacing_y * detector_spacing_y);
+    VR[0] = std::cos(omega);
+    VR[1] = std::sin(omega);
+    VR[2] = 0.0;
+    // Consistent with standard CBCT, see https://arxiv.org/pdf/2110.09841.pdf, Fig. 3
+    VX[0] = std::sin(omega);
+    VX[1] = -std::cos(omega);
+    VX[2] = 0.0;
+    a = multiplyVectorByConstant(VX, 1.0 / detector_spacing_x);
+    VX = multiplyVectorByConstant(VX, detector_spacing_x);
+    VY[0] = 0.0;
+    VY[1] = 0.0;
+    VY[2] = -detector_spacing_y;
+    b[0] = 0.0;
+    b[1] = 0.0;
+    b[2] = -1.0 / detector_spacing_y;
     std::copy(std::begin(a), std::end(a), std::begin(pvm));
-    pvm[3] = 0.5 * projection_size_x;
+    pvm[3] = 0.5 * projection_size_x - 0.5;
     std::copy(std::begin(a), std::end(a), std::begin(pvm) + 4);
-    pvm[7] = 0.5 * projection_size_y;
+    pvm[7] = 0.5 * projection_size_y - 0.5;
     return Geometry3DParallelCameraMatrix(std::begin(pvm));
 }
 
@@ -220,8 +227,8 @@ Geometry3DParallelCameraMatrix::initializeFromParameters(const uint32_t projecti
                                                          const std::array<double, 3> VX,
                                                          const std::array<double, 3> VY)
 {
-    double x_shift = -0.5 * double(projection_size_x);
-    double y_shift = -0.5 * double(projection_size_y);
+    double x_shift = -0.5 * (double(projection_size_x) - 1.0);
+    double y_shift = -0.5 * (double(projection_size_y) - 1.0);
     std::array<double, 3> detector_x_shift = multiplyVectorByConstant<3>(VX, x_shift);
     std::array<double, 3> detector_y_shift = multiplyVectorByConstant<3>(VY, y_shift);
     std::array<double, 3> detectorOrigin = vectorSum<3>(detectorCenter, detector_x_shift);

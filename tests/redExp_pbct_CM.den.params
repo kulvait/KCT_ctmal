@@ -1,0 +1,17 @@
+{
+  "_json_message": "Created using KCT script createCameraMatricesForCircularScanTrajectoryParallelRay3D.py",
+  "detector_centerx": 0.0,
+  "detector_centery": 0.0,
+  "detector_centerz": 0.0,
+  "endpoint": false,
+  "force": false,
+  "number_of_angles": 5001,
+  "omega_angular_range": 360,
+  "omega_zero": 0,
+  "outputMatrixFile": "redExp_pbct_CM.den",
+  "pixel_sizex": 0.001064,
+  "pixel_sizey": 0.001064,
+  "projection_sizex": 3927,
+  "projection_sizey": 900,
+  "write_params_file": true
+}
