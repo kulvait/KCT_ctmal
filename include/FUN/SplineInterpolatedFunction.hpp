@@ -141,12 +141,11 @@ namespace util {
                 err = io::xprintf(
                     "Basis size %d is greater than the number of functions in file %s, %d!",
                     basisSize, inputFunctionsFile.c_str(), bfi.dimz());
-                LOGE << err;
-                throw std::runtime_error(err);
+                KCTERR(err);
             }
             this->valuesPerFunction = bfi.dimx();
             // Fill this array only by values without offset.
-            if(bfi.getDataType() == io::DenSupportedType::double_)
+            if(bfi.getDataType() == io::DenSupportedType::FLOAT64)
             {
                 // Time shift does not apply here but when evaluating functions
                 double* times = new double[valuesPerFunction];
