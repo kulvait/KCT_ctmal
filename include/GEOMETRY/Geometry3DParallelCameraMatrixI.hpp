@@ -32,9 +32,20 @@ namespace geometry {
         virtual std::array<double, 3> directionVectorVY() const = 0;
 
         /**
-         * @return Cos of the angle between VX and VY, dot product of unit vectors.
+         * Cosine of the angle between PX and PY direction on the detector in word coordinates, it
+         * is 0.0 for rectangular pixels.
+         *
+         * @return Cos of the angle between VX and VY, dot product of unit vectors, 0.0 for
+         * rectangular pixels.
          */
         virtual double pixelSkew() const = 0;
+
+        /**
+         * Area of the pixel on the detector.
+         *
+         * @return |PX x PY| or |PX| |PY| sin (skew)
+         */
+        virtual double pixelArea() const = 0;
 
         /**
          * Get minimal vector (x,y,z) that gets projected to (PX, PY).

@@ -44,6 +44,7 @@ namespace geometry {
          * @return Absolute value of cosine of the normal vectors, often 1.0
          */
         double detectorTilt() const;
+        double pixelArea() const;
         void detectorTilt(double* scalar) const;
         void directionVectorVR(double* vector3) const;
         void directionVectorVX(double* vector3) const;

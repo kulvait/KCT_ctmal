@@ -69,6 +69,16 @@ double Geometry3DParallelCameraMatrix::pixelSkew() const
     return vectorDotProduct<3>(VXN, VYN);
 }
 
+double Geometry3DParallelCameraMatrix::pixelArea() const
+{
+    // I have to normalize VX and VY and compute their scalar product
+    std::array<double, 3> VX = directionVectorVX();
+    std::array<double, 3> VY = directionVectorVY();
+    std::array<double, 3> AreaVector = vectorProduct(VX, VY);
+    // Here without absolute value as the vectors VX and VY direction matters
+    return vectorNorm<3>(AreaVector);
+}
+
 void Geometry3DParallelCameraMatrix::directionVectorVR(double* vector3) const
 {
     std::array<double, 3> VXN = normalizeVector<3>(directionVectorVX());

@@ -40,6 +40,7 @@ public:
 
     // Implements Geometry3DParallelCameraMatrixI
     double pixelSkew() const;
+    double pixelArea() const;
 
     void directionVectorVR(double* vector3) const;
     void directionVectorVX(double* vector3) const;

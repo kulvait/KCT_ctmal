@@ -40,6 +40,7 @@ namespace geometry {
 
     // Implements Geometry3DParallelI
     double Geometry3DParallel::pixelSkew() const { return parallelCameraMatrix.pixelSkew(); }
+    double Geometry3DParallel::pixelArea() const { return parallelCameraMatrix.pixelArea(); }
     double Geometry3DParallel::detectorTilt() const { return cosDetectorTilt; }
     void Geometry3DParallel::detectorTilt(double* scalar) const { *scalar = cosDetectorTilt; }
     void Geometry3DParallel::directionVectorVR(double* vector3) const

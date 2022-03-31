@@ -27,6 +27,13 @@ namespace geometry {
         virtual double pixelSkew() const = 0;
 
         /**
+         * Area of the pixel on the detector.
+         *
+         * @return |PX x PY| or |PX| |PY| sin (skew)
+         */
+        virtual double pixelArea() const = 0;
+
+        /**
          * Cosine of the angle between the detector and surface orthogonal to incoming rays, for
          * detector orthogonal to the rays it is 1.0.
          *
