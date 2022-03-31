@@ -49,7 +49,7 @@ Geometry3DParallelCameraMatrix::Geometry3DParallelCameraMatrix(
 
 bool Geometry3DParallelCameraMatrix::operator==(const Geometry3DParallelCameraMatrix& rhs)
 {
-    for(int i = 0; i != projectionMatrixVector.size(); i++)
+    for(uint32_t i = 0; i != projectionMatrixVector.size(); i++)
     {
         if(this->projectionMatrixVector[i] != rhs.projectionMatrixVector[i])
         {
