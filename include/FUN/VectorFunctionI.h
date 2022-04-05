@@ -42,6 +42,8 @@ namespace util {
             this->dimension = dimension;
         }
 
+        virtual ~VectorFunctionI() = default;
+
         /**Dimension of the vector.
          *
          */

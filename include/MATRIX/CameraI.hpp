@@ -17,6 +17,7 @@ namespace matrix {
     class CameraI
     {
     public:
+        virtual ~CameraI() = default;
         virtual void sourcePosition(double* vector3) const = 0;
         /**
          * @return Source position in a word coordinates.

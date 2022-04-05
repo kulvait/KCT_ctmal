@@ -17,6 +17,7 @@ namespace geometry {
     class Geometry3DParallelI
     {
     public:
+        virtual ~Geometry3DParallelI() = default;
         /**
          * Cosine of the angle between PX and PY direction on the detector in word coordinates, it
          * is 0.0 for rectangular pixels.
