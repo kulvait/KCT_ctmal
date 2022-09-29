@@ -21,9 +21,9 @@ namespace matrix {
 
         double distance(ProjectionMatrix a, ProjectionMatrix b) override
         {
-            PMatComparator pmc;
-            KCT::Matrix<3, 4> a_;
-            KCT::Matrix<3, 4> b_;
+            CTL::PMatComparator pmc;
+            CTL::Matrix<3, 4> a_;
+            CTL::Matrix<3, 4> b_;
             for(int i = 0; i != 3; i++)
                 for(int j = 0; j != 4; j++)
                 {
