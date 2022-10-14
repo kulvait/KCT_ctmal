@@ -45,12 +45,11 @@ namespace util {
         {
             if(startReportingDegree >= numberOfFunctions)
             {
-                std::string msg
+                std::string ERR
                     = io::xprintf("Parameter sartReportingDegree=%d but it should be less than "
                                   "numberOfFunctions=%d, correct!",
                                   startReportingDegree, numberOfFunctions);
-                LOGD << msg;
-                throw std::runtime_error(msg);
+                KCTERR(ERR);
             }
         } ///< Inits the function
 
@@ -89,14 +88,14 @@ namespace util {
             if(names == nullptr)
             {
                 names = std::make_shared<std::vector<std::string>>();
-                for(uint32_t i = startReportingDegree; i <= numberOfFunctions; ++i)
+                for(uint32_t i = startReportingDegree; i < numberOfFunctions; ++i)
                 {
                     names->push_back(io::xprintf("Funtion %d", i));
                 }
             }
             if(title == "")
             {
-                VectorFunctionI::plotFunctions(granularity, names, "Harmonic basis");
+                VectorFunctionI::plotFunctions(granularity, names, "Trigonometric basis");
             } else
             {
                 VectorFunctionI::plotFunctions(granularity, names, title);

@@ -100,31 +100,28 @@ namespace util {
             , startReportDegree(startReportDegree)
             , timeShift(timeShift)
         {
-            std::string err;
+            std::string ERR;
             if(startReportDegree < 0)
             {
-                err = io::xprintf(
+                ERR = io::xprintf(
                     "Variable startReportDegree must be non negative but supplied was %d.",
                     startReportDegree);
-                LOGE << err;
-                throw std::runtime_error(err);
+                KCTERR(ERR);
             }
             if(baseSize - startReportDegree < 0)
             {
-                err = io::xprintf("Base size must be greater then startReportDegree and not "
+                ERR = io::xprintf("Base size must be greater then startReportDegree and not "
                                   "%d as supplied.",
                                   baseSize);
-                LOGE << err;
-                throw std::runtime_error(err);
+                KCTERR(ERR);
             }
             io::DenFileInfo bfi(inputFunctionsFile);
             if(basisSize > bfi.dimz())
             {
-                err = io::xprintf(
+                ERR = io::xprintf(
                     "Basis size %d is greater than the number of functions in file %s, %d!",
                     basisSize, inputFunctionsFile.c_str(), bfi.dimz());
-                LOGE << err;
-                throw std::runtime_error(err);
+                KCTERR(ERR);
             }
             this->valuesPerFunction = bfi.dimx();
             // The following needs to be defined after previous line
@@ -133,7 +130,7 @@ namespace util {
             this->valuesD = new double[baseSize * valuesPerFunction];
             this->valuesF = new float[baseSize * valuesPerFunction];
             // Fill this array only by values without offset.
-            if(bfi.getDataType() == io::DenSupportedType::FLOAT64)
+            if(bfi.getElementType() == io::DenSupportedType::FLOAT64)
             {
                 std::shared_ptr<io::Frame2DReaderI<double>> pr
                     = std::make_shared<io::DenFrame2DReader<double>>(inputFunctionsFile);
@@ -147,7 +144,7 @@ namespace util {
                         valuesF[i * valuesPerFunction + j] = float(f->get(j, 0));
                     }
                 }
-            } else if(bfi.getDataType() == io::DenSupportedType::FLOAT32)
+            } else if(bfi.getElementType() == io::DenSupportedType::FLOAT32)
             {
 
                 std::shared_ptr<io::Frame2DReaderI<float>> pr
@@ -164,9 +161,8 @@ namespace util {
                 }
             } else
             {
-                err = io::xprintf("Basis should be encoded in double or float file!");
-                LOGE << err;
-                throw std::runtime_error(err);
+                ERR = io::xprintf("Basis should be encoded in double or float file!");
+                KCTERR(ERR);
             }
             if(valuesBeforeStart != nullptr)
             {
