@@ -145,7 +145,7 @@ namespace util {
             }
             this->valuesPerFunction = bfi.dimx();
             // Fill this array only by values without offset.
-            if(bfi.getDataType() == io::DenSupportedType::FLOAT64)
+            if(bfi.getElementType() == io::DenSupportedType::FLOAT64)
             {
                 // Time shift does not apply here but when evaluating functions
                 double* times = new double[valuesPerFunction];
