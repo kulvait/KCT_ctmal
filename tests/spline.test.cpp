@@ -5,6 +5,11 @@
 // Internal libs
 #include "SPLINE/SplineFitter.hpp"
 #include "stringFormatter.h"
+
+#if __GNUC__ >= 7
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 #include "matplotlibcpp.h"
 namespace plt = matplotlibcpp;
 
@@ -42,3 +47,4 @@ TEST_CASE("KCT.math.SplineFitter", "[spline]")
     delete[] val;
 }
 
+#pragma GCC diagnostic pop

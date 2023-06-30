@@ -94,7 +94,7 @@ endif (DOXYGEN_FOUND)
 #Testing
 include_directories(${CMAKE_SOURCE_DIR}/tests)
 add_library(Catch INTERFACE)
-target_include_directories(Catch INTERFACE ${CMAKE_SOURCE_DIR}/submodules/Catch2/single_include)
+target_include_directories(Catch INTERFACE ${CMAKE_SOURCE_DIR}/submodules/Catch2/single_include/catch2)
 FILE( GLOB TST_SRC ${CMAKE_SOURCE_DIR}/tests/*.cpp )
 add_executable(test_ctmal ${TST_SRC})
 target_link_libraries(test_ctmal Catch)
