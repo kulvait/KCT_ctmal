@@ -47,4 +47,6 @@ TEST_CASE("KCT.math.SplineFitter", "[spline]")
     delete[] val;
 }
 
+#if __GNUC__ >= 7
 #pragma GCC diagnostic pop
+#endif

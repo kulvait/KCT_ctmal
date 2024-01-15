@@ -187,6 +187,7 @@ Matrix Matrix::operator-(const Matrix& B) const
 
 std::string Matrix::toString(std::string name) const
 {
+    std::string padString(name.size(), ' ');
     std::ostringstream os;
     for(unsigned int i = 0; i != m; ++i)
     {
@@ -195,7 +196,7 @@ std::string Matrix::toString(std::string name) const
             os << io::xprintf("%s = |", name.c_str());
         } else
         {
-            os << "    |";
+            os << io::xprintf("%s   |", padString.c_str());
         }
         for(unsigned int j = 0; j != n; ++j)
         {
