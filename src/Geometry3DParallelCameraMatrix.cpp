@@ -187,6 +187,31 @@ std::array<double, 8> Geometry3DParallelCameraMatrix::projectionMatrixAsVector8(
     projectionMatrixAsVector8(std::begin(pmv));
     return pmv;
 }
+void Geometry3DParallelCameraMatrix::projectionMatrixPXAsVector4(double* vector4) const
+{
+    std::copy(std::begin(projectionMatrixVector), std::begin(projectionMatrixVector) + 4, vector4);
+}
+
+std::array<double, 4> Geometry3DParallelCameraMatrix::projectionMatrixPXAsVector4() const
+{
+    std::array<double, 4> pmv;
+    projectionMatrixPXAsVector4(std::begin(pmv));
+    return pmv;
+}
+
+void Geometry3DParallelCameraMatrix::projectionMatrixPXAsVector3(double* vector3, double z) const
+{
+    std::copy(std::begin(projectionMatrixVector), std::begin(projectionMatrixVector) + 3, vector3);
+    vector3[2] = projectionMatrixVector[3] + projectionMatrixVector[2] * z;
+}
+
+std::array<double, 3> Geometry3DParallelCameraMatrix::projectionMatrixPXAsVector3(double z) const
+{
+    std::array<double, 3> pmv;
+    projectionMatrixPXAsVector3(std::begin(pmv), z);
+    return pmv;
+}
+
 std::string Geometry3DParallelCameraMatrix::toString(std::string name) const
 {
     Matrix pmv(2, 4, std::begin(projectionMatrixVector));

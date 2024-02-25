@@ -77,6 +77,12 @@ namespace geometry {
 
         virtual void projectionMatrixAsVector8(double* vector8) const = 0;
         virtual std::array<double, 8> projectionMatrixAsVector8() const = 0;
+
+        virtual void projectionMatrixPXAsVector4(double* vector4) const = 0;
+        virtual std::array<double, 4> projectionMatrixPXAsVector4() const = 0;
+
+        virtual void projectionMatrixPXAsVector3(double* vector3, double z = 0.0) const = 0;
+        virtual std::array<double, 3> projectionMatrixPXAsVector3(double z = 0.0) const = 0;
     };
 } // namespace geometry
 } // namespace KCT

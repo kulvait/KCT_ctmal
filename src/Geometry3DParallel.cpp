@@ -105,6 +105,26 @@ namespace geometry {
         return parallelCameraMatrix.projectionMatrixAsVector8();
     }
 
+    void Geometry3DParallel::projectionMatrixPXAsVector4(double* vector4) const
+    {
+        parallelCameraMatrix.projectionMatrixPXAsVector4(vector4);
+    }
+
+    std::array<double, 4> Geometry3DParallel::projectionMatrixPXAsVector4() const
+    {
+        return parallelCameraMatrix.projectionMatrixPXAsVector4();
+    }
+
+    void Geometry3DParallel::projectionMatrixPXAsVector3(double* vector3, double z) const
+    {
+        parallelCameraMatrix.projectionMatrixPXAsVector3(vector3, z);
+    }
+
+    std::array<double, 3> Geometry3DParallel::projectionMatrixPXAsVector3(double z) const
+    {
+        return parallelCameraMatrix.projectionMatrixPXAsVector3(z);
+    }
+
     // Static functions
     // Helper ASTRA parallel3d
     Geometry3DParallel

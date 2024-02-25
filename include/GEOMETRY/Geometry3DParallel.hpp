@@ -63,6 +63,10 @@ namespace geometry {
 
         void projectionMatrixAsVector8(double* vector8) const;
         std::array<double, 8> projectionMatrixAsVector8() const;
+        void projectionMatrixPXAsVector4(double* vector4) const;
+        std::array<double, 4> projectionMatrixPXAsVector4() const;
+        void projectionMatrixPXAsVector3(double* vector3, double z = 0.0) const;
+        std::array<double, 3> projectionMatrixPXAsVector3(double z = 0.0) const;
 
         /**
          * Auxiliary helper function
