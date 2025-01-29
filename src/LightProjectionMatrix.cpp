@@ -259,6 +259,20 @@ namespace matrix {
                              std::begin(ipiv)); // LU factorization of matrix
         if(inf != 0)
         {
+            std::ostringstream matrixStream;
+            matrixStream << "Extended Camera Matrix (4x4):\n";
+
+            for(int i = 0; i < 4; ++i)
+            {
+                for(int j = 0; j < 4; ++j)
+                {
+                    matrixStream << std::setw(12) << extendedCameraMatrix[i * 4 + j] << " ";
+                }
+                matrixStream << "\n";
+            }
+
+            std::string MATRIX = matrixStream.str();
+            LOGE << io::xprintf("Problem handling maxtrix %s", MATRIX.c_str());
             std::string ERR;
             if(inf < 0)
             {
@@ -269,8 +283,7 @@ namespace matrix {
                     "The factorization has been completed, but U is exactly singular, U_%d,%d=0.",
                     inf, inf);
             }
-            LOGE << ERR;
-            throw std::runtime_error(ERR);
+            KCTERR(ERR);
         }
         inf = LAPACKE_dgetri(LAPACK_ROW_MAJOR, n, std::begin(extendedCameraMatrix), n,
                              std::begin(ipiv));
