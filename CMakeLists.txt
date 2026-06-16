@@ -54,6 +54,8 @@ FILE( GLOB CTMAL_SRC ${CMAKE_SOURCE_DIR}/src/*.cpp )
 add_library(ctmal ${CTMAL_SRC})
 target_link_libraries(ctmal ctiol)
 target_link_libraries(ctmal ${MKL_CORE_LIBRARY})
+target_link_libraries(ctmal Python3::Python)
+target_link_libraries(ctmal Python3::NumPy)
 set_target_properties(
     ctmal
     PROPERTIES 
@@ -105,5 +107,6 @@ target_link_libraries(test_ctmal ctiol)
 target_link_libraries(test_ctmal ctmal)
 target_link_libraries(test_ctmal Python3::Python)
 target_link_libraries(test_ctmal Python3::NumPy)
+set_target_properties(test_ctmal PROPERTIES ENABLE_EXPORTS ON)
 enable_testing()
 add_test(NAME CTMALTest COMMAND test_ctmal)
