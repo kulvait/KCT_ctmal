@@ -248,7 +248,7 @@ Geometry3DParallelCameraMatrix::initializeFromParameters(const double detector_s
     b[2] = -1.0 / detector_spacing_y;
     std::copy(std::begin(a), std::end(a), std::begin(pvm));
     pvm[3] = 0.5 * projection_size_x - 0.5;
-    std::copy(std::begin(a), std::end(a), std::begin(pvm) + 4);
+    std::copy(std::begin(b), std::end(b), std::begin(pvm) + 4);
     pvm[7] = 0.5 * projection_size_y - 0.5;
     return Geometry3DParallelCameraMatrix(std::begin(pvm));
 }
