@@ -201,7 +201,7 @@ std::array<double, 4> Geometry3DParallelCameraMatrix::projectionMatrixPXAsVector
 
 void Geometry3DParallelCameraMatrix::projectionMatrixPXAsVector3(double* vector3, double z) const
 {
-    std::copy(std::begin(projectionMatrixVector), std::begin(projectionMatrixVector) + 3, vector3);
+    std::copy(std::begin(projectionMatrixVector), std::begin(projectionMatrixVector) + 2, vector3);
     vector3[2] = projectionMatrixVector[3] + projectionMatrixVector[2] * z;
 }
 

@@ -13,10 +13,10 @@ namespace geometry {
     {
     }
     // Analogous to ASTRA parallel3d_vec
-    Geometry3DParallel::Geometry3DParallel(const std::array<double, 3> rayDirection,
-                                           const std::array<double, 3> detectorOrigin,
-                                           const std::array<double, 3> VX,
-                                           const std::array<double, 3> VY)
+    Geometry3DParallel::Geometry3DParallel(const std::array<double, 3>& rayDirection,
+                                           const std::array<double, 3>& detectorOrigin,
+                                           const std::array<double, 3>& VX,
+                                           const std::array<double, 3>& VY)
         : parallelCameraMatrix(rayDirection, detectorOrigin, VX, VY)
     {
         // Compute cosDetectorTilt

@@ -22,10 +22,10 @@ namespace geometry {
     {
     public:
         Geometry3DParallel(const Geometry3DParallelCameraMatrix& pm, const double cosDetectorTilt);
-        Geometry3DParallel(const std::array<double, 3> rayDirection,
-                           const std::array<double, 3> detectorOrigin,
-                           const std::array<double, 3> VX,
-                           const std::array<double, 3> VY);
+        Geometry3DParallel(const std::array<double, 3>& rayDirection,
+                           const std::array<double, 3>& detectorOrigin,
+                           const std::array<double, 3>& VX,
+                           const std::array<double, 3>& VY);
         bool operator==(const Geometry3DParallel& rhs);
 
         // Implements Geometry3DParallelI

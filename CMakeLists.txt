@@ -1,5 +1,7 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.19)
 project(CTIOL)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/submodules/CTIOL/cmake")
 
 set(CMAKE_INSTALL_PREFIX $ENV{HOME}/bin)
 set(CMAKE_CXX_STANDARD 17)#Supported values are 98, 11 and 14.
@@ -35,12 +37,13 @@ include_directories(${CMAKE_SOURCE_DIR}/submodules/matplotlib-cpp)
 #Python for matplotlib
 #find_package(PythonLibs 2.7)
 #include_directories(${PYTHON_INCLUDE_DIRS})
-find_package (Python3 COMPONENTS Interpreter Development NumPy)
+find_package(Python3 COMPONENTS Interpreter Development NumPy)
 include_directories(${Python3_INCLUDE_DIRS})
 include_directories(${Python3_NumPy_INCLUDE_DIRS})
 
 #CT input output library
 FILE( GLOB CTIOL_SRC ${CMAKE_SOURCE_DIR}/submodules/CTIOL/src/*.cpp ${CMAKE_SOURCE_DIR}/submodules/CTIOL/src/PROG/*.cpp)
+list(REMOVE_ITEM CTIOL_SRC ${CMAKE_SOURCE_DIR}/submodules/CTIOL/src/PROG/ArgumentsThreadingOpenCL.cpp)
 add_library(ctiol ${CTIOL_SRC})
 include_directories(${CMAKE_SOURCE_DIR}/submodules/CTIOL/include)
 target_link_libraries(ctiol stdc++fs)#include <experimental/filesystem>
@@ -100,6 +103,7 @@ add_executable(test_ctmal ${TST_SRC})
 target_link_libraries(test_ctmal Catch)
 target_link_libraries(test_ctmal ctiol)
 target_link_libraries(test_ctmal ctmal)
-target_link_libraries(test_ctmal ${Python3_LIBRARIES})
+target_link_libraries(test_ctmal Python3::Python)
+target_link_libraries(test_ctmal Python3::NumPy)
 enable_testing()
 add_test(NAME CTMALTest COMMAND test_ctmal)
