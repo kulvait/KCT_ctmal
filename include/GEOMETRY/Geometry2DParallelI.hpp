@@ -41,11 +41,12 @@ namespace geometry {
          * It corresponds to projector crossing origin.
          *
          * @param PX Detector coordinate
+         * @param z World coordinate off plane. This is to tweak offsets of COR or PX=PX0.
          *
-         * @return Vector projecting to PX.
+         * @return Vector projecting to PX, third coordinate is z.
          */
-        virtual void backprojectToPosition(const double PX, double* vector3) const = 0;
-        virtual std::array<double, 3> backprojectToPosition(const double PX) const = 0;
+        virtual void backprojectToPosition(const double PX, double* vector3, const double z) const = 0;
+        virtual std::array<double, 3> backprojectToPosition(const double PX, const double z) const = 0;
 
         /**
          * Projection to the detector from the world coordinates.
@@ -57,13 +58,12 @@ namespace geometry {
          */
         virtual void project(const double x0, const double x1, const double x2, double* PX) const
             = 0;
-        virtual void project(const float x0, const float x1, const float x2, float* PX) const = 0;
 
         virtual void projectionMatrixAsVector4(double* vector4) const = 0;
         virtual std::array<double, 4> projectionMatrixAsVector4() const = 0;
 
-        virtual void projectionMatrixPXAsVector3(double* vector3) const = 0;
-        virtual std::array<double, 3> projectionMatrixPXAsVector3() const = 0;
+        virtual void projectionMatrixPXAsVector3(double* vector3, const double z) const = 0;
+        virtual std::array<double, 3> projectionMatrixPXAsVector3(const double z) const = 0;
     };
 } // namespace geometry
 } // namespace KCT

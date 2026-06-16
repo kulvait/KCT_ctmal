@@ -48,50 +48,27 @@ bool Geometry2DParallelCameraMatrix::operator==(const Geometry2DParallelCameraMa
     return true;
 }
 
-void Geometry2DParallelCameraMatrix::directionVectorVR(double* vector3) const
-{
-    std::array<double, 3> a = projectionMatrixPXAsVector3();
-
-    // Convention:
-    // a is normal to iso-PX planes and aligned with incoming-ray direction in XY geometry
-    double nxy = std::sqrt(a[0] * a[0] + a[1] * a[1]);
-    if(nxy < zeroPrecisionTolerance)
-    {
-        KCTERR("Can not determine ray direction VR from projection matrix.");
-    }
-
-    std::array<double, 3> VR;
-    VR[0] = a[0] / nxy;
-    VR[1] = a[1] / nxy;
-    VR[2] = 0.0;
-
-    std::copy(std::begin(VR), std::end(VR), vector3);
-}
-
+// We use first two elements of projection matrix, third entry is in this geontery only to adjust
+// offset of projection and is not used to determine direction of detector or rays.
 void Geometry2DParallelCameraMatrix::directionVectorVX(double* vector3) const
 {
-    std::array<double, 3> a = projectionMatrixPXAsVector3();
-
-    double normSquared = vectorDotProduct<3>(a, a);
+    std::array<double, 2> a;
+    std::copy(std::begin(projectionMatrixVector), std::begin(projectionMatrixVector) + 2,
+              a.begin());
+    std::array<double, 3> VX;
+    double normSquared = vectorDotProduct<2>(a, a);
     if(normSquared < zeroPrecisionTolerance)
     {
         KCTERR("Can not determine detector direction VX from projection matrix.");
     }
 
-    // Choose VX orthogonal to VR in XY plane, right-handed with +Z.
-    std::array<double, 3> VX;
-    VX[0] = a[1] / normSquared;
-    VX[1] = -a[0] / normSquared;
+    // Get vector in the same direction as a but with length equal to pixel spacing (i.e. norm of
+    // VX)
+    VX[0] = a[0] / normSquared;
+    VX[1] = a[1] / normSquared;
     VX[2] = 0.0;
 
     std::copy(std::begin(VX), std::end(VX), vector3);
-}
-
-std::array<double, 3> Geometry2DParallelCameraMatrix::directionVectorVR() const
-{
-    std::array<double, 3> VR;
-    directionVectorVR(std::begin(VR));
-    return VR;
 }
 
 std::array<double, 3> Geometry2DParallelCameraMatrix::directionVectorVX() const
@@ -101,29 +78,55 @@ std::array<double, 3> Geometry2DParallelCameraMatrix::directionVectorVX() const
     return VX;
 }
 
+void Geometry2DParallelCameraMatrix::directionVectorVR(double* vector3) const
+{
+    std::array<double, 3> VXN = normalizeVector<3>(directionVectorVX());
+    std::array<double, 3> VYN = { 0.0, 0.0, 1.0 }; // Normal to XY plane
+    std::array<double, 3> VR = vectorProduct(VXN, VYN);
+    VR = normalizeVector<3>(VR);
+    std::copy(std::begin(VR), std::end(VR), vector3);
+}
+
+std::array<double, 3> Geometry2DParallelCameraMatrix::directionVectorVR() const
+{
+    std::array<double, 3> VR;
+    directionVectorVR(std::begin(VR));
+    return VR;
+}
+
 double Geometry2DParallelCameraMatrix::pixelSpacing() const
 {
     std::array<double, 3> VX = directionVectorVX();
     return vectorNorm<3>(VX);
 }
 
-void Geometry2DParallelCameraMatrix::backprojectToPosition(const double PX, double* vector3) const
+void Geometry2DParallelCameraMatrix::backprojectToPosition(const double PX,
+                                                           double* vector3,
+                                                           double z) const
 {
     std::array<double, 3> x = backprojectToPosition(PX);
     std::copy(std::begin(x), std::end(x), vector3);
 }
 
-std::array<double, 3> Geometry2DParallelCameraMatrix::backprojectToPosition(const double PX) const
+// We are looking to the position on the detector alpha a + PX0 = PX for given offset parametrized by z
+std::array<double, 3> Geometry2DParallelCameraMatrix::backprojectToPosition(const double PX,
+                                                                            double z) const
 {
-    std::array<double, 3> a = projectionMatrixPXAsVector3();
-    double aa = vectorDotProduct<3>(a, a);
+    std::array<double, 2> a;
+    std::copy(std::begin(projectionMatrixVector), std::begin(projectionMatrixVector) + 2,
+              a.begin());
+    double aa = vectorDotProduct<2>(a, a);
+
+    double OFFSETX = projectionMatrixVector[3] + projectionMatrixVector[2] * z;
+    double PXO = PX - OFFSETX;
     if(aa < zeroPrecisionTolerance)
     {
         KCTERR("Can not backproject from singular projection matrix.");
     }
-
-    double PXO = PX - projectionMatrixVector[3];
-    return multiplyVectorByConstant<3>(a, PXO / aa);
+    double alpha = PXO / aa;
+    std::array<double, 2> detectorPosition = multiplyVectorByConstant<2>(a, alpha);
+    std::array<double, 3> position = { detectorPosition[0], detectorPosition[1], z };
+    return position;
 }
 
 void Geometry2DParallelCameraMatrix::project(const double x0,

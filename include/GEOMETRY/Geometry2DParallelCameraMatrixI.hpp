@@ -47,8 +47,10 @@ namespace geometry {
          *
          * @return Vector projecting to PX.
          */
-        virtual void backprojectToPosition(const double PX, double* vector3) const = 0;
-        virtual std::array<double, 3> backprojectToPosition(const double PX) const = 0;
+        virtual void backprojectToPosition(const double PX, double* vector3, double z = 0.0) const
+            = 0;
+        virtual std::array<double, 3> backprojectToPosition(const double PX, double z = 0.0) const
+            = 0;
 
         /**
          * Projection to the detector from the world coordinates.

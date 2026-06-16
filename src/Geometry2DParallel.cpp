@@ -51,18 +51,26 @@ namespace geometry {
         return parallelCameraMatrix.directionVectorVX();
     }
 
-    void Geometry2DParallel::backprojectToPosition(const double PX, double* vector3) const
+    /**
+     * Get minimal vector (x,y,z) that gets projected to PX.
+     * It corresponds to projector crossing origin.
+     *
+     * @param PX Detector coordinate
+     *
+     * @return Vector projecting to PX.
+     */
+    void Geometry2DParallel::backprojectToPosition(const double PX, double* vector3, const double z) const
     {
-        parallelCameraMatrix.backprojectToPosition(PX, vector3);
+        parallelCameraMatrix.backprojectToPosition(PX, vector3, z);
     }
 
-    std::array<double, 3> Geometry2DParallel::backprojectToPosition(const double PX) const
+    std::array<double, 3> Geometry2DParallel::backprojectToPosition(const double PX, const double z) const
     {
-        return parallelCameraMatrix.backprojectToPosition(PX);
+        return parallelCameraMatrix.backprojectToPosition(PX, z);
     }
 
-    void Geometry2DParallel::project(const double x0, const double x1, const double x2,
-                                     double* PX) const
+    void
+    Geometry2DParallel::project(const double x0, const double x1, const double x2, double* PX) const
     {
         parallelCameraMatrix.project(x0, x1, x2, PX);
     }
@@ -89,10 +97,8 @@ namespace geometry {
 
     // Static functions
 
-    Geometry2DParallel
-    Geometry2DParallel::initializeFromParameters(const double detector_spacing_x,
-                                                 const uint32_t projection_size_x,
-                                                 const double angle)
+    Geometry2DParallel Geometry2DParallel::initializeFromParameters(
+        const double detector_spacing_x, const uint32_t projection_size_x, const double angle)
     {
         Geometry2DParallelCameraMatrix parallelCameraMatrix
             = Geometry2DParallelCameraMatrix::initializeFromParameters(detector_spacing_x,

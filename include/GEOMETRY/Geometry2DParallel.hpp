@@ -8,12 +8,13 @@
 
 // Internal libs
 #include "GEOMETRY/Geometry2DParallelCameraMatrix.hpp"
+#include "GEOMETRY/Geometry2DParallelI.hpp"
 #include "MATRIX/utils.hpp"
 
 namespace KCT {
 namespace geometry {
 
-    class Geometry2DParallel
+    class Geometry2DParallel : public Geometry2DParallelI
     {
     public:
         Geometry2DParallel(const Geometry2DParallelCameraMatrix& pcm);
@@ -43,9 +44,9 @@ namespace geometry {
         void projectionMatrixPXAsVector3(double* vector3, double z = 0.0) const;
         std::array<double, 3> projectionMatrixPXAsVector3(double z = 0.0) const;
 
-        // Returns one point on the line corresponding to detector coordinate PX
-        void backprojectToPosition(const double PX, double* vector3) const;
-        std::array<double, 3> backprojectToPosition(const double PX) const;
+        // Returns one point on the line corresponding to detector coordinate PX with parametrization of offset by z
+        void backprojectToPosition(const double PX, double* vector3, double z = 0.0) const;
+        std::array<double, 3> backprojectToPosition(const double PX, double z = 0.0) const;
 
         // Static helpers analogous to the 3D API
         static Geometry2DParallel initializeFromParameters(const double detector_spacing_x,

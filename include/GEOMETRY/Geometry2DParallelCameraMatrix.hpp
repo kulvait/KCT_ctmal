@@ -45,8 +45,8 @@ public:
 
     double pixelSpacing() const;
 
-    void backprojectToPosition(const double PX, double* vector3) const;
-    std::array<double, 3> backprojectToPosition(const double PX) const;
+    void backprojectToPosition(const double PX, double* vector3, double z = 0.0) const;
+    std::array<double, 3> backprojectToPosition(const double PX, double z = 0.0) const;
 
     void project(const double x0, const double x1, const double x2, double* PX) const;
     void project(const float x0, const float x1, const float x2, float* PX) const;
